@@ -26,7 +26,9 @@
 (require 'eglot)
 (require 'cl-lib)
 (require 'ert)
+(require 'ert-x) ; ert-simulate-command
 (require 'edebug)
+(require 'python) ; python-mode-hook
 
 ;; Helpers
 
@@ -52,7 +54,8 @@
 (defun eglot--call-with-dirs-and-files (dirs fn)
   (let* ((fixture-directory (make-temp-file "eglot--fixture" t))
          (default-directory fixture-directory)
-         new-buffers new-servers)
+         new-buffers new-servers
+         cleanup-events-et-cetera-p)
     (unwind-protect
         (let ((find-file-hook
                (cons (lambda () (push (current-buffer) new-buffers))
@@ -60,23 +63,26 @@
               (eglot-connect-hook
                (lambda (server) (push server new-servers))))
           (mapc #'eglot--make-file-or-dirs dirs)
-          (funcall fn))
-      (eglot--message "Killing buffers %s,  deleting %s, killing %s"
-                      (mapconcat #'buffer-name new-buffers ", ")
-                      default-directory
-                      (mapcar #'jsonrpc-name new-servers))
+          (funcall fn)
+          (setq cleanup-events-et-cetera-p t))
       (unwind-protect
           (let ((eglot-autoreconnect nil))
-            (mapc #'eglot-shutdown
+            (mapc (lambda (server)
+                    (eglot-shutdown
+                     server nil nil (not cleanup-events-et-cetera-p)))
                   (cl-remove-if-not #'jsonrpc-running-p new-servers)))
-        (mapc #'kill-buffer (mapcar #'jsonrpc--events-buffer new-servers))
+        (eglot--message
+         "Killing project buffers %s, deleting %s, killing server %s"
+         (mapconcat #'buffer-name new-buffers ", ")
+         default-directory
+         (mapcar #'jsonrpc-name new-servers))
         (dolist (buf new-buffers) ;; have to save otherwise will get prompted
           (with-current-buffer buf (save-buffer) (kill-buffer)))
         (delete-directory fixture-directory 'recursive)))))
 
 (cl-defmacro eglot--with-timeout (timeout &body body)
   (declare (indent 1) (debug t))
-  `(eglot--call-with-timeout ',timeout (lambda () ,@body)))
+  `(eglot--call-with-timeout ,timeout (lambda () ,@body)))
 
 (defun eglot--call-with-timeout (timeout fn)
   (let* ((tag (gensym "eglot-test-timeout"))
@@ -154,8 +160,8 @@
   "Spin until FN match in EVENTS-SYM, flush events after it.
 Pass TIMEOUT to `eglot--with-timeout'."
   (declare (indent 2) (debug (sexp sexp sexp &rest form)))
-  `(eglot--with-timeout (,timeout ,(or message
-                                       (format "waiting for:\n%s" (pp-to-string body))))
+  `(eglot--with-timeout '(,timeout ,(or message
+                                        (format "waiting for:\n%s" (pp-to-string body))))
      (let ((event
             (cl-loop thereis (cl-loop for json in ,events-sym
                                       for method = (plist-get json :method)
@@ -187,8 +193,8 @@ Pass TIMEOUT to `eglot--with-timeout'."
   (define-derived-mode rust-mode prog-mode "Rust"))
 (add-to-list 'auto-mode-alist '("\\.rs\\'" . rust-mode))
 
-(defun eglot--tests-connect ()
-  (eglot--with-timeout 2
+(defun eglot--tests-connect (&optional timeout)
+  (eglot--with-timeout (or timeout 2)
     (apply #'eglot--connect (eglot--guess-contact))))
 
 (ert-deftest auto-detect-running-server ()
@@ -367,23 +373,31 @@ Pass TIMEOUT to `eglot--with-timeout'."
       (should (string-match "^exit" eldoc-last-message)))))
 
 (ert-deftest formatting ()
-  "Test document formatting in a python LSP"
+  "Test formatting in a python LSP"
   (skip-unless (and (executable-find "pyls")
                     (or (executable-find "yapf")
                         (executable-find "autopep8"))))
   (eglot--with-dirs-and-files
-      '(("project" . (("something.py" . "def foo():pass"))))
+      '(("project" . (("something.py" . "def a():pass\ndef b():pass"))))
     (with-current-buffer
         (eglot--find-file-noselect "project/something.py")
       (should (eglot--tests-connect))
-      (search-forward ":pa")
-      (eglot-format-buffer)
+      (search-forward "b():pa")
+      (eglot-format (point-at-bol) (point-at-eol))
       (should (looking-at "ss"))
-      (should (or
-               ;; yapf
-               (string= (buffer-string) "def foo():\n    pass\n")
-               ;; autopep8
-               (string= (buffer-string) "def foo(): pass\n"))))))
+      (should
+       (or
+        ;; yapf
+        (string= (buffer-string) "def a():pass\n\n\ndef b():\n    pass\n")
+        ;; autopep8
+        (string= (buffer-string) "def a():pass\n\n\ndef b(): pass\n")))
+      (eglot-format-buffer)
+      (should
+       (or
+        ;; yapf
+        (string= (buffer-string) "def a():\n    pass\n\n\ndef b():\n    pass\n")
+        ;; autopep8
+        (string= (buffer-string) "def a(): pass\n\n\ndef b(): pass\n"))))))
 
 (ert-deftest javascript-basic ()
   "Test basic autocompletion in a python LSP"
@@ -413,6 +427,104 @@ Pass TIMEOUT to `eglot--with-timeout'."
                    (cl-find-if (jsonrpc-lambda (&key severity &allow-other-keys)
                                  (= severity 1))
                                diagnostics)))))))))
+
+(ert-deftest zzz-eglot-ensure ()
+  "Test basic `eglot-ensure' functionality"
+  (skip-unless (executable-find "pyls"))
+  (eglot--with-dirs-and-files
+      '(("project" . (("foo.py" . "import sys\nsys.exi")
+                      ("bar.py" . "import sys\nsys.exi"))))
+    (let ((saved-python-mode-hook python-mode-hook)
+          server)
+      (unwind-protect
+          (progn
+            (add-hook 'python-mode-hook 'eglot-ensure)
+            ;; need `ert-simulate-command' because `eglot-ensure'
+            ;; relies on `post-command-hook'.
+            (with-current-buffer
+                (ert-simulate-command
+                 '(find-file "project/foo.py"))
+              (should (setq server (eglot--current-server))))
+            (with-current-buffer
+                (ert-simulate-command
+                 '(find-file "project/bar.py"))
+              (should (eq server (eglot--current-server)))))
+        (setq python-mode-hook saved-python-mode-hook)))))
+
+(ert-deftest slow-sync-connection-wait ()
+  "Connect with `eglot-sync-connect' set to t."
+  (skip-unless (executable-find "pyls"))
+  (eglot--with-dirs-and-files
+      '(("project" . (("something.py" . "import sys\nsys.exi"))))
+    (with-current-buffer
+        (eglot--find-file-noselect "project/something.py")
+      (let ((eglot-sync-connect t)
+            (eglot-server-programs
+             `((python-mode . ("sh" "-c" "sleep 1 && pyls")))))
+        (should (eglot--tests-connect 3))))))
+
+(ert-deftest slow-sync-connection-intime ()
+  "Connect synchronously with `eglot-sync-connect' set to 2."
+  (skip-unless (executable-find "pyls"))
+  (eglot--with-dirs-and-files
+      '(("project" . (("something.py" . "import sys\nsys.exi"))))
+    (with-current-buffer
+        (eglot--find-file-noselect "project/something.py")
+      (let ((eglot-sync-connect 2)
+            (eglot-server-programs
+             `((python-mode . ("sh" "-c" "sleep 1 && pyls")))))
+        (should (eglot--tests-connect 3))))))
+
+(ert-deftest slow-async-connection ()
+  "Connect asynchronously with `eglot-sync-connect' set to 2."
+  (skip-unless (executable-find "pyls"))
+  (eglot--with-dirs-and-files
+      '(("project" . (("something.py" . "import sys\nsys.exi"))))
+    (with-current-buffer
+        (eglot--find-file-noselect "project/something.py")
+      (let ((eglot-sync-connect 1)
+            (eglot-server-programs
+             `((python-mode . ("sh" "-c" "sleep 2 && pyls")))))
+        (should-not (apply #'eglot--connect (eglot--guess-contact)))
+        (eglot--with-timeout 3
+          (while (not (eglot--current-server))
+            (accept-process-output nil 0.2))
+          (should (eglot--current-server)))))))
+
+(ert-deftest slow-sync-timeout ()
+  "Failed attempt at connection synchronously."
+  (skip-unless (executable-find "pyls"))
+  (eglot--with-dirs-and-files
+      '(("project" . (("something.py" . "import sys\nsys.exi"))))
+    (with-current-buffer
+        (eglot--find-file-noselect "project/something.py")
+      (let ((eglot-sync-connect t)
+            (eglot-connect-timeout 1)
+            (eglot-server-programs
+             `((python-mode . ("sh" "-c" "sleep 2 && pyls")))))
+        (should-error (apply #'eglot--connect (eglot--guess-contact)))))))
+
+(ert-deftest eglot-capabilities ()
+  "Unit test for `eglot--server-capable'."
+  (cl-letf (((symbol-function 'eglot--capabilities)
+             (lambda (_dummy)
+               ;; test data lifted from Golangserver example at
+               ;; https://github.com/joaotavora/eglot/pull/74
+               (list :textDocumentSync 2 :hoverProvider t
+                     :completionProvider '(:triggerCharacters ["."])
+                     :signatureHelpProvider '(:triggerCharacters ["(" ","])
+                     :definitionProvider t :typeDefinitionProvider t
+                     :referencesProvider t :documentSymbolProvider t
+                     :workspaceSymbolProvider t :implementationProvider t
+                     :documentFormattingProvider t :xworkspaceReferencesProvider t
+                     :xdefinitionProvider t :xworkspaceSymbolByProperties t)))
+            ((symbol-function 'eglot--current-server-or-lose)
+             (lambda () nil)))
+    (should (eql 2 (eglot--server-capable :textDocumentSync)))
+    (should (eglot--server-capable :completionProvider :triggerCharacters))
+    (should (equal '(:triggerCharacters ["."]) (eglot--server-capable :completionProvider)))
+    (should-not (eglot--server-capable :foobarbaz))
+    (should-not (eglot--server-capable :textDocumentSync :foobarbaz))))
 
 (provide 'eglot-tests)
 ;;; eglot-tests.el ends here

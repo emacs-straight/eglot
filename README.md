@@ -1,8 +1,8 @@
-[![Build Status](https://travis-ci.org/joaotavora/eglot.png)](https://travis-ci.org/joaotavora/eglot)
+[![Build Status](https://travis-ci.org/joaotavora/eglot.png?branch=master)](https://travis-ci.org/joaotavora/eglot)
 [![MELPA](http://melpa.org/packages/eglot-badge.svg)](http://melpa.org/#/eglot)
 
-Eglot
------
+M-x Eglot
+---------
 
 *E*macs Poly*glot*. Emacs client to [Language Server Protocol][lsp]
 servers.  Scroll down this README for some
@@ -30,7 +30,10 @@ for the language of your choice. Otherwise, it prompts you to enter one:
 * Ruby's [solargraph][solargraph]
 * Bash's [bash-language-server][bash-language-server]
 * PHP's [php-language-server][php-language-server]
-* [cquery][cquery] for C/C++
+* C/C++'s [ccls][ccls]  ([cquery][cquery] and [clangd][clangd] also work)
+* Haskell's [IDE engine][haskell-ide-engine]
+* Kotlin's [kotlin-language-server][kotlin-language-server]
+* Golang's [go-langserver][go-langserver]
 
 I'll add to this list as I test more servers. In the meantime you can
 customize `eglot-server-programs`:
@@ -39,9 +42,17 @@ customize `eglot-server-programs`:
 (add-to-list 'eglot-server-programs '(foo-mode . ("foo-language-server" "--args")))
 ```
 
-Let me know how well it works and we can add it to the list.  You can
-also enter a `server:port` pattern to connect to an LSP server. To
-skip the guess and always be prompted use `C-u M-x eglot`.
+Let me know how well it works and we can add it to the list.  If the
+server has some quirk or non-conformity, it's possible to extend Eglot
+to adapt to it.  Here's how to get [cquery][cquery] working for
+example:
+
+```lisp
+(add-to-list 'eglot-server-programs '((c++ mode c-mode) . (eglot-cquery "cquery")))
+```
+
+You can also enter a `server:port` pattern to connect to an LSP
+server. To skip the guess and always be prompted use `C-u M-x eglot`.
 
 ## Connecting automatically
 
@@ -95,8 +106,8 @@ Here's a summary of available commands:
 
 - `M-x eglot-rename` ask the server to rename the symbol at point;
 
-- `M-x eglot-format-buffer` ask the server to reformat the current
-  buffer;
+- `M-x eglot-format` asks the server to format buffer or the active
+  region;
 
 - `M-x eglot-code-actions` asks the server for any code actions at
   point. These may tipically be simple fixes, like deleting an unused
@@ -112,6 +123,11 @@ Here's a summary of available commands:
 
 - `M-x eglot-stderr-buffer` if the LSP server is printing useful debug
 information in stderr, jumps to a buffer with these contents.
+
+- `M-x eglot-signal-didChangeConfiguration` updates the LSP server
+configuration according to the value of the variable
+`eglot-workspace-configuration`, which you may be set in a
+`.dir-locals` file, for example.
 
 There are *no keybindings* specific to Eglot, but you can bind stuff
 in `eglot-mode-map`, which is active as long as Eglot is managing a
@@ -163,7 +179,7 @@ eglot-shutdown`.
 ## Workspace
 - [ ] workspace/workspaceFolders (3.6.0)
 - [ ] workspace/didChangeWorkspaceFolders (3.6.0)
-- [ ] workspace/didChangeConfiguration
+- [x] workspace/didChangeConfiguration
 - [ ] workspace/configuration (3.6.0)
 - [x] workspace/didChangeWatchedFiles
 - [x] workspace/symbol
@@ -200,7 +216,7 @@ eglot-shutdown`.
 - [ ] textDocument/documentColor
 - [ ] textDocument/colorPresentation (3.6.0)
 - [x] textDocument/formatting 
-- [ ] textDocument/rangeFormatting
+- [x] textDocument/rangeFormatting
 - [ ] textDocument/onTypeFormatting
 - [x] textDocument/rename
 
@@ -214,32 +230,42 @@ eglot-shutdown`.
 ![eglot-rename](./gif-examples/eglot-rename.gif)
 ![eglot-xref-find-definition](./gif-examples/eglot-xref-find-definition.gif)
 ![eglot-xref-find-references](./gif-examples/eglot-xref-find-references.gif)
+![eglot-snippets-on-completion](./gif-examples/eglot-snippets-on-completion.gif)
 
 # Differences to lsp-mode.el
 
-Eglot is **beta**. It may currently underperform
-[lsp-mode.el][emacs-lsp], both in functionality and correctness. That
-other extension is much more mature and has a host of
-[plugins][emacs-lsp-plugins] for bells and whistles.  If you don't
-like the minimalist approach of `eglot.el`, you could be better served
-with `lsp-mode.el` for now.
+Eglot and [lsp-mode.el][emacs-lsp] share a common goal, which is to
+bring LSP to Emacs.  lsp-mode.el is a more mature extension with a
+host of [plugins][emacs-lsp-plugins] for bells and whistles.  Eglot
+may still lag it in some aspects, but the gap is closing as more
+features make it into Eglot and more servers are supported
+out-of-the-box.
+
+Conversely, you may find Eglot surpasses lsp-mode.el in other aspects,
+namely simplicity.  Eglot is considerably less code and hassle than
+lsp-mode.el.  In most cases, there's nothing to configure.  It's a
+minimalist approach focused on user experience and performance.
 
 User-visible differences:
 
-- Single and friendly entry point `M-x eglot`, not `M-x
-  eglot-<language>`. Also no `eglot-<language>` extra packages.
-- No "whitelisting" or "blacklisting" directories to languages. `M-x
-  eglot` starts servers to handle major modes inside a specific
-  project. Uses Emacs's built-in `project.el` library to discover
-  projects. Automatically detects current and future opened files
-  under that project and syncs with server.
+- The single most visible difference is the friendly entry point `M-x
+  eglot`, not `M-x eglot-<language>`.  Also, there are no
+  `eglot-<language>` extra packages.
+
+- There's no "whitelisting" or "blacklisting" directories to
+  languages.  `M-x eglot` starts servers to handle file of a major
+  mode inside a specific project, using Emacs's built-in `project.el`
+  library to discover projects.  Then it automatically detects current
+  and future opened files under that project and syncs with server;
+
 - Easy way to quit/restart a server, just middle/right click on the
-  connection name.
+  connection name;
 - Pretty interactive mode-line section for live tracking of server
-  communication.
-- Automatically restarts frequently crashing servers (like RLS).
-- Server-initiated edits are confirmed with the user.
-- Diagnostics work out-of-the-box (no `flycheck.el` needed).
+  communication;
+- Automatically restarts frequently crashing servers (like RLS);
+- Slow-to-start servers start asynchronously in the background;
+- Server-initiated edits are confirmed with the user;
+- Diagnostics work out-of-the-box (no `flycheck.el` needed);
 - Smoother/more responsive (read below).
    
 Under the hood:
@@ -268,8 +294,11 @@ Under the hood:
 [php-language-server]: https://github.com/felixfbecker/php-language-server
 [company-mode]: https://github.com/company-mode/company-mode
 [cquery]: https://github.com/cquery-project/cquery
+[ccls]: https://github.com/MaskRay/ccls
+[clangd]: https://clang.llvm.org/extra/clangd.html
 [solargraph]: https://github.com/castwide/solargraph
 [windows-subprocess-hang]: https://www.gnu.org/software/emacs/manual/html_node/efaq-w32/Subprocess-hang.html
+[haskell-ide-engine]: https://github.com/haskell/haskell-ide-engine
+[kotlin-language-server]: https://github.com/fwcd/KotlinLanguageServer
+[go-langserver]: https://github.com/sourcegraph/go-langserver
 
-
-   

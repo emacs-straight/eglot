@@ -10,12 +10,16 @@ LOAD_PATH=-L .
 ELFILES := eglot.el eglot-tests.el
 ELCFILES := $(ELFILES:.el=.elc)
 
+JSONRPC ?=--eval '(package-initialize)'				\
+          --eval '(package-refresh-contents)'			\
+          --eval '(package-install (quote jsonrpc))'
+
 all: compile
 
 # Compilation
 #
 %.elc: %.el
-	$(EMACS) -Q $(LOAD_PATH) --batch -f batch-byte-compile $<
+	$(EMACS) -Q $(LOAD_PATH) $(JSONRPC) --batch -f batch-byte-compile $<
 
 compile: $(ELCFILES)
 
@@ -23,6 +27,8 @@ compile: $(ELCFILES)
 #
 eglot-check: compile
 	$(EMACS) -Q --batch $(LOAD_PATH)				\
+		$(JSONRPC)						\
+		-l eglot						\
 		-l eglot-tests						\
 		--eval '(ert-run-tests-batch-and-exit (quote $(SELECTOR)))'
 
