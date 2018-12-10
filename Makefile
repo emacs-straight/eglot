@@ -10,24 +10,28 @@ LOAD_PATH=-L .
 ELFILES := eglot.el eglot-tests.el
 ELCFILES := $(ELFILES:.el=.elc)
 
-JSONRPC ?=--eval '(package-initialize)'				\
-          --eval '(package-refresh-contents)'			\
-          --eval '(package-install (quote jsonrpc))'
+ELPADEPS ?=--eval '(package-initialize)'			\
+           --eval '(package-refresh-contents)'			\
+           --eval '(package-install (quote jsonrpc))'		\
+           --eval '(package-install 				\
+                      (cadr (assoc (quote flymake)		\
+                                   package-archive-contents)))'
 
 all: compile
 
 # Compilation
 #
 %.elc: %.el
-	$(EMACS) -Q $(LOAD_PATH) $(JSONRPC) --batch -f batch-byte-compile $<
+	$(EMACS) -Q $(ELPADEPS) $(LOAD_PATH) --batch -f batch-byte-compile $<
 
 compile: $(ELCFILES)
 
 # Automated tests
 #
 eglot-check: compile
-	$(EMACS) -Q --batch $(LOAD_PATH)				\
-		$(JSONRPC)						\
+	$(EMACS) -Q --batch						\
+		$(ELPADEPS)						\
+		$(LOAD_PATH)						\
 		-l eglot						\
 		-l eglot-tests						\
 		--eval '(setq ert-batch-backtrace-right-margin 200)'	\

@@ -578,6 +578,10 @@ Pass TIMEOUT to `eglot--with-timeout'."
              `((python-mode . ("sh" "-c" "sleep 2 && pyls")))))
         (should-error (apply #'eglot--connect (eglot--guess-contact)))))))
 
+
+
+;;; Unit tests
+;;; 
 (ert-deftest eglot-capabilities ()
   "Unit test for `eglot--server-capable'."
   (cl-letf (((symbol-function 'eglot--capabilities)
@@ -600,9 +604,80 @@ Pass TIMEOUT to `eglot--with-timeout'."
     (should-not (eglot--server-capable :foobarbaz))
     (should-not (eglot--server-capable :textDocumentSync :foobarbaz))))
 
+
+(ert-deftest eglot-strict-interfaces ()
+  (let ((eglot--lsp-interface-alist
+         `((FooObject . ((:foo :bar) (:baz))))))
+    (should
+     (equal '("foo" . "bar")
+            (let ((eglot-strict-mode nil))
+              (eglot--dbind (foo bar) `(:foo "foo" :bar "bar")
+                (cons foo bar)))))
+    (should-error
+     (let ((eglot-strict-mode '(disallow-non-standard-keys)))
+       (eglot--dbind (foo bar) `(:foo "foo" :bar "bar" :fotrix bargh)
+         (cons foo bar))))
+    (should
+     (equal '("foo" . "bar")
+            (let ((eglot-strict-mode nil))
+              (eglot--dbind (foo bar) `(:foo "foo" :bar "bar" :fotrix bargh)
+                (cons foo bar)))))
+    (should-error
+     (let ((eglot-strict-mode '(disallow-non-standard-keys)))
+       (eglot--dbind ((FooObject) foo bar) `(:foo "foo" :bar "bar" :fotrix bargh)
+         (cons foo bar))))
+    (should
+     (equal '("foo" . "bar")
+            (let ((eglot-strict-mode '(disallow-non-standard-keys)))
+              (eglot--dbind ((FooObject) foo bar) `(:foo "foo" :bar "bar" :baz bargh)
+                (cons foo bar)))))
+    (should
+     (equal '("foo" . nil)
+            (let ((eglot-strict-mode nil))
+              (eglot--dbind ((FooObject) foo bar) `(:foo "foo" :baz bargh)
+                (cons foo bar)))))
+    (should
+     (equal '("foo" . "bar")
+            (let ((eglot-strict-mode '(enforce-required-keys)))
+              (eglot--dbind ((FooObject) foo bar) `(:foo "foo" :bar "bar" :baz bargh)
+                (cons foo bar)))))
+    (should-error
+     (let ((eglot-strict-mode '(enforce-required-keys)))
+       (eglot--dbind ((FooObject) foo bar) `(:foo "foo" :baz bargh)
+         (cons foo bar))))))
+
+(ert-deftest eglot-dcase ()
+  (let ((eglot--lsp-interface-alist
+         `((FooObject . ((:foo :bar) (:baz)))
+           (CodeAction (:title) (:kind :diagnostics :edit :command))
+           (Command (:title :command) (:arguments)))))
+    (should
+     (equal
+      "foo"
+      (eglot--dcase `(:foo "foo" :bar "bar")
+        (((FooObject) foo)
+         foo))))
+    (should
+     (equal
+      (list "foo" "some command" "some edit")
+      (eglot--dcase '(:title "foo" :command "some command" :edit "some edit")
+        (((Command) _title _command _arguments)
+         (ert-fail "Shouldn't have destructured this object as a Command"))
+        (((CodeAction) title edit command)
+         (list title command edit)))))
+    (should
+     (equal
+      (list "foo" "some command" nil)
+      (eglot--dcase '(:title "foo" :command "some command")
+        (((Command) title command arguments)
+         (list title command arguments))
+        (((CodeAction) _title _edit _command)
+         (ert-fail "Shouldn't have destructured this object as a CodeAction")))))))
+
 (provide 'eglot-tests)
 ;;; eglot-tests.el ends here
 
 ;; Local Variables:
 ;; checkdoc-force-docstrings-flag: nil
 ;; End:
+
