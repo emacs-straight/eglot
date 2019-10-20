@@ -1,26 +1,28 @@
 [![Build Status](https://travis-ci.org/joaotavora/eglot.png?branch=master)](https://travis-ci.org/joaotavora/eglot)
 [![MELPA](http://melpa.org/packages/eglot-badge.svg)](http://melpa.org/#/eglot)
 
-M-x Eglot
----------
+# M-x Eglot
 
-*E*macs Poly*glot*. Emacs client to [Language Server Protocol][lsp]
-servers.  Scroll down this README for some
-[pretty gifs](#animated_gifs).
+*E*macs Poly*glot*: an Emacs [LSP][lsp] client that stays out of your
+way:
 
-# Installation and usage
+* 📽 Scroll down this README for some [pretty gifs](#animated_gifs)
+* 📚 Read about [servers](#connecting), [commands and
+  keybindings](#commands), and [customization](#customization)
+* 📣 Read the [NEWS][news] file
 
-Eglot is in both [ELPA][gnuelpa] and [MELPA][melpa]. Installation is
-straightforward:
+# _1-2-3_
 
-```
-(package-install 'eglot) ; Requires Emacs 26!
-;; Now find some source file, any source file
-M-x eglot
-```
+Install from [ELPA][gnuelpa] or [MELPA][melpa].  Just type `M-x
+package-install RET eglot RET` into Emacs 26.1+.
 
-*That's it*. If you're lucky, this guesses the LSP executable to start
-for the language of your choice. Otherwise, it prompts you to enter one:
+Now find some source file, any source file, and type `M-x eglot`.
+
+*That's it*. If you're lucky, this guesses the LSP program to start
+for the language you're using. Otherwise, it prompts you to enter one.
+
+<a name="connecting"></a>
+# Connecting to a server
 
 `M-x eglot` can guess and work out-of-the-box with these servers:
 
@@ -34,9 +36,12 @@ for the language of your choice. Otherwise, it prompts you to enter one:
 * C/C++'s [ccls][ccls]  ([cquery][cquery] and [clangd][clangd] also work)
 * Haskell's [IDE engine][haskell-ide-engine]
 * Kotlin's [kotlin-language-server][kotlin-language-server]
-* Golang's [go-langserver][go-langserver]
+* Go's [gopls][gopls]
 * Ocaml's [ocaml-language-server][ocaml-language-server]
 * R's [languageserver][r-languageserver]
+* Dart's [dart_language_server][dart_language_server]
+* Elixir's [elixir-ls][elixir-ls]
+* Ada's [ada_language_server][ada_language_server]
 
 I'll add to this list as I test more servers. In the meantime you can
 customize `eglot-server-programs`:
@@ -88,7 +93,7 @@ this way:
 ```lisp
 (add-to-list 'eglot-server-programs
              `(python-mode . ("pyls" "-v" "--tcp" "--host"
-                              "localhost" "--port" :autoport))))
+                              "localhost" "--port" :autoport)))
 ```
 
 You can see that the element associated with `python-mode` is now a
@@ -97,6 +102,45 @@ it be started as a server.  Notice the `:autoport` symbol in there: it
 is replaced dynamically by a local port believed to be vacant, so that
 the ensuing TCP connection finds a listening server.
 
+<a name="reporting bugs"></a>
+# Reporting bugs
+
+Having trouble connecting to a server?  Expected to have a certain
+capability supported by it (e.g. completion) but nothing happens?  Or
+do you get spurious and annoying errors in an otherwise smooth
+operation?  We may have help, so open a [new
+issue](https://github.com/joaotavora/eglot/issues) and try to be as
+precise and objective about the problem as you can:
+
+1. Try to replicate the problem with **as clean an Emacs run as
+   possible**.  This means an empty `.emacs` init file or close to it
+   (just loading `eglot.el`, `company.el` and `yasnippet.el` for
+   example, and you don't even need `use-package.el` to do that).
+    
+2. Include the log of **LSP events** and the **stderr output** of the
+   server (if any).  You can find the former with `M-x
+   eglot-events-buffer` and the latter with `M-x eglot-stderr-buffer`.
+   You run these commands in the buffer where you enabled Eglot, but
+   if you didn't manage to enable Eglot at all (because of some
+   bootstrapping problem), you can still find these buffers in your
+   buffer list: they're named like `*EGLOT <project>/<major-mode>
+   events*` and `*EGLOT <project>/<major-mode> stderr*`.
+    
+3. If Emacs errored (you saw -- and possibly heard -- an error
+   message), make sure you repeat the process using `M-x
+   toggle-debug-on-error` so you **get a backtrace** of the error that
+   you should also attach to the bug report.
+   
+Some more notes: it's understandable that you report it to Eglot
+first, because that's the user-facing side of the LSP experience in
+Emacs, but the outcome may well be that you will have to report the
+problem to the server's developers, as is often the case.  But the
+problem can very well be on Eglot's side, of course, and in that case
+we want to fix it!  Also bear in mind that Eglot's developers have
+limited resources and no way to test all the possible server
+combinations, so you'll have to do most of the testing.
+
+<a name="commands"></a>
 # Commands and keybindings
 
 Here's a summary of available commands:
@@ -118,8 +162,7 @@ Here's a summary of available commands:
   there are any there;
 
 - `M-x eglot-help-at-point` asks the server for help for symbol at
-  point. Currently this is what `eldoc-mode` displays in the echo
-  area;
+  point.
 
 - `M-x eglot-events-buffer` jumps to the events buffer for debugging
   communication with the server.
@@ -142,7 +185,47 @@ either:
 (define-key eglot-mode-map (kbd "<f6>") 'xref-find-definitions)
 ```
 
-# How does this work exactly?
+<a name="customization"></a>
+# Customization
+
+Here's a quick summary of the customization options.  In Eglot's
+customization group (`M-x customize-group`) there is more
+documentation on what these do.
+
+- `eglot-autoreconnect`: Control ability to reconnect automatically to
+  the LSP server;
+
+- `eglot-connect-timeout`: Number of seconds before timing out LSP
+  connection attempts;
+
+- `eglot-sync-connect`: Control blocking of LSP connection attempts;
+
+- `eglot-events-buffer-size`: Control the size of the Eglot events
+  buffer;
+
+- `eglot-ignored-server-capabilites`: LSP server capabilities that
+  Eglot could use, but won't;
+
+- `eglot-put-doc-in-help-buffer`: If non-nil, put eldoc docstrings in
+  separate `*eglot-help*` buffer;
+
+- `eglot-auto-display-help-buffer`: If non-nil, automatically display
+  `*eglot-help*` buffer;
+
+There are a couple more variables that you can customize via Emacs
+lisp:
+
+- `eglot-server-programs`: as described [above](#connecting);
+
+- `eglot-strict-mode`: Set to `nil` by default, meaning Eglot is
+  generally lenient about non-conforming servers.  Set this to
+  `(disallow-non-standard-keys enforce-required-keys)` when debugging
+  servers.
+
+- `eglot-server-initialized-hook`: Hook run after server is
+  successfully initialized;
+
+# How does Eglot work?
 
 `M-x eglot` starts a server via a shell-command guessed from
 `eglot-server-programs`, using the current major-mode (for whatever
@@ -159,7 +242,7 @@ provide enhanced code analysis via `xref-find-definitions`,
 To "unmanage" these buffers, shutdown the server with `M-x
 eglot-shutdown`.
 
-# Supported Protocol features (3.6)
+# Supported Protocol features
 
 ## General
 - [x] initialize
@@ -206,8 +289,9 @@ eglot-shutdown`.
 - [x] textDocument/hover
 - [x] textDocument/signatureHelp (fancy stuff with Python's [pyls][pyls])
 - [x] textDocument/definition
-- [ ] textDocument/typeDefinition (3.6.0)
-- [ ] textDocument/implementation (3.6.0)
+- [x] textDocument/typeDefinition (3.6.0)
+- [x] textDocument/implementation (3.6.0)
+- [x] textDocument/declaration (3.14)
 - [x] textDocument/references
 - [x] textDocument/documentHighlight
 - [x] textDocument/documentSymbol
@@ -304,7 +388,11 @@ Under the hood:
 [windows-subprocess-hang]: https://www.gnu.org/software/emacs/manual/html_node/efaq-w32/Subprocess-hang.html
 [haskell-ide-engine]: https://github.com/haskell/haskell-ide-engine
 [kotlin-language-server]: https://github.com/fwcd/KotlinLanguageServer
-[go-langserver]: https://github.com/sourcegraph/go-langserver
+[gopls]: https://github.com/golang/go/wiki/gopls
 [eclipse-jdt]: https://github.com/eclipse/eclipse.jdt.ls
 [ocaml-language-server]: https://github.com/freebroccolo/ocaml-language-server
 [r-languageserver]: https://cran.r-project.org/package=languageserver
+[dart_language_server]: https://github.com/natebosch/dart_language_server
+[elixir-ls]: https://github.com/JakeBecker/elixir-ls
+[news]: https://github.com/joaotavora/eglot/blob/master/NEWS.md
+[ada_language_server]: https://github.com/AdaCore/ada_language_server
