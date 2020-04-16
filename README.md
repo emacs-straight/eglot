@@ -35,6 +35,7 @@ for the language you're using. Otherwise, it prompts you to enter one.
 * PHP's [php-language-server][php-language-server]
 * C/C++'s [ccls][ccls]  ([cquery][cquery] and [clangd][clangd] also work)
 * Haskell's [IDE engine][haskell-ide-engine]
+* Elm's [elm-language-server][elm-language-server]
 * Kotlin's [kotlin-language-server][kotlin-language-server]
 * Go's [gopls][gopls]
 * Ocaml's [ocaml-language-server][ocaml-language-server]
@@ -42,6 +43,8 @@ for the language you're using. Otherwise, it prompts you to enter one.
 * Dart's [dart_language_server][dart_language_server]
 * Elixir's [elixir-ls][elixir-ls]
 * Ada's [ada_language_server][ada_language_server]
+* Scala's [metals][metals]
+* TeX/LaTeX's [Digestif][digestif]
 
 I'll add to this list as I test more servers. In the meantime you can
 customize `eglot-server-programs`:
@@ -50,17 +53,9 @@ customize `eglot-server-programs`:
 (add-to-list 'eglot-server-programs '(foo-mode . ("foo-language-server" "--args")))
 ```
 
-Let me know how well it works and we can add it to the list.  If the
-server has some quirk or non-conformity, it's possible to extend Eglot
-to adapt to it.  Here's how to get [cquery][cquery] working for
-example:
+Let me know how well it works and we can add it to the list.  
 
-```lisp
-(add-to-list 'eglot-server-programs '((c++ mode c-mode) . (eglot-cquery "cquery")))
-```
-
-You can also enter a `server:port` pattern to connect to an LSP
-server. To skip the guess and always be prompted use `C-u M-x eglot`.
+To skip the guess and always be prompted use `C-u M-x eglot`.
 
 ## Connecting automatically
 
@@ -101,6 +96,73 @@ more complicated invocation of the `pyls` program, which requests that
 it be started as a server.  Notice the `:autoport` symbol in there: it
 is replaced dynamically by a local port believed to be vacant, so that
 the ensuing TCP connection finds a listening server.
+
+## Per-project server configuration
+
+Most servers can guess good defaults and will operate nicely
+out-of-the-box, but some need to be configured specially via LSP
+interfaces.  Additionally, in some situations, you may also want a
+particular server to operate differently across different projects.
+
+Per-project settings are realized with Emacs's _directory variables_
+and the Elisp variable `eglot-workspace-configuration`.  To make a
+particular Python project always enable Pyls's snippet support, put a
+file named `.dir-locals.el` in the project's root:
+
+```lisp
+((python-mode
+  . ((eglot-workspace-configuration
+      . ((:pyls . (:plugins (:jedi_completion (:include_params t)))))))))
+```
+
+This tells Emacs that any `python-mode` buffers in that directory
+should have a particular buffer-local value of
+`eglot-workspace-configuration`.  That variable's value should be
+_association list_ of _parameter sections_ which are presumably
+understood by the server.  In this example, we associate section
+`pyls` with the parameters object `(:plugins (:jedi_completion
+(:include_params t)))`.
+
+Now, supposing that you also had some Go code in the very same
+project, you can configure the Gopls server in the same file.  Adding
+a section for `go-mode`, the file's contents become:
+
+```lisp
+((python-mode
+  . ((eglot-workspace-configuration
+      . ((:pyls . (:plugins (:jedi_completion (:include_params t))))))))
+ (go-mode
+  . ((eglot-workspace-configuration
+      . ((:gopls . (:usePlaceholders t)))))))
+```
+
+If you can't afford an actual `.dir-locals.el` file, or if managing
+these files becomes cumbersome, the Emacs manual teaches you
+programmatic ways to leverage per-directory local variables.
+
+## Handling quirky servers
+
+Some servers need even more special hand-holding to operate correctly.
+If your server has some quirk or non-conformity, it's possible to
+extend Eglot via Elisp to adapt to it.  Here's an example on how to
+get [cquery][cquery] working:
+
+```lisp
+(add-to-list 'eglot-server-programs '((c++ mode c-mode) . (eglot-cquery "cquery")))
+
+(defclass eglot-cquery (eglot-lsp-server) ()
+  :documentation "A custom class for cquery's C/C++ langserver.")
+
+(cl-defmethod eglot-initialization-options ((server eglot-cquery))
+  "Passes through required cquery initialization options"
+  (let* ((root (car (project-roots (eglot--project server))))
+         (cache (expand-file-name ".cquery_cached_index/" root)))
+    (list :cacheDirectory (file-name-as-directory cache)
+          :progressReportFrequencyMs -1)))
+```
+
+See `eglot.el`'s section on Java's JDT server for an even more
+sophisticated example.
 
 <a name="reporting bugs"></a>
 # Reporting bugs
@@ -212,6 +274,9 @@ documentation on what these do.
 - `eglot-auto-display-help-buffer`: If non-nil, automatically display
   `*eglot-help*` buffer;
 
+- `eglot-confirm-server-initiated-edits`: If non-nil, ask for confirmation 
+  before allowing server to edit the source buffer's text;
+
 There are a couple more variables that you can customize via Emacs
 lisp:
 
@@ -225,6 +290,10 @@ lisp:
 - `eglot-server-initialized-hook`: Hook run after server is
   successfully initialized;
 
+- `eglot-managed-mode-hook`: Hook run after Eglot started or stopped
+  managing a buffer.  Use `eglot-managed-p` to tell if current buffer
+  is still being managed.
+
 # How does Eglot work?
 
 `M-x eglot` starts a server via a shell-command guessed from
@@ -235,11 +304,25 @@ If the connection is successful, you see an `[eglot:<server>]`
 indicator pop up in your mode-line.  More importantly, this means
 current *and future* file buffers of that major mode *inside your
 current project* automatically become \"managed\" by the LSP server,
-i.e.  information about their contents is exchanged periodically to
-provide enhanced code analysis via `xref-find-definitions`,
-`flymake-mode`, `eldoc-mode`, `completion-at-point`, among others.
+This means that information about these file's contents is exchanged
+periodically to provide enhanced code analysis.  Among other features:
 
-To "unmanage" these buffers, shutdown the server with `M-x
+* definitions can be found via `xref-find-definitions`;
+* on-the-fly diagnostics are given by `flymake-mode`;
+* function signature hints are given by `eldoc-mode`;
+* completion can be summoned with `completion-at-point`.
+
+Some extra features are provided if certain libraries are installed
+and enabled, such as:
+
+* completion dropdowns via [company];
+* snippet completions via [yasnippet];
+* marked-up documentation via [markdown].
+
+Eglot doesn't _require_ these libraries to work effectively, but will
+use them automatically if they are found to be active.
+
+To "unmanage" a project's buffers, shutdown the server with `M-x
 eglot-shutdown`.
 
 # Supported Protocol features
@@ -266,7 +349,7 @@ eglot-shutdown`.
 - [ ] workspace/workspaceFolders (3.6.0)
 - [ ] workspace/didChangeWorkspaceFolders (3.6.0)
 - [x] workspace/didChangeConfiguration
-- [ ] workspace/configuration (3.6.0)
+- [x] workspace/configuration (3.6.0)
 - [x] workspace/didChangeWatchedFiles
 - [x] workspace/symbol
 - [x] workspace/executeCommand
@@ -310,14 +393,63 @@ eglot-shutdown`.
 <a name="animated_gifs"></a>
 # _Obligatory animated gif section_
 
-![eglot-code-actions](./gif-examples/eglot-code-actions.gif)
+## Completion
 ![eglot-completions](./gif-examples/eglot-completions.gif)
-![eglot-diagnostics](./gif-examples/eglot-diagnostics.gif)
-![eglot-hover-on-symbol](./gif-examples/eglot-hover-on-symbol.gif)
-![eglot-rename](./gif-examples/eglot-rename.gif)
-![eglot-xref-find-definition](./gif-examples/eglot-xref-find-definition.gif)
-![eglot-xref-find-references](./gif-examples/eglot-xref-find-references.gif)
+
+The animation shows [company-mode][company] presenting the completion
+candidates to the user, but Eglot works with the built-in
+`completion-at-point` function as well, which is usually bound to
+`C-M-i`.
+
+## Snippet completion
 ![eglot-snippets-on-completion](./gif-examples/eglot-snippets-on-completion.gif)
+
+Eglot provides template based completion if the server supports
+snippet completion and [yasnippet][yasnippet] is enabled _before_
+Eglot connects to the server.  The animation shows
+[company-mode][company], but `completion-at-point` also works with
+snippets.
+
+## Diagnostics
+![eglot-diagnostics](./gif-examples/eglot-diagnostics.gif)
+
+Eglot relays the diagnostics information received from the server to
+[flymake][flymake].  Command `display-local-help` (bound to `C-h .`)
+shows the diagnostic message under point, but flymake provides other
+convenient ways to handle diagnostic errors.
+
+When Eglot manages a buffer, it disables other flymake backends.  See
+variable `eglot-stay-out-of` to change that.
+
+## Code Actions
+![eglot-code-actions](./gif-examples/eglot-code-actions.gif)
+
+The server may provide code actions, for example, to fix a diagnostic
+error or to suggest refactoring edits.  Command `eglot-code-actions`
+queries the server for possible code actions at point.  See variable
+`eglot-confirm-server-initiated-edits` to customize its behavior.
+
+## Hover on symbol
+![eglot-hover-on-symbol](./gif-examples/eglot-hover-on-symbol.gif)
+
+## Rename
+![eglot-rename](./gif-examples/eglot-rename.gif)
+
+Type `M-x eglot-rename RET` to rename the symbol at point.
+
+## Find definition
+![eglot-xref-find-definition](./gif-examples/eglot-xref-find-definition.gif)
+
+To jump to the definition of a symbol, use the built-in
+`xref-find-definitions` command, which is bound to `M-.`.
+
+## Find references
+![eglot-xref-find-references](./gif-examples/eglot-xref-find-references.gif)
+
+Eglot here relies on emacs' built-in functionality as well.
+`xref-find-references` is bound to `M-?`.  Additionally, Eglot
+provides the following similar commands: `eglot-find-declaration`,
+`eglot-find-implementation`, `eglot-find-typeDefinition`.
 
 # Historical differences to lsp-mode.el
 
@@ -387,6 +519,7 @@ Under the hood:
 [solargraph]: https://github.com/castwide/solargraph
 [windows-subprocess-hang]: https://www.gnu.org/software/emacs/manual/html_node/efaq-w32/Subprocess-hang.html
 [haskell-ide-engine]: https://github.com/haskell/haskell-ide-engine
+[elm-language-server]: https://github.com/elm-tooling/elm-language-server
 [kotlin-language-server]: https://github.com/fwcd/KotlinLanguageServer
 [gopls]: https://github.com/golang/go/wiki/gopls
 [eclipse-jdt]: https://github.com/eclipse/eclipse.jdt.ls
@@ -396,3 +529,9 @@ Under the hood:
 [elixir-ls]: https://github.com/JakeBecker/elixir-ls
 [news]: https://github.com/joaotavora/eglot/blob/master/NEWS.md
 [ada_language_server]: https://github.com/AdaCore/ada_language_server
+[metals]: http://scalameta.org/metals/
+[digestif]: https://github.com/astoff/digestif
+[company]: http://elpa.gnu.org/packages/company.html
+[flymake]: https://www.gnu.org/software/emacs/manual/html_node/flymake/index.html#Top
+[yasnippet]: http://elpa.gnu.org/packages/yasnippet.html
+[markdown]: https://github.com/defunkt/markdown-mode
