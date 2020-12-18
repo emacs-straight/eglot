@@ -1,4 +1,21 @@
-# 1.6 (16/20/2020)
+# 1.7 (upcoming)
+
+##### Support hierarchical symbols in Imenu ([#303][github#303])
+
+Thanks to Ingo Lohmar for the original implementation.
+
+##### Handle multiple "documentation at point" sources ([#439][github#439], [#494][github#494], [#481][github#481], [#454][github#454])
+
+Such sources include as LSP's signature, hover and also the Flymake
+diagnostic messages.  They can all be presented in the echo area
+(space permitting), or via `C-h .`.  For now, composition of different
+sources can be customized using `eldoc-documentation-strategy`,
+`eldoc-echo-area-use-multiline-p` and `eldoc-prefer-doc-buffer`.
+
+The variables `eglot-put-doc-in-help-buffer` and
+`eglot-auto-display-help-buffer` have been removed.
+
+# 1.6 (16/04/2020)
 
 ##### Column offset calculation is now LSP-conform ([#361][github#361])
 
@@ -207,6 +224,7 @@ and now said bunch of references-->
 [github#270]: https://github.com/joaotavora/eglot/issues/270
 [github#279]: https://github.com/joaotavora/eglot/issues/279
 [github#302]: https://github.com/joaotavora/eglot/issues/302
+[github#303]: https://github.com/joaotavora/eglot/issues/303
 [github#304]: https://github.com/joaotavora/eglot/issues/304
 [github#311]: https://github.com/joaotavora/eglot/issues/311
 [github#313]: https://github.com/joaotavora/eglot/issues/313
