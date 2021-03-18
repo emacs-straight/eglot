@@ -10,6 +10,7 @@ way:
 * 📚 Read about [servers](#connecting), [commands and
   keybindings](#commands), and [customization](#customization)
 * 📣 Read the [NEWS][news] file
+* 🏆 Folks over at Google [seem to like it][gospb].  Thanks!
 
 # _1-2-3_
 
@@ -21,12 +22,22 @@ Now find some source file, any source file, and type `M-x eglot`.
 *That's it*. If you're lucky, this guesses the LSP program to start
 for the language you're using. Otherwise, it prompts you to enter one.
 
+### _1-2-3-pitfall!_
+
+By design, Eglot doesn't depend on anything but Emacs.  But there
+_are_ ELPA dependencies to newer versions of so-called "core packages"
+developed _in the Emacs mainline_.  So unless you're using a
+bleeding-edge Emacs, where loading `eglot.el` is all you'd need to do,
+make sure your package system pulls in and loads the newest
+`project.el`, `xref.el`, `eldoc.el`, etc...  In case of trouble `M-x
+find-library` can help you tell if that happened.
+
 <a name="connecting"></a>
 # Connecting to a server
 
 `M-x eglot` can guess and work out-of-the-box with these servers:
 
-* Javascript's [javascript-typescript-stdio][javascript-typescript-langserver]
+* Javascript's [TS & JS Language Server ][typescript-language-server]
 * Rust's [rls][rls]
 * Python's [pyls][pyls]
 * Ruby's [solargraph][solargraph]
@@ -46,7 +57,9 @@ for the language you're using. Otherwise, it prompts you to enter one.
 * Ada's [ada_language_server][ada_language_server]
 * Scala's [metals][metals]
 * TeX/LaTeX's [Digestif][digestif]
+* Nix's [rnix-lsp][rnix-lsp]
 * Godot Engine's [built-in LSP][godot]
+* Fortran's [fortls][fortls]
 
 I'll add to this list as I test more servers. In the meantime you can
 customize `eglot-server-programs`:
@@ -167,6 +180,13 @@ See `eglot.el`'s section on Java's JDT server for an even more
 sophisticated example.
 
 <a name="reporting bugs"></a>
+
+## TRAMP support
+
+Should just work.  Try `M-x eglot` in a buffer visiting a remote file
+on a server where you've also installed the language server.  Only
+supported on Emacs 27.1.
+
 # Reporting bugs
 
 Having trouble connecting to a server?  Expected to have a certain
@@ -206,22 +226,23 @@ Here's a summary of available commands:
 
 - `M-x eglot`, as described above;
 
-- `M-x eglot-reconnect` reconnects to the server;
+- `M-x eglot-reconnect` reconnects to current server;
 
-- `M-x eglot-shutdown` says bye-bye to the server;
+- `M-x eglot-shutdown` says bye-bye to server of your choice;
+
+- `M-x eglot-shutdown-all` says bye-bye to every server;
 
 - `M-x eglot-rename` ask the server to rename the symbol at point;
 
 - `M-x eglot-format` asks the server to format buffer or the active
   region;
 
-- `M-x eglot-code-actions` asks the server for any code actions at
-  point. These may tipically be simple fixes, like deleting an unused
-  variable, or fixing an import. Left click on diagnostics to check if
-  there are any there;
+- `M-x eglot-code-actions` asks the server for any "code actions" at
+  point. Can also be invoked by `mouse-1`-clicking some diagnostics.
+  Also `M-x eglot-code-action-<TAB>` for shortcuts to specific actions.
 
-- `M-x eglot-help-at-point` asks the server for help for symbol at
-  point.
+- `M-x eldoc` asks the Eldoc system for help at point (this command
+  isn't specific to Eglot, by the way, it works in other contexts).
 
 - `M-x eglot-events-buffer` jumps to the events buffer for debugging
   communication with the server.
@@ -239,8 +260,10 @@ in `eglot-mode-map`, which is active as long as Eglot is managing a
 file in your project. The commands don't need to be Eglot-specific,
 either:
 
-```
-(define-key eglot-mode-map (kbd "C-c h") 'eglot-help-at-point)
+```lisp
+(define-key eglot-mode-map (kbd "C-c r") 'eglot-rename)
+(define-key eglot-mode-map (kbd "C-c o") 'eglot-code-action-organize-imports)
+(define-key eglot-mode-map (kbd "C-c h") 'eldoc)
 (define-key eglot-mode-map (kbd "<f6>") 'xref-find-definitions)
 ```
 
@@ -284,6 +307,10 @@ lisp:
 - `eglot-managed-mode-hook`: Hook run after Eglot started or stopped
   managing a buffer.  Use `eglot-managed-p` to tell if current buffer
   is still being managed.
+
+- `eglot-stay-out-of`: List of Emacs features that Eglot shouldn't
+  automatically try to manage on users' behalf.  Useful when you need
+  non-LSP Flymake or Company backends.  See docstring for examples.
 
 # How does Eglot work?
 
@@ -501,10 +528,11 @@ Under the hood:
 [pyls]: https://github.com/palantir/python-language-server
 [gnuelpa]: https://elpa.gnu.org/packages/eglot.html
 [melpa]: http://melpa.org/#/eglot
-[javascript-typescript-langserver]: https://github.com/sourcegraph/javascript-typescript-langserver
+[typescript-language-server]: https://github.com/theia-ide/typescript-language-server
 [emacs-lsp]: https://github.com/emacs-lsp/lsp-mode
 [emacs-lsp-plugins]: https://github.com/emacs-lsp
 [bash-language-server]: https://github.com/mads-hartmann/bash-language-server
+[rnix-lsp]: https://github.com/nix-community/rnix-lsp
 [php-language-server]: https://github.com/felixfbecker/php-language-server
 [company-mode]: https://github.com/company-mode/company-mode
 [cquery]: https://github.com/cquery-project/cquery
@@ -515,12 +543,12 @@ Under the hood:
 [haskell-language-server]: https://github.com/haskell/haskell-language-server
 [elm-language-server]: https://github.com/elm-tooling/elm-language-server
 [kotlin-language-server]: https://github.com/fwcd/KotlinLanguageServer
-[gopls]: https://github.com/golang/go/wiki/gopls
+[gopls]: https://github.com/golang/tools/tree/master/gopls
 [eclipse-jdt]: https://github.com/eclipse/eclipse.jdt.ls
 [ocaml-language-server]: https://github.com/freebroccolo/ocaml-language-server
 [r-languageserver]: https://cran.r-project.org/package=languageserver
 [dart_language_server]: https://github.com/natebosch/dart_language_server
-[elixir-ls]: https://github.com/JakeBecker/elixir-ls
+[elixir-ls]: https://github.com/elixir-lsp/elixir-ls
 [erlang_ls]: https://github.com/erlang-ls/erlang_ls
 [news]: https://github.com/joaotavora/eglot/blob/master/NEWS.md
 [ada_language_server]: https://github.com/AdaCore/ada_language_server
@@ -531,3 +559,5 @@ Under the hood:
 [yasnippet]: http://elpa.gnu.org/packages/yasnippet.html
 [markdown]: https://github.com/defunkt/markdown-mode
 [godot]: https://godotengine.org
+[fortls]: https://github.com/hansec/fortran-language-server
+[gospb]: https://opensource.googleblog.com/2020/10/announcing-latest-google-open-source.html

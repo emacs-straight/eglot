@@ -59,6 +59,7 @@
 (require 'imenu)
 (require 'cl-lib)
 (require 'project)
+(require 'seq)
 (require 'url-parse)
 (require 'url-util)
 (require 'pcase)
@@ -96,11 +97,10 @@
 
 (defvar eglot-server-programs '((rust-mode . (eglot-rls "rls"))
                                 (python-mode . ("pyls"))
-                                ((js-mode
-                                  typescript-mode)
-                                 . ("javascript-typescript-stdio"))
+                                ((js-mode typescript-mode)
+                                 . ("typescript-language-server" "--stdio"))
                                 (sh-mode . ("bash-language-server" "start"))
-                                (php-mode
+                                ((php-mode phps-mode)
                                  . ("php" "vendor/felixfbecker/\
 language-server/bin/php-language-server.php"))
                                 ((c++-mode c-mode) . ("ccls"))
@@ -123,7 +123,9 @@ language-server/bin/php-language-server.php"))
                                 ((tex-mode context-mode texinfo-mode bibtex-mode)
                                  . ("digestif"))
                                 (erlang-mode . ("erlang_ls" "--transport" "stdio"))
-                                (gdscript-mode . ("localhost" 6008)))
+                                (nix-mode . ("rnix-lsp"))
+                                (gdscript-mode . ("localhost" 6008))
+                                (f90-mode . ("fortls")))
   "How the command `eglot' guesses the server to start.
 An association list of (MAJOR-MODE . CONTACT) pairs.  MAJOR-MODE
 is a mode symbol, or a list of mode symbols.  The associated
@@ -165,6 +167,10 @@ of those modes.  CONTACT can be:
   hints on finding the required programs, etc.  Otherwise, it
   should not ask the user for any input, and return nil or signal
   an error if it can't produce a valid CONTACT.")
+
+(defface eglot-highlight-symbol-face
+  '((t (:inherit bold)))
+  "Face used to highlight the symbol at point.")
 
 (defface eglot-mode-line
   '((t (:inherit font-lock-constant-face :weight bold)))
@@ -238,6 +244,10 @@ let the buffer grow forever."
 
 (defconst eglot--{} (make-hash-table) "The empty JSON object.")
 
+(defun eglot--executable-find (command &optional remote)
+  "Like Emacs 27's `executable-find', ignore REMOTE on Emacs 26."
+  (if (>= emacs-major-version 27) (executable-find command remote)
+    (executable-find command)))
 
 
 ;;; Message verification helpers
@@ -265,12 +275,11 @@ let the buffer grow forever."
       (Position (:line :character))
       (Range (:start :end))
       (Registration (:id :method) (:registerOptions))
-      (Registration (:id :method) (:registerOptions))
       (ResponseError (:code :message) (:data))
       (ShowMessageParams (:type :message))
       (ShowMessageRequestParams (:type :message) (:actions))
       (SignatureHelp (:signatures) (:activeSignature :activeParameter))
-      (SignatureInformation (:label) (:documentation :parameters))
+      (SignatureInformation (:label) (:documentation :parameters :activeParameter))
       (SymbolInformation (:name :kind :location)
                          (:deprecated :containerName))
       (DocumentSymbol (:name :range :selectionRange :kind)
@@ -560,7 +569,8 @@ treated as in `eglot-dbind'."
              :signatureHelp      (list :dynamicRegistration :json-false
                                        :signatureInformation
                                        `(:parameterInformation
-                                         (:labelOffsetSupport t)))
+                                         (:labelOffsetSupport t)
+                                         :activeParameterSupport t))
              :references         `(:dynamicRegistration :json-false)
              :definition         `(:dynamicRegistration :json-false)
              :declaration        `(:dynamicRegistration :json-false)
@@ -642,11 +652,12 @@ Interactively, read SERVER from the minibuffer unless there is
 only one and it's managing the current buffer.
 
 Forcefully quit it if it doesn't respond within TIMEOUT seconds.
-Don't leave this function with the server still running.
+TIMEOUT defaults to 1.5 seconds.  Don't leave this function with
+the server still running.
 
 If PRESERVE-BUFFERS is non-nil (interactively, when called with a
 prefix argument), do not kill events and output buffers of
-SERVER.  ."
+SERVER."
   (interactive (list (eglot--read-server "Shutdown which server"
                                          (eglot-current-server))
                      t nil current-prefix-arg))
@@ -659,6 +670,13 @@ SERVER.  ."
     ;; Now ask jsonrpc.el to shut down the server.
     (jsonrpc-shutdown server (not preserve-buffers))
     (unless preserve-buffers (kill-buffer (jsonrpc-events-buffer server)))))
+
+(defun eglot-shutdown-all (&optional preserve-buffers)
+  "Politely ask all language servers to quit, in order.
+PRESERVE-BUFFERS as in `eglot-shutdown', which see."
+  (interactive (list current-prefix-arg))
+  (cl-loop for ss being the hash-values of eglot--servers-by-project
+           do (cl-loop for s in ss do (eglot-shutdown s nil preserve-buffers))))
 
 (defun eglot--on-shutdown (server)
   "Called by jsonrpc.el when SERVER is already dead."
@@ -726,7 +744,8 @@ be guessed."
                     (funcall guess interactive)
                   guess))
          (class (or (and (consp guess) (symbolp (car guess))
-                         (prog1 (car guess) (setq guess (cdr guess))))
+                         (prog1 (unless current-prefix-arg (car guess))
+                           (setq guess (cdr guess))))
                     'eglot-lsp-server))
          (program (and (listp guess)
                        (stringp (car guess))
@@ -747,7 +766,7 @@ be guessed."
                      ((null guess)
                       (format "[eglot] Sorry, couldn't guess for `%s'!\n%s"
                               managed-mode base-prompt))
-                     ((and program (not (executable-find program)))
+                     ((and program (not (eglot--executable-find program t)))
                       (concat (format "[eglot] I guess you want to run `%s'"
                                       program-guess)
                               (format ", but I can't find `%s' in PATH!" program)
@@ -773,13 +792,13 @@ be guessed."
 (defun eglot (managed-major-mode project class contact &optional interactive)
   "Manage a project with a Language Server Protocol (LSP) server.
 
-The LSP server of CLASS started (or contacted) via CONTACT.  If
-this operation is successful, current *and future* file buffers
-of MANAGED-MAJOR-MODE inside PROJECT automatically become
-\"managed\" by the LSP server, meaning information about their
-contents is exchanged periodically to provide enhanced
-code-analysis via `xref-find-definitions', `flymake-mode',
-`eldoc-mode', `completion-at-point', among others.
+The LSP server of CLASS is started (or contacted) via CONTACT.
+If this operation is successful, current *and future* file
+buffers of MANAGED-MAJOR-MODE inside PROJECT become \"managed\"
+by the LSP server, meaning information about their contents is
+exchanged periodically to provide enhanced code-analysis via
+`xref-find-definitions', `flymake-mode', `eldoc-mode',
+`completion-at-point', among others.
 
 Interactively, the command attempts to guess MANAGED-MAJOR-MODE
 from current buffer, CLASS and CONTACT from
@@ -791,7 +810,7 @@ MANAGED-MAJOR-MODE.
 
 PROJECT is a project instance as returned by `project-current'.
 
-CLASS is a subclass of symbol `eglot-lsp-server'.
+CLASS is a subclass of `eglot-lsp-server'.
 
 CONTACT specifies how to contact the server.  It is a
 keyword-value plist used to initialize CLASS or a plain list as
@@ -872,6 +891,21 @@ received the initializing configuration.
 
 Each function is passed the server as an argument")
 
+(defun eglot--cmd (contact)
+  "Helper for `eglot--connect'."
+  (if (file-remote-p default-directory)
+      ;; TODO: this seems like a bug, although it’s everywhere. For
+      ;; some reason, for remote connections only, over a pipe, we
+      ;; need to turn off line buffering on the tty.
+      ;;
+      ;; Not only does this seem like there should be a better way,
+      ;; but it almost certainly doesn’t work on non-unix systems.
+      (list "sh" "-c"
+            (string-join (cons "stty raw > /dev/null;"
+                               (mapcar #'shell-quote-argument contact))
+             " "))
+    contact))
+
 (defun eglot--connect (managed-major-mode project class contact)
   "Connect to MANAGED-MAJOR-MODE, PROJECT, CLASS and CONTACT.
 This docstring appeases checkdoc, that's all."
@@ -902,12 +936,13 @@ This docstring appeases checkdoc, that's all."
                       (let ((default-directory default-directory))
                         (make-process
                          :name readable-name
-                         :command contact
+                         :command (eglot--cmd contact)
                          :connection-type 'pipe
                          :coding 'utf-8-emacs-unix
                          :noquery t
                          :stderr (get-buffer-create
-                                  (format "*%s stderr*" readable-name)))))))))
+                                  (format "*%s stderr*" readable-name))
+                         :file-handler t)))))))
          (spread (lambda (fn) (lambda (server method params)
                                 (apply fn server method (append params nil)))))
          (server
@@ -937,10 +972,15 @@ This docstring appeases checkdoc, that's all."
                      (jsonrpc-async-request
                       server
                       :initialize
-                      (list :processId (unless (eq (jsonrpc-process-type server)
-                                                   'network)
-                                         (emacs-pid))
-                            :rootPath (expand-file-name default-directory)
+                      (list :processId
+                            (unless (or (file-remote-p default-directory)
+                                        (eq (jsonrpc-process-type server)
+                                            'network))
+                              (emacs-pid))
+                            ;; Maybe turn trampy `/ssh:foo@bar:/path/to/baz.py'
+                            ;; into `/path/to/baz.py', so LSP groks it.
+                            :rootPath (expand-file-name
+                                       (file-local-name default-directory))
                             :rootUri (eglot--path-to-uri default-directory)
                             :initializationOptions (eglot-initialization-options
                                                     server)
@@ -1159,17 +1199,33 @@ If optional MARKER, return a marker instead"
           (funcall eglot-move-to-column-function col)))
       (if marker (copy-marker (point-marker)) (point)))))
 
+(defconst eglot--uri-path-allowed-chars
+  (let ((vec (copy-sequence url-path-allowed-chars)))
+    (aset vec ?: nil) ;; see github#639
+    vec)
+  "Like `url-path-allows-chars' but more restrictive.")
+
 (defun eglot--path-to-uri (path)
   "URIfy PATH."
-  (url-hexify-string
-   (concat "file://" (if (eq system-type 'windows-nt) "/") (file-truename path))
-   url-path-allowed-chars))
+  (concat "file://" (if (eq system-type 'windows-nt) "/")
+          (url-hexify-string
+           ;; Again watch out for trampy paths.
+           (directory-file-name (file-local-name (file-truename path))) 
+           eglot--uri-path-allowed-chars)))
 
 (defun eglot--uri-to-path (uri)
-  "Convert URI to a file path."
+  "Convert URI to file path, helped by `eglot--current-server'."
   (when (keywordp uri) (setq uri (substring (symbol-name uri) 1)))
-  (let ((retval (url-filename (url-generic-parse-url (url-unhex-string uri)))))
-    (if (eq system-type 'windows-nt) (substring retval 1) retval)))
+  (let* ((retval (url-filename (url-generic-parse-url (url-unhex-string uri))))
+         (normalized (if (and (eq system-type 'windows-nt)
+                              (cl-plusp (length retval)))
+                         (substring retval 1)
+                       retval))
+         (server (eglot-current-server))
+         (remote-prefix (and server
+                             (file-remote-p
+                              (project-root (eglot--project server))))))
+    (concat remote-prefix normalized)))
 
 (defun eglot--snippet-expansion-fn ()
   "Compute a function to expand snippets.
@@ -1190,7 +1246,9 @@ Doubles as an indicator of snippet support."
     (with-temp-buffer
       (setq-local markdown-fontify-code-blocks-natively t)
       (insert string)
-      (ignore-errors (delay-mode-hooks (funcall mode)))
+      (let ((inhibit-message t)
+	    (message-log-max nil))
+        (ignore-errors (delay-mode-hooks (funcall mode))))
       (font-lock-ensure)
       (string-trim (filter-buffer-substring (point-min) (point-max))))))
 
@@ -1199,30 +1257,29 @@ Doubles as an indicator of snippet support."
 You could add, for instance, the symbol
 `:documentHighlightProvider' to prevent automatic highlighting
 under cursor."
-  :type '(repeat
-          (choice
-           (const :tag "Documentation on hover" :hoverProvider)
-           (const :tag "Code completion" :completionProvider)
-           (const :tag "Function signature help" :signatureHelpProvider)
-           (const :tag "Go to definition" :definitionProvider)
-           (const :tag "Go to type definition" :typeDefinitionProvider)
-           (const :tag "Go to implementation" :implementationProvider)
-           (const :tag "Go to declaration" :implementationProvider)
-           (const :tag "Find references" :referencesProvider)
-           (const :tag "Highlight symbols automatically" :documentHighlightProvider)
-           (const :tag "List symbols in buffer" :documentSymbolProvider)
-           (const :tag "List symbols in workspace" :workspaceSymbolProvider)
-           (const :tag "Execute code actions" :codeActionProvider)
-           (const :tag "Code lens" :codeLensProvider)
-           (const :tag "Format buffer" :documentFormattingProvider)
-           (const :tag "Format portion of buffer" :documentRangeFormattingProvider)
-           (const :tag "On-type formatting" :documentOnTypeFormattingProvider)
-           (const :tag "Rename symbol" :renameProvider)
-           (const :tag "Highlight links in document" :documentLinkProvider)
-           (const :tag "Decorate color references" :colorProvider)
-           (const :tag "Fold regions of buffer" :foldingRangeProvider)
-           (const :tag "Execute custom commands" :executeCommandProvider)
-           (symbol :tag "Other"))))
+  :type '(set
+          :tag "Tick the ones you're not interested in"
+          (const :tag "Documentation on hover" :hoverProvider)
+          (const :tag "Code completion" :completionProvider)
+          (const :tag "Function signature help" :signatureHelpProvider)
+          (const :tag "Go to definition" :definitionProvider)
+          (const :tag "Go to type definition" :typeDefinitionProvider)
+          (const :tag "Go to implementation" :implementationProvider)
+          (const :tag "Go to declaration" :implementationProvider)
+          (const :tag "Find references" :referencesProvider)
+          (const :tag "Highlight symbols automatically" :documentHighlightProvider)
+          (const :tag "List symbols in buffer" :documentSymbolProvider)
+          (const :tag "List symbols in workspace" :workspaceSymbolProvider)
+          (const :tag "Execute code actions" :codeActionProvider)
+          (const :tag "Code lens" :codeLensProvider)
+          (const :tag "Format buffer" :documentFormattingProvider)
+          (const :tag "Format portion of buffer" :documentRangeFormattingProvider)
+          (const :tag "On-type formatting" :documentOnTypeFormattingProvider)
+          (const :tag "Rename symbol" :renameProvider)
+          (const :tag "Highlight links in document" :documentLinkProvider)
+          (const :tag "Decorate color references" :colorProvider)
+          (const :tag "Fold regions of buffer" :foldingRangeProvider)
+          (const :tag "Execute custom commands" :executeCommandProvider)))
 
 (defun eglot--server-capable (&rest feats)
   "Determine if current server is capable of FEATS."
@@ -1359,9 +1416,11 @@ Use `eglot-managed-p' to determine if current buffer is managed.")
     (eglot--setq-saving eldoc-documentation-strategy
                         #'eldoc-documentation-enthusiast)
     (eglot--setq-saving xref-prompt-for-identifier nil)
-    (eglot--setq-saving flymake-diagnostic-functions '(eglot-flymake-backend t))
+    (eglot--setq-saving flymake-diagnostic-functions '(eglot-flymake-backend))
     (eglot--setq-saving company-backends '(company-capf))
     (eglot--setq-saving company-tooltip-align-annotations t)
+    (when (assoc 'flex completion-styles-alist)
+      (eglot--setq-saving completion-styles '(flex basic)))
     (unless (eglot--stay-out-of-p 'imenu)
       (add-function :before-until (local 'imenu-create-index-function)
                     #'eglot-imenu))
@@ -1563,15 +1622,16 @@ COMMAND is a symbol naming the command."
 (cl-defmethod eglot-handle-request
   (_server (_method (eql window/showMessageRequest)) &key type message actions)
   "Handle server request window/showMessageRequest"
-  (let ((label (completing-read
-                (concat
-                 (format (propertize "[eglot] Server reports (type=%s): %s"
-                                     'face (if (<= type 1) 'error))
-                         type message)
-                 "\nChoose an option: ")
-                (or (mapcar (lambda (obj) (plist-get obj :title)) actions)
-                    '("OK"))
-                nil t (plist-get (elt actions 0) :title))))
+  (let* ((actions (append actions nil)) ;; gh#627
+         (label (completing-read
+                 (concat
+                  (format (propertize "[eglot] Server reports (type=%s): %s"
+                                      'face (if (<= type 1) 'error))
+                          type message)
+                  "\nChoose an option: ")
+                 (or (mapcar (lambda (obj) (plist-get obj :title)) actions)
+                     '("OK"))
+                 nil t (plist-get (elt actions 0) :title))))
     (if label `(:title ,label) :null)))
 
 (cl-defmethod eglot-handle-notification
@@ -1796,6 +1856,7 @@ Records BEG, END and PRE-CHANGE-LENGTH locally."
 SECTION should be a keyword or a string, value can be anything
 that can be converted to JSON.")
 
+;;;###autoload
 (put 'eglot-workspace-configuration 'safe-local-variable 'listp)
 
 (defun eglot-signal-didChangeConfiguration (server)
@@ -1999,7 +2060,7 @@ Try to visit the target file for a richer summary line."
        (eglot--lambda ((Location) uri range)
          (collect (eglot--xref-make-match (symbol-name (symbol-at-point))
                                           uri range)))
-       (if (vectorp response) response (list response))))))
+       (if (vectorp response) response (and response (list response)))))))
 
 (cl-defun eglot--lsp-xref-helper (method &key extra-params capability )
   "Helper for `eglot-find-declaration' & friends."
@@ -2121,7 +2182,7 @@ is not active."
                                        insertText)
                                       (t
                                        (string-trim-left label)))))
-                           (unless (zerop (length item))
+                           (unless (zerop (length proxy))
                              (put-text-property 0 1 'eglot--lsp-item item proxy))
                            proxy))
                        items)))))
@@ -2147,10 +2208,10 @@ is not active."
          (cond
           ((eq action 'metadata) metadata)               ; metadata
           ((eq action 'lambda)                           ; test-completion
-           (member probe (funcall proxies)))
+           (test-completion probe (funcall proxies)))
           ((eq (car-safe action) 'boundaries) nil)       ; boundaries
-          ((and (null action)                            ; try-completion
-                (member probe (funcall proxies)) t))
+          ((null action)                                 ; try-completion
+           (try-completion probe (funcall proxies)))
           ((eq action t)                                 ; all-completions
            (cl-remove-if-not
             (lambda (proxy)
@@ -2196,54 +2257,58 @@ is not active."
              (cl-coerce (cl-getf completion-capability :triggerCharacters) 'list))
             (line-beginning-position))))
        :exit-function
-       (lambda (proxy _status)
-         ;; To assist in using this whole `completion-at-point'
-         ;; function inside `completion-in-region', ensure the exit
-         ;; function runs in the buffer where the completion was
-         ;; triggered from.  This should probably be in Emacs itself.
-         ;; (github#505)
-         (with-current-buffer (if (minibufferp)
-                                  (window-buffer (minibuffer-selected-window))
-                                (current-buffer))
-           (eglot--dbind ((CompletionItem) insertTextFormat
-                          insertText textEdit additionalTextEdits label)
-               (funcall
-                resolve-maybe
-                (or (get-text-property 0 'eglot--lsp-item proxy)
-                    ;; When selecting from the *Completions*
-                    ;; buffer, `proxy' won't have any properties.
-                    ;; A lookup should fix that (github#148)
-                    (get-text-property
-                     0 'eglot--lsp-item
-                     (cl-find proxy (funcall proxies) :test #'string=))))
-             (let ((snippet-fn (and (eql insertTextFormat 2)
-                                    (eglot--snippet-expansion-fn))))
-               (cond (textEdit
-                      ;; Undo (yes, undo) the newly inserted completion.
-                      ;; If before completion the buffer was "foo.b" and
-                      ;; now is "foo.bar", `proxy' will be "bar".  We
-                      ;; want to delete only "ar" (`proxy' minus the
-                      ;; symbol whose bounds we've calculated before)
-                      ;; (github#160).
-                      (delete-region (+ (- (point) (length proxy))
-                                        (if bounds (- (cdr bounds) (car bounds)) 0))
-                                     (point))
-                      (eglot--dbind ((TextEdit) range newText) textEdit
-                        (pcase-let ((`(,beg . ,end) (eglot--range-region range)))
-                          (delete-region beg end)
-                          (goto-char beg)
-                          (funcall (or snippet-fn #'insert) newText)))
-                      (when (cl-plusp (length additionalTextEdits))
-                        (eglot--apply-text-edits additionalTextEdits)))
-                     (snippet-fn
-                      ;; A snippet should be inserted, but using plain
-                      ;; `insertText'.  This requires us to delete the
-                      ;; whole completion, since `insertText' is the full
-                      ;; completion's text.
-                      (delete-region (- (point) (length proxy)) (point))
-                      (funcall snippet-fn (or insertText label)))))
-             (eglot--signal-textDocument/didChange)
-             (eldoc))))))))
+       (lambda (proxy status)
+         (when (eq status 'finished)
+           ;; To assist in using this whole `completion-at-point'
+           ;; function inside `completion-in-region', ensure the exit
+           ;; function runs in the buffer where the completion was
+           ;; triggered from.  This should probably be in Emacs itself.
+           ;; (github#505)
+           (with-current-buffer (if (minibufferp)
+                                    (window-buffer (minibuffer-selected-window))
+                                  (current-buffer))
+             (eglot--dbind ((CompletionItem) insertTextFormat
+                            insertText textEdit additionalTextEdits label)
+                 (funcall
+                  resolve-maybe
+                  (or (get-text-property 0 'eglot--lsp-item proxy)
+                      ;; When selecting from the *Completions*
+                      ;; buffer, `proxy' won't have any properties.
+                      ;; A lookup should fix that (github#148)
+                      (get-text-property
+                       0 'eglot--lsp-item
+                       (cl-find proxy (funcall proxies) :test #'string=))))
+               (let ((snippet-fn (and (eql insertTextFormat 2)
+                                      (eglot--snippet-expansion-fn))))
+                 (cond (textEdit
+                        ;; Undo (yes, undo) the newly inserted completion.
+                        ;; If before completion the buffer was "foo.b" and
+                        ;; now is "foo.bar", `proxy' will be "bar".  We
+                        ;; want to delete only "ar" (`proxy' minus the
+                        ;; symbol whose bounds we've calculated before)
+                        ;; (github#160).
+                        (delete-region (+ (- (point) (length proxy))
+                                          (if bounds
+                                              (- (cdr bounds) (car bounds))
+                                            0))
+                                       (point))
+                        (eglot--dbind ((TextEdit) range newText) textEdit
+                          (pcase-let ((`(,beg . ,end)
+                                       (eglot--range-region range)))
+                            (delete-region beg end)
+                            (goto-char beg)
+                            (funcall (or snippet-fn #'insert) newText)))
+                        (when (cl-plusp (length additionalTextEdits))
+                          (eglot--apply-text-edits additionalTextEdits)))
+                       (snippet-fn
+                        ;; A snippet should be inserted, but using plain
+                        ;; `insertText'.  This requires us to delete the
+                        ;; whole completion, since `insertText' is the full
+                        ;; completion's text.
+                        (delete-region (- (point) (length proxy)) (point))
+                        (funcall snippet-fn (or insertText label)))))
+               (eglot--signal-textDocument/didChange)
+               (eldoc)))))))))
 
 (defun eglot--hover-info (contents &optional range)
   (let ((heading (and range (pcase-let ((`(,beg . ,end) (eglot--range-region range)))
@@ -2252,14 +2317,15 @@ is not active."
                          (if (vectorp contents) contents (list contents)) "\n")))
     (when (or heading (cl-plusp (length body))) (concat heading body))))
 
-(defun eglot--sig-info (sigs active-sig active-param)
+(defun eglot--sig-info (sigs active-sig sig-help-active-param)
   (cl-loop
    for (sig . moresigs) on (append sigs nil) for i from 0
    concat
-   (eglot--dbind ((SignatureInformation) label documentation parameters) sig
+   (eglot--dbind ((SignatureInformation) label documentation parameters activeParameter) sig
      (with-temp-buffer
        (save-excursion (insert label))
-       (let (params-start params-end)
+       (let ((active-param (or activeParameter sig-help-active-param))
+             params-start params-end)
          ;; Ad-hoc attempt to parse label as <name>(<params>)
          (when (looking-at "\\([^(]+\\)(\\([^)]+\\))")
            (setq params-start (match-beginning 2) params-end (match-end 2))
@@ -2364,8 +2430,9 @@ is not active."
                     (pcase-let ((`(,beg . ,end)
                                  (eglot--range-region range)))
                       (let ((ov (make-overlay beg end)))
-                        (overlay-put ov 'face 'highlight)
-                        (overlay-put ov 'evaporate t)
+                        (overlay-put ov 'face 'eglot-highlight-symbol-face)
+                        (overlay-put ov 'modification-hooks
+                                     `(,(lambda (o &rest _) (delete-overlay o))))
                         ov)))
                   highlights))))
        :deferred :textDocument/documentHighlight)
@@ -2414,7 +2481,8 @@ is not active."
               (jsonrpc-request (eglot--current-server-or-lose)
                                :textDocument/documentSymbol
                                `(:textDocument
-                                 ,(eglot--TextDocumentIdentifier))))))))
+                                 ,(eglot--TextDocumentIdentifier))
+                               :cancel-on-input non-essential))))))
 
 (defun eglot--apply-text-edits (edits &optional version)
   "Apply EDITS for current buffer if at VERSION, or if it's nil."
@@ -2472,8 +2540,7 @@ is not active."
                      (eglot--dbind ((VersionedTextDocumentIdentifier) uri version)
                          textDocument
                        (list (eglot--uri-to-path uri) edits version)))
-                   documentChanges))
-          edit)
+                   documentChanges)))
       (cl-loop for (uri edits) on changes by #'cddr
                do (push (list (eglot--uri-to-path uri) edits) prepared))
       (if (or confirm
@@ -2483,17 +2550,11 @@ is not active."
                    (format "[eglot] Server wants to edit:\n  %s\n Proceed? "
                            (mapconcat #'identity (mapcar #'car prepared) "\n  ")))
             (eglot--error "User cancelled server edit")))
-      (while (setq edit (car prepared))
-        (pcase-let ((`(,path ,edits ,version)  edit))
-          (with-current-buffer (find-file-noselect path)
-            (eglot--apply-text-edits edits version))
-          (pop prepared))
-        t)
-      (unwind-protect
-          (if prepared (eglot--warn "Caution: edits of files %s failed."
-                                    (mapcar #'car prepared))
-            (eldoc)
-            (eglot--message "Edit successful!"))))))
+      (cl-loop for edit in prepared
+               for (path edits version) = edit
+               do (with-current-buffer (find-file-noselect path)
+                    (eglot--apply-text-edits edits version))
+               finally (eldoc) (eglot--message "Edit successful!")))))
 
 (defun eglot-rename (newname)
   "Rename the current symbol to NEWNAME."
@@ -2509,14 +2570,21 @@ is not active."
                                            :newName ,newname))
    current-prefix-arg))
 
+(defun eglot--region-bounds () "Region bounds if active, else point and nil."
+  (if (use-region-p) `(,(region-beginning) ,(region-end)) `(,(point) nil)))
 
-(defun eglot-code-actions (beg &optional end)
-  "Offer to execute code actions between BEG and END.
-Interactively, if a region is active, BEG and END are its bounds,
-else BEG is point and END is nil, which results in a request for
-code actions at point"
+(defun eglot-code-actions (beg &optional end action-kind)
+  "Offer to execute actions of ACTION-KIND between BEG and END.
+If ACTION-KIND is nil, consider all kinds of actions.
+Interactively, default BEG and END to region's bounds else BEG is
+point and END is nil, which results in a request for code actions
+at point.  With prefix argument, prompt for ACTION-KIND."
   (interactive
-   (if (region-active-p) `(,(region-beginning) ,(region-end)) `(,(point) nil)))
+   `(,@(eglot--region-bounds)
+     ,(and current-prefix-arg
+           (completing-read "[eglot] Action kind: "
+                            '("quickfix" "refactor.extract" "refactor.inline"
+                              "refactor.rewrite" "source.organizeImports")))))
   (unless (eglot--server-capable :codeActionProvider)
     (eglot--error "Server can't execute code actions!"))
   (let* ((server (eglot--current-server-or-lose))
@@ -2530,27 +2598,36 @@ code actions at point"
                  :context
                  `(:diagnostics
                    [,@(cl-loop for diag in (flymake-diagnostics beg end)
-                               when (cdr (assoc 'eglot-lsp-diag (eglot--diag-data diag)))
-                               collect it)]))))
+                               when (cdr (assoc 'eglot-lsp-diag
+                                                (eglot--diag-data diag)))
+                               collect it)]
+                   ,@(when action-kind `(:only [,action-kind]))))
+           :deferred t))
          (menu-items
-          (or (mapcar (jsonrpc-lambda (&rest all &key title &allow-other-keys)
-                        (cons title all))
-                      actions)
-              (eglot--error "No code actions here")))
+          (or (cl-loop for action across actions
+                       ;; Do filtering ourselves, in case the `:only'
+                       ;; didn't go through.
+                       when (or (not action-kind)
+                                (equal action-kind (plist-get action :kind)))
+                       collect (cons (plist-get action :title) action))
+              (apply #'eglot--error
+                     (if action-kind `("No \"%s\" code actions here" ,action-kind)
+                       `("No code actions here")))))
          (preferred-action (cl-find-if
-                            (jsonrpc-lambda (&key isPreferred &allow-other-keys)
-                              isPreferred)
-                            actions))
-         (menu `("Eglot code actions:" ("dummy" ,@menu-items)))
-         (action (if (listp last-nonmenu-event)
-                     (x-popup-menu last-nonmenu-event menu)
-                   (cdr (assoc (completing-read "[eglot] Pick an action: "
-                                                menu-items nil t
-                                                nil nil (or (plist-get
-                                                             preferred-action
-                                                             :title)
-                                                            (car menu-items)))
-                               menu-items)))))
+                            (lambda (menu-item)
+                              (plist-get (cdr menu-item) :isPreferred))
+                            menu-items))
+         (default-action (car (or preferred-action (car menu-items))))
+         (action (if (and action-kind (null (cadr menu-items)))
+                     (cdr (car menu-items))
+                   (if (listp last-nonmenu-event)
+                       (x-popup-menu last-nonmenu-event `("Eglot code actions:"
+                                                          ("dummy" ,@menu-items)))
+                     (cdr (assoc (completing-read
+                                  (format "[eglot] Pick an action (default %s): "
+                                          default-action)
+                                  menu-items nil t nil nil default-action)
+                                 menu-items))))))
     (eglot--dcase action
       (((Command) command arguments)
        (eglot-execute-command server (intern command) arguments))
@@ -2560,44 +2637,43 @@ code actions at point"
          (eglot--dbind ((Command) command arguments) command
            (eglot-execute-command server (intern command) arguments)))))))
 
+(defmacro eglot--code-action (name kind)
+  "Define NAME to execute KIND code action."
+  `(defun ,name (beg &optional end)
+     ,(format "Execute '%s' code actions between BEG and END." kind)
+     (interactive (eglot--region-bounds))
+     (eglot-code-actions beg end ,kind)))
+
+(eglot--code-action eglot-code-action-organize-imports "source.organizeImports")
+(eglot--code-action eglot-code-action-extract "refactor.extract")
+(eglot--code-action eglot-code-action-inline "refactor.inline")
+(eglot--code-action eglot-code-action-rewrite "refactor.rewrite")
+(eglot--code-action eglot-code-action-quickfix "quickfix")
 
 
 ;;; Dynamic registration
 ;;;
-(defun eglot--wildcard-to-regexp (wildcard)
-  "(Very lame attempt to) convert WILDCARD to a Elisp regexp."
-  (cl-loop
-   with substs = '(("{" . "\\\\(")
-                   ("}" . "\\\\)")
-                   ("," . "\\\\|"))
-   with string = (wildcard-to-regexp wildcard)
-   for (pattern . rep) in substs
-   for target = string then result
-   for result = (replace-regexp-in-string pattern rep target)
-   finally return result))
-
 (cl-defmethod eglot-register-capability
   (server (method (eql workspace/didChangeWatchedFiles)) id &key watchers)
   "Handle dynamic registration of workspace/didChangeWatchedFiles"
   (eglot-unregister-capability server method id)
   (let* (success
-         (globs (mapcar (eglot--lambda ((FileSystemWatcher) globPattern)
-                          globPattern)
-                        watchers))
-         (glob-dirs
-          (delete-dups (mapcar #'file-name-directory
-                               (mapcan #'file-expand-wildcards globs)))))
+         (globs (mapcar
+                 (eglot--lambda ((FileSystemWatcher) globPattern)
+                   (eglot--glob-compile globPattern t t))
+                 watchers))
+         (dirs-to-watch
+          (cl-loop for f in (eglot--files-recursively)
+                   when (cl-loop for g in globs thereis (funcall g f))
+                   collect (file-name-directory f) into dirs
+                   finally (cl-return (delete-dups dirs)))))
     (cl-labels
         ((handle-event
           (event)
           (pcase-let ((`(,desc ,action ,file ,file1) event))
             (cond
              ((and (memq action '(created changed deleted))
-                   (cl-find file globs
-                            :test (lambda (f glob)
-                                    (string-match (eglot--wildcard-to-regexp
-                                                   (expand-file-name glob))
-                                                  f))))
+                   (cl-find file globs :test (lambda (f g) (funcall g f))))
               (jsonrpc-notify
                server :workspace/didChangeWatchedFiles
                `(:changes ,(vector `(:uri ,(eglot--path-to-uri file)
@@ -2610,13 +2686,13 @@ code actions at point"
               (handle-event `(,desc 'created ,file1)))))))
       (unwind-protect
           (progn
-            (dolist (dir glob-dirs)
+            (dolist (dir dirs-to-watch)
               (push (file-notify-add-watch dir '(change) #'handle-event)
                     (gethash id (eglot--file-watches server))))
             (setq
              success
              `(:message ,(format "OK, watching %s directories in %s watchers"
-                                 (length glob-dirs) (length watchers)))))
+                                 (length dirs-to-watch) (length watchers)))))
         (unless success
           (eglot-unregister-capability server method id))))))
 
@@ -2626,6 +2702,79 @@ code actions at point"
   (mapc #'file-notify-rm-watch (gethash id (eglot--file-watches server)))
   (remhash id (eglot--file-watches server))
   (list t "OK"))
+
+
+;;; Glob heroics
+;;;
+(defun eglot--glob-parse (glob)
+  "Compute list of (STATE-SYM EMITTER-FN PATTERN)."
+  (with-temp-buffer
+    (save-excursion (insert glob))
+    (cl-loop
+     with grammar = '((:**      "\\*\\*/?"              eglot--glob-emit-**)
+                      (:*       "\\*"                   eglot--glob-emit-*)
+                      (:?       "\\?"                   eglot--glob-emit-?)
+                      (:{}      "{[^][*{}]+}"           eglot--glob-emit-{})
+                      (:range   "\\[\\^?[^][/,*{}]+\\]" eglot--glob-emit-range)
+                      (:literal "[^][,*?{}]+"           eglot--glob-emit-self))
+     until (eobp)
+     collect (cl-loop
+              for (_token regexp emitter) in grammar
+              thereis (and (re-search-forward (concat "\\=" regexp) nil t)
+                           (list (cl-gensym "state-") emitter (match-string 0)))
+              finally (error "Glob '%s' invalid at %s" (buffer-string) (point))))))
+
+(defun eglot--glob-compile (glob &optional byte-compile noerror)
+  "Convert GLOB into Elisp function.  Maybe BYTE-COMPILE it.
+If NOERROR, return predicate, else erroring function."
+  (let* ((states (eglot--glob-parse glob))
+         (body `(with-current-buffer (get-buffer-create " *eglot-glob-matcher*")
+                  (erase-buffer)
+                  (save-excursion (insert string))
+                  (cl-labels ,(cl-loop for (this that) on states
+                                       for (self emit text) = this
+                                       for next = (or (car that) 'eobp)
+                                       collect (funcall emit text self next))
+                    (or (,(caar states))
+                        (error "Glob done but more unmatched text: '%s'"
+                               (buffer-substring (point) (point-max)))))))
+         (form `(lambda (string) ,(if noerror `(ignore-errors ,body) body))))
+    (if byte-compile (byte-compile form) form)))
+
+(defun eglot--glob-emit-self (text self next)
+  `(,self () (re-search-forward ,(concat "\\=" (regexp-quote text))) (,next)))
+
+(defun eglot--glob-emit-** (_ self next)
+  `(,self () (or (ignore-errors (save-excursion (,next)))
+                 (and (re-search-forward "\\=/?[^/]+/?") (,self)))))
+
+(defun eglot--glob-emit-* (_ self next)
+  `(,self () (re-search-forward "\\=[^/]")
+          (or (ignore-errors (save-excursion (,next))) (,self))))
+
+(defun eglot--glob-emit-? (_ self next)
+  `(,self () (re-search-forward "\\=[^/]") (,next)))
+
+(defun eglot--glob-emit-{} (arg self next)
+  (let ((alternatives (split-string (substring arg 1 (1- (length arg))) ",")))
+    `(,self ()
+            (or ,@(cl-loop for alt in alternatives
+                           collect `(re-search-forward ,(concat "\\=" alt) nil t))
+                (error "Failed matching any of %s" ',alternatives))
+            (,next))))
+
+(defun eglot--glob-emit-range (arg self next)
+  (when (eq ?! (aref arg 1)) (aset arg 1 ?^))
+  `(,self () (re-search-forward ,(concat "\\=" arg)) (,next)))
+
+(defun eglot--files-recursively (&optional dir)
+  "Because `directory-files-recursively' isn't complete in 26.3."
+  (cons (setq dir (expand-file-name (or dir default-directory)))
+        (cl-loop with default-directory = dir
+                 with completion-regexp-list = '("^[^.]")
+                 for f in (file-name-all-completions "" dir)
+                 if (file-name-directory f) append (eglot--files-recursively f)
+                 else collect (expand-file-name f))))
 
 
 ;;; Rust-specific
@@ -2685,8 +2834,8 @@ If INTERACTIVE, prompt user for details."
               "org\\.eclipse\\.equinox\\.launcher_.*\\.jar$"
               (file-name-nondirectory path))
              (file-exists-p path))))
-    (let* ((classpath (or (getenv "CLASSPATH") ":"))
-           (cp-jar (cl-find-if #'is-the-jar (split-string classpath ":")))
+    (let* ((classpath (or (getenv "CLASSPATH") path-separator))
+           (cp-jar (cl-find-if #'is-the-jar (split-string classpath path-separator)))
            (jar cp-jar)
            (dir
             (cond
@@ -2724,7 +2873,7 @@ If INTERACTIVE, prompt user for details."
       (when (and interactive (not cp-jar)
                  (y-or-n-p (concat "Add path to the server program "
                                    "to CLASSPATH environment variable?")))
-        (setenv "CLASSPATH" (concat (getenv "CLASSPATH") ":" jar)))
+        (setenv "CLASSPATH" (concat (getenv "CLASSPATH") path-separator jar)))
       (unless (file-directory-p workspace)
         (make-directory workspace t))
       (cons 'eglot-eclipse-jdt

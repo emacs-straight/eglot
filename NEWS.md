@@ -1,4 +1,26 @@
-# 1.7 (upcoming)
+# (upcoming)
+
+##### TRAMP support ([#637][github#637], ([#463][github#463], ([#84][github#84])
+
+Thanks to Brian Cully for the minimalist approach.
+
+(also thanks to Felipe Lema who conducted many early experiments in
+[#463][github#463])
+
+##### Code action shortcuts ([#411][github#411])
+
+`M-x eglot-code-actions` accepts an optional `action-kind` argument,
+specified interactively with `C-u`.  Other shortcuts call specific
+actions directly (`eglot-code-action-inline`,
+`eglot-code-action-extract`, `eglot-code-action-rewrite`,
+`eglot-code-action-organize-imports` and
+`eglot-code-action-quickfix`).  One can create own shortcuts for code
+actions with specific a kind by calling `eglot-code-actions` from
+elisp.
+
+##### New command `eglot-shutdown-server` ([#643][github#643])
+
+# 1.7 (16/12/2020)
 
 ##### Support hierarchical symbols in Imenu ([#303][github#303])
 
@@ -196,6 +218,7 @@ and now said bunch of references-->
 [github#81]: https://github.com/joaotavora/eglot/issues/81
 [github#82]: https://github.com/joaotavora/eglot/issues/82
 [github#83]: https://github.com/joaotavora/eglot/issues/83
+[github#84]: https://github.com/joaotavora/eglot/issues/84
 [github#86]: https://github.com/joaotavora/eglot/issues/86
 [github#87]: https://github.com/joaotavora/eglot/issues/87
 [github#93]: https://github.com/joaotavora/eglot/issues/93
@@ -232,3 +255,11 @@ and now said bunch of references-->
 [github#324]: https://github.com/joaotavora/eglot/issues/324
 [github#326]: https://github.com/joaotavora/eglot/issues/326
 [github#361]: https://github.com/joaotavora/eglot/issues/361
+[github#411]: https://github.com/joaotavora/eglot/issues/411
+[github#439]: https://github.com/joaotavora/eglot/issues/439
+[github#454]: https://github.com/joaotavora/eglot/issues/454
+[github#463]: https://github.com/joaotavora/eglot/issues/463
+[github#481]: https://github.com/joaotavora/eglot/issues/481
+[github#494]: https://github.com/joaotavora/eglot/issues/494
+[github#637]: https://github.com/joaotavora/eglot/issues/637
+[github#643]: https://github.com/joaotavora/eglot/issues/643
