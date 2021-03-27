@@ -125,7 +125,8 @@ language-server/bin/php-language-server.php"))
                                 (erlang-mode . ("erlang_ls" "--transport" "stdio"))
                                 (nix-mode . ("rnix-lsp"))
                                 (gdscript-mode . ("localhost" 6008))
-                                (f90-mode . ("fortls")))
+                                (f90-mode . ("fortls"))
+                                (zig-mode . ("zls")))
   "How the command `eglot' guesses the server to start.
 An association list of (MAJOR-MODE . CONTACT) pairs.  MAJOR-MODE
 is a mode symbol, or a list of mode symbols.  The associated
@@ -1740,9 +1741,11 @@ THINGS are either registrations or unregisterations (sic)."
   (append
    (eglot--VersionedTextDocumentIdentifier)
    (list :languageId
-         (if (string-match "\\(.*\\)-mode" (symbol-name major-mode))
-             (match-string 1 (symbol-name major-mode))
-           "unknown")
+	 (cond
+           ((get major-mode 'eglot-language-id))
+           ((string-match "\\(.*\\)-mode" (symbol-name major-mode))
+            (match-string 1 (symbol-name major-mode)))
+           (t "unknown"))
          :text
          (eglot--widening
           (buffer-substring-no-properties (point-min) (point-max))))))
