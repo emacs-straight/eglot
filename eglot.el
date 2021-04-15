@@ -25,7 +25,7 @@
 ;;; Commentary:
 
 ;; Simply M-x eglot should be enough to get you started, but here's a
-;; little info (see the accompanying README.md or the URL for more).
+ ;; little info (see the accompanying README.md or the URL for more).
 ;;
 ;; M-x eglot starts a server via a shell-command guessed from
 ;; `eglot-server-programs', using the current major-mode (for whatever
@@ -1445,7 +1445,9 @@ Use `eglot-managed-p' to determine if current buffer is managed.")
     (cl-loop for (var . saved-binding) in eglot--saved-bindings
              do (set (make-local-variable var) saved-binding))
     (remove-function (local 'imenu-create-index-function) #'eglot-imenu)
-    (setq eglot--current-flymake-report-fn nil)
+    (when eglot--current-flymake-report-fn
+      (eglot--report-to-flymake nil)
+      (setq eglot--current-flymake-report-fn nil))
     (let ((server eglot--cached-server))
       (setq eglot--cached-server nil)
       (when server
@@ -1680,17 +1682,8 @@ COMMAND is a symbol naming the command."
                                              (t          'eglot-note))
                                        message `((eglot-lsp-diag . ,diag-spec)))))
          into diags
-         finally (cond ((and flymake-mode eglot--current-flymake-report-fn)
-                        (save-restriction
-                          (widen)
-                          (funcall eglot--current-flymake-report-fn diags
-                                   ;; If the buffer hasn't changed since last
-                                   ;; call to the report function, flymake won't
-                                   ;; delete old diagnostics.  Using :region
-                                   ;; keyword forces flymake to delete
-                                   ;; them (github#159).
-                                   :region (cons (point-min) (point-max))))
-                        (setq eglot--unreported-diagnostics nil))
+         finally (cond (eglot--current-flymake-report-fn
+                        (eglot--report-to-flymake diags))
                        (t
                         (setq eglot--unreported-diagnostics (cons t diags))))))
     (jsonrpc--debug server "Diagnostics received for unvisited %s" uri)))
@@ -1970,13 +1963,28 @@ When called interactively, use the currently active server"
     :textDocument (eglot--TextDocumentIdentifier))))
 
 (defun eglot-flymake-backend (report-fn &rest _more)
-  "An EGLOT Flymake backend.
-Calls REPORT-FN maybe if server publishes diagnostics in time."
+  "A Flymake backend for Eglot.
+Calls REPORT-FN (or arranges for it to be called) when the server
+publishes diagnostics.  Between calls to this function, REPORT-FN
+may be called multiple times (respecting the protocol of
+`flymake-backend-functions')."
   (setq eglot--current-flymake-report-fn report-fn)
   ;; Report anything unreported
   (when eglot--unreported-diagnostics
-    (funcall report-fn (cdr eglot--unreported-diagnostics))
-    (setq eglot--unreported-diagnostics nil)))
+    (eglot--report-to-flymake (cdr eglot--unreported-diagnostics))))
+
+(defun eglot--report-to-flymake (diags)
+  "Internal helper for `eglot-flymake-backend'."
+  (save-restriction
+    (widen)
+    (funcall eglot--current-flymake-report-fn diags
+             ;; If the buffer hasn't changed since last
+             ;; call to the report function, flymake won't
+             ;; delete old diagnostics.  Using :region
+             ;; keyword forces flymake to delete
+             ;; them (github#159).
+             :region (cons (point-min) (point-max))))
+  (setq eglot--unreported-diagnostics nil))
 
 (defun eglot-xref-backend () "EGLOT xref backend." 'eglot)
 
@@ -2012,7 +2020,7 @@ Try to visit the target file for a richer summary line."
                                 (substring (buffer-substring bol (point-at-eol)))
                                 (hi-beg (- beg bol))
                                 (hi-end (- (min (point-at-eol) end) bol)))
-                     (add-face-text-property hi-beg hi-end 'highlight
+                     (add-face-text-property hi-beg hi-end 'xref-match
                                              t substring)
                      (list substring (1+ (current-line)) (eglot-current-column)
                            (- end beg))))))
@@ -2238,6 +2246,13 @@ is not active."
                (concat " "
                        (propertize annotation
                                    'face 'font-lock-function-name-face))))))
+       :company-kind
+       ;; Associate each lsp-item with a lsp-kind symbol.
+       (lambda (proxy)
+         (when-let* ((lsp-item (get-text-property 0 'eglot--lsp-item proxy))
+                     (kind (alist-get (plist-get lsp-item :kind)
+                                      eglot--kind-names)))
+           (intern (downcase kind))))
        :company-doc-buffer
        (lambda (proxy)
          (let* ((documentation
@@ -2666,10 +2681,7 @@ at point.  With prefix argument, prompt for ACTION-KIND."
                    (eglot--glob-compile globPattern t t))
                  watchers))
          (dirs-to-watch
-          (cl-loop for f in (eglot--files-recursively)
-                   when (cl-loop for g in globs thereis (funcall g f))
-                   collect (file-name-directory f) into dirs
-                   finally (cl-return (delete-dups dirs)))))
+          (eglot--directories-matched-by-globs default-directory globs)))
     (cl-labels
         ((handle-event
           (event)
@@ -2776,8 +2788,31 @@ If NOERROR, return predicate, else erroring function."
         (cl-loop with default-directory = dir
                  with completion-regexp-list = '("^[^.]")
                  for f in (file-name-all-completions "" dir)
-                 if (file-name-directory f) append (eglot--files-recursively f)
+                 if (file-directory-p f) append (eglot--files-recursively f)
                  else collect (expand-file-name f))))
+
+(defun eglot--directories-recursively (&optional dir)
+  "Because `directory-files-recursively' isn't complete in 26.3."
+  (cons (setq dir (expand-file-name (or dir default-directory)))
+        (cl-loop with default-directory = dir
+                 with completion-regexp-list = '("^[^.]")
+                 for f in (file-name-all-completions "" dir)
+                 if (file-directory-p f) append (eglot--files-recursively f)
+                 else collect (expand-file-name f))))
+
+(defun eglot--directories-matched-by-globs (dir globs)
+  "Discover subdirectories of DIR with files matched by one of GLOBS.
+Each element of GLOBS is either an uncompiled glob-string or a
+compiled glob."
+  (setq globs (cl-loop for g in globs
+                       collect (if (stringp g) (eglot--glob-compile g t t) g)))
+  (cl-loop for f in (eglot--files-recursively dir)
+           for fdir = (file-name-directory f)
+           when (and
+                 (not (member fdir dirs))
+                 (cl-loop for g in globs thereis (funcall g f)))
+           collect fdir into dirs
+           finally (cl-return (delete-dups dirs))))
 
 
 ;;; Rust-specific
