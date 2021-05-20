@@ -49,7 +49,7 @@ find-library` can help you tell if that happened.
 * Elm's [elm-language-server][elm-language-server]
 * Kotlin's [kotlin-language-server][kotlin-language-server]
 * Go's [gopls][gopls]
-* Ocaml's [ocaml-language-server][ocaml-language-server]
+* Ocaml's [ocaml-lsp][ocaml-lsp]
 * R's [languageserver][r-languageserver]
 * Dart's [dart_language_server][dart_language_server]
 * Elixir's [elixir-ls][elixir-ls]
@@ -179,6 +179,13 @@ get [cquery][cquery] working:
 
 See `eglot.el`'s section on Java's JDT server for an even more
 sophisticated example.
+
+Similarly, some servers require the language identifier strings they
+are sent by `eglot` to match the exact strings used by VSCode. `eglot`
+usually guesses these identifiers from the major mode name
+(e.g. `elm-mode` → `"elm"`), but the mapping can be overridden using
+the `:LANGUAGE-ID` element in the syntax of `eglot-server-programs` if
+necessary.
 
 <a name="reporting bugs"></a>
 
@@ -312,6 +319,12 @@ lisp:
 - `eglot-stay-out-of`: List of Emacs features that Eglot shouldn't
   automatically try to manage on users' behalf.  Useful when you need
   non-LSP Flymake or Company backends.  See docstring for examples.
+  
+- `eglot-extend-to-xref`: If non-nil and `xref-find-definitions` lands
+  you in a file outside your project -- like a system-installed
+  library or header file -- transiently consider it managed by the
+  same LSP server.  That file is still outside your project
+  (i.e. `project-find-file` won't find it).
 
 # How does Eglot work?
 
@@ -546,7 +559,7 @@ Under the hood:
 [kotlin-language-server]: https://github.com/fwcd/KotlinLanguageServer
 [gopls]: https://github.com/golang/tools/tree/master/gopls
 [eclipse-jdt]: https://github.com/eclipse/eclipse.jdt.ls
-[ocaml-language-server]: https://github.com/freebroccolo/ocaml-language-server
+[ocaml-lsp]: https://github.com/ocaml/ocaml-lsp/
 [r-languageserver]: https://cran.r-project.org/package=languageserver
 [dart_language_server]: https://github.com/natebosch/dart_language_server
 [elixir-ls]: https://github.com/elixir-lsp/elixir-ls
