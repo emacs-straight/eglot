@@ -1,11 +1,22 @@
 # (upcoming)
 
+##### Multiple servers supported out-of-box for same major mode ([#688][github#688])
+
+In practice, this removes the need for Eglot to "officially" bless one
+server over another.  Thanks to Felicián Németh for the original idea.
+
 ##### TRAMP support ([#637][github#637], ([#463][github#463], ([#84][github#84])
 
 Thanks to Brian Cully for the minimalist approach.
 
 (also thanks to Felipe Lema who conducted many early experiments in
 [#463][github#463])
+
+##### `eglot-ignored-server-capabilities` now correctly spelled ([#724][github#724])
+
+This user-visible variable used to be spelled
+`eglot-ignored-server-capabilites`, which is still a valid but
+obsolete name.
 
 ##### Manage cross-referenced files outside project ([#76][github#76], ([#686][github#686], ([#695][github#695])
 
@@ -272,4 +283,5 @@ and now said bunch of references-->
 [github#637]: https://github.com/joaotavora/eglot/issues/637
 [github#643]: https://github.com/joaotavora/eglot/issues/643
 [github#686]: https://github.com/joaotavora/eglot/issues/686
+[github#688]: https://github.com/joaotavora/eglot/issues/688
 [github#695]: https://github.com/joaotavora/eglot/issues/695

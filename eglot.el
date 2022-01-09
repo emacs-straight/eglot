@@ -1,6 +1,6 @@
 ;;; eglot.el --- Client for Language Server Protocol (LSP) servers  -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2018-2020 Free Software Foundation, Inc.
+;; Copyright (C) 2018-2021 Free Software Foundation, Inc.
 
 ;; Version: 1.7
 ;; Author: João Távora <joaotavora@gmail.com>
@@ -20,7 +20,7 @@
 ;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+;; along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 
@@ -50,7 +50,7 @@
 ;;
 ;;   (add-hook 'foo-mode-hook 'eglot-ensure)
 ;;
-;; To attempt to start an eglot session automatically everytime a
+;; To attempt to start an eglot session automatically every time a
 ;; foo-mode buffer is visited.
 ;;
 ;;; Code:
@@ -91,19 +91,66 @@
 
 ;;; User tweakable stuff
 (defgroup eglot nil
-  "Interaction with Language Server Protocol servers"
+  "Interaction with Language Server Protocol servers."
   :prefix "eglot-"
   :group 'applications)
 
-(defvar eglot-server-programs '((rust-mode . (eglot-rls "rls"))
-                                (python-mode . ("pyls"))
+(defun eglot-alternatives (alternatives)
+  "Compute server-choosing function for `eglot-server-programs'.
+Each element of ALTERNATIVES is a string PROGRAM or a list of
+strings (PROGRAM ARGS...) where program names an LSP server
+program to start with ARGS.  Returns a function of one argument.
+When invoked, that function will return a list (ABSPATH ARGS),
+where ABSPATH is the absolute path of the PROGRAM that was
+chosen (interactively or automatically)."
+  (lambda (&optional interactive)
+    ;; JT@2021-06-13: This function is way more complicated than it
+    ;; could be because it accounts for the fact that
+    ;; `eglot--executable-find' may take much longer to execute on
+    ;; remote files.
+    (let* ((listified (cl-loop for a in alternatives
+                               collect (if (listp a) a (list a))))
+           (err (lambda ()
+                  (error "None of '%s' are valid executables"
+                         (mapconcat #'identity alternatives ", ")))))
+      (cond (interactive
+             (let* ((augmented (mapcar (lambda (a)
+                                         (let ((found (eglot--executable-find
+                                                       (car a) t)))
+                                           (and found
+                                                (cons (car a) (cons found (cdr a))))))
+                                       listified))
+                    (available (remove nil augmented)))
+               (cond ((cdr available)
+                      (cdr (assoc
+                            (completing-read
+                             "[eglot] More than one server executable available:"
+                             (mapcar #'car available)
+                             nil t nil nil (car (car available)))
+                            available #'equal)))
+                     ((cdr (car available)))
+                     (t
+                      ;; Don't error when used interactively, let the
+                      ;; Eglot prompt the user for alternative (github#719)
+                      nil))))
+            (t
+             (cl-loop for (p . args) in listified
+                      for probe = (eglot--executable-find p t)
+                      when probe return (cons probe args)
+                      finally (funcall err)))))))
+
+(defvar eglot-server-programs `((rust-mode . (eglot-rls "rls"))
+                                (python-mode
+                                 . ,(eglot-alternatives
+                                     '("pylsp" "pyls" ("pyright-langserver" "--stdio"))))
                                 ((js-mode typescript-mode)
                                  . ("typescript-language-server" "--stdio"))
                                 (sh-mode . ("bash-language-server" "start"))
                                 ((php-mode phps-mode)
                                  . ("php" "vendor/felixfbecker/\
 language-server/bin/php-language-server.php"))
-                                ((c++-mode c-mode) . ("ccls"))
+                                ((c++-mode c-mode) . ,(eglot-alternatives
+                                                       '("clangd" "ccls")))
                                 (((caml-mode :language-id "ocaml")
                                   (tuareg-mode :language-id "ocaml") reason-mode)
                                  . ("ocamllsp"))
@@ -112,6 +159,7 @@ language-server/bin/php-language-server.php"))
                                 (haskell-mode
                                  . ("haskell-language-server-wrapper" "--lsp"))
                                 (elm-mode . ("elm-language-server"))
+                                (mint-mode . ("mint" "ls"))
                                 (kotlin-mode . ("kotlin-language-server"))
                                 (go-mode . ("gopls"))
                                 ((R-mode ess-r-mode) . ("R" "--slave" "-e"
@@ -124,10 +172,16 @@ language-server/bin/php-language-server.php"))
                                 ((tex-mode context-mode texinfo-mode bibtex-mode)
                                  . ("digestif"))
                                 (erlang-mode . ("erlang_ls" "--transport" "stdio"))
+                                (yaml-mode . ("yaml-language-server" "--stdio"))
                                 (nix-mode . ("rnix-lsp"))
                                 (gdscript-mode . ("localhost" 6008))
-                                (f90-mode . ("fortls"))
-                                (zig-mode . ("zls")))
+                                ((fortran-mode f90-mode) . ("fortls"))
+                                (lua-mode . ("lua-lsp"))
+                                (zig-mode . ("zls"))
+                                (css-mode "css-languageserver" "--stdio")
+                                (html-mode "html-languageserver" "--stdio")
+                                (json-mode "json-languageserver" "--stdio")
+                                (dockerfile-mode . ("docker-langserver" "--stdio")))
   "How the command `eglot' guesses the server to start.
 An association list of (MAJOR-MODE . CONTACT) pairs.  MAJOR-MODE
 identifies the buffers that are to be managed by a specific
@@ -264,7 +318,9 @@ let the buffer grow forever."
     (5 . "Field") (6 . "Variable") (7 . "Class") (8 . "Interface")
     (9 . "Module") (10 . "Property") (11 . "Unit") (12 . "Value")
     (13 . "Enum") (14 . "Keyword") (15 . "Snippet") (16 . "Color")
-    (17 . "File") (18 . "Reference")))
+    (17 . "File") (18 . "Reference") (19 . "Folder") (20 . "EnumMember")
+    (21 . "Constant") (22 . "Struct") (23 . "Event") (24 . "Operator")
+    (25 . "TypeParameter")))
 
 (defconst eglot--{} (make-hash-table) "The empty JSON object.")
 
@@ -293,6 +349,7 @@ let the buffer grow forever."
       (Hover (:contents) (:range))
       (InitializeResult (:capabilities) (:serverInfo))
       (Location (:uri :range))
+      (LocationLink (:targetUri :targetRange :targetSelectionRange) (:originSelectionRange))
       (LogMessageParams (:type :message))
       (MarkupContent (:kind :value))
       (ParameterInformation (:label) (:documentation))
@@ -524,7 +581,7 @@ treated as in `eglot-dbind'."
     `(let ((,b ,buf)) (if (buffer-live-p ,b) (with-current-buffer ,b ,@body)))))
 
 (cl-defmacro eglot--when-buffer-window (buf &body body)
-  "Check BUF showing somewhere, then do BODY in it" (declare (indent 1) (debug t))
+  "Check BUF showing somewhere, then do BODY in it." (declare (indent 1) (debug t))
   (let ((b (cl-gensym)))
     `(let ((,b ,buf))
        ;;notice the exception when testing with `ert'
@@ -532,7 +589,7 @@ treated as in `eglot-dbind'."
          (with-current-buffer ,b ,@body)))))
 
 (cl-defmacro eglot--widening (&rest body)
-  "Save excursion and restriction. Widen. Then run BODY." (declare (debug t))
+  "Save excursion and restriction.  Widen.  Then run BODY." (declare (debug t))
   `(save-excursion (save-restriction (widen) ,@body)))
 
 (cl-defgeneric eglot-handle-request (server method &rest params)
@@ -545,7 +602,7 @@ treated as in `eglot-dbind'."
   "Ask SERVER to execute COMMAND with ARGUMENTS.")
 
 (cl-defgeneric eglot-initialization-options (server)
-  "JSON object to send under `initializationOptions'"
+  "JSON object to send under `initializationOptions'."
   (:method (_s) eglot--{})) ; blank default
 
 (cl-defgeneric eglot-register-capability (server method id &rest params)
@@ -596,10 +653,14 @@ treated as in `eglot-dbind'."
                                          (:labelOffsetSupport t)
                                          :activeParameterSupport t))
              :references         `(:dynamicRegistration :json-false)
-             :definition         `(:dynamicRegistration :json-false)
-             :declaration        `(:dynamicRegistration :json-false)
-             :implementation     `(:dynamicRegistration :json-false)
-             :typeDefinition     `(:dynamicRegistration :json-false)
+             :definition         (list :dynamicRegistration :json-false
+                                       :linkSupport t)
+             :declaration        (list :dynamicRegistration :json-false
+                                       :linkSupport t)
+             :implementation     (list :dynamicRegistration :json-false
+                                       :linkSupport t)
+             :typeDefinition     (list :dynamicRegistration :json-false
+                                       :linkSupport t)
              :documentSymbol     (list
                                   :dynamicRegistration :json-false
                                   :hierarchicalDocumentSymbolSupport t
@@ -810,7 +871,9 @@ be guessed."
                      ((null guess)
                       (format "[eglot] Sorry, couldn't guess for `%s'!\n%s"
                               managed-mode base-prompt))
-                     ((and program (not (eglot--executable-find program t)))
+                     ((and program
+                           (not (file-name-absolute-p program))
+                           (not (eglot--executable-find program t)))
                       (concat (format "[eglot] I guess you want to run `%s'"
                                       program-guess)
                               (format ", but I can't find `%s' in PATH!" program)
@@ -1333,7 +1396,10 @@ Doubles as an indicator of snippet support."
       (font-lock-ensure)
       (string-trim (filter-buffer-substring (point-min) (point-max))))))
 
-(defcustom eglot-ignored-server-capabilites (list)
+(define-obsolete-variable-alias 'eglot-ignored-server-capabilites
+  'eglot-ignored-server-capabilities "1.8")
+
+(defcustom eglot-ignored-server-capabilities (list)
   "LSP server capabilities that Eglot could use, but won't.
 You could add, for instance, the symbol
 `:documentHighlightProvider' to prevent automatic highlighting
@@ -1419,7 +1485,7 @@ and just return it.  PROMPT shouldn't end with a question mark."
     map))
 
 (defvar-local eglot--current-flymake-report-fn nil
-  "Current flymake report function for this buffer")
+  "Current flymake report function for this buffer.")
 
 (defvar-local eglot--saved-bindings nil
   "Bindings saved by `eglot--setq-saving'.")
@@ -1431,7 +1497,7 @@ against a variable's name.  Examples include the string
 \"company\" or the symbol `xref'.
 
 Before Eglot starts \"managing\" a particular buffer, it
-opinionatedly sets some peripheral Emacs facilites, such as
+opinionatedly sets some peripheral Emacs facilities, such as
 Flymake, Xref and Company.  These overriding settings help ensure
 consistent Eglot behaviour and only stay in place until
 \"managing\" stops (usually via `eglot-shutdown'), whereupon the
@@ -1500,8 +1566,8 @@ Use `eglot-managed-p' to determine if current buffer is managed.")
     (unless (eglot--stay-out-of-p 'imenu)
       (add-function :before-until (local 'imenu-create-index-function)
                     #'eglot-imenu))
-    (flymake-mode 1)
-    (eldoc-mode 1)
+    (unless (eglot--stay-out-of-p 'flymake) (flymake-mode 1))
+    (unless (eglot--stay-out-of-p 'eldoc) (eldoc-mode 1))
     (cl-pushnew (current-buffer) (eglot--managed-buffers (eglot-current-server))))
    (t
     (remove-hook 'after-change-functions 'eglot--after-change t)
@@ -1547,7 +1613,7 @@ Use `eglot-managed-p' to determine if current buffer is managed.")
                      :key #'eglot--major-mode)
             (and eglot-extend-to-xref
                  buffer-file-name
-                 (gethash (expand-file-name buffer-file-name) 
+                 (gethash (expand-file-name buffer-file-name)
                           eglot--servers-by-xrefed-file)))))
 
 (defun eglot--current-server-or-lose ()
@@ -1636,7 +1702,7 @@ Uses THING, FACE, DEFS and PREPEND."
              `("/" ,(eglot--mode-line-props
                      "error" 'compilation-mode-line-fail
                      '((mouse-3 eglot-clear-status  "clear this status"))
-                     (format "An error occured: %s\n" (plist-get last-error
+                     (format "An error occurred: %s\n" (plist-get last-error
                                                                  :message)))))
          ,@(when (and doing (not done-p))
              `("/" ,(eglot--mode-line-props doing
@@ -1672,14 +1738,14 @@ Uses THING, FACE, DEFS and PREPEND."
 ;;;
 (cl-defmethod eglot-handle-notification
   (_server method &key &allow-other-keys)
-  "Handle unknown notification"
+  "Handle unknown notification."
   (unless (or (string-prefix-p "$" (format "%s" method))
               (not (memq 'disallow-unknown-methods eglot-strict-mode)))
     (eglot--warn "Server sent unknown notification method `%s'" method)))
 
 (cl-defmethod eglot-handle-request
   (_server method &key &allow-other-keys)
-  "Handle unknown request"
+  "Handle unknown request."
   (when (memq 'disallow-unknown-methods eglot-strict-mode)
     (jsonrpc-error "Unknown request method `%s'" method)))
 
@@ -1692,14 +1758,14 @@ COMMAND is a symbol naming the command."
 
 (cl-defmethod eglot-handle-notification
   (_server (_method (eql window/showMessage)) &key type message)
-  "Handle notification window/showMessage"
+  "Handle notification window/showMessage."
   (eglot--message (propertize "Server reports (type=%s): %s"
                               'face (if (<= type 1) 'error))
                   type message))
 
 (cl-defmethod eglot-handle-request
   (_server (_method (eql window/showMessageRequest)) &key type message actions)
-  "Handle server request window/showMessageRequest"
+  "Handle server request window/showMessageRequest."
   (let* ((actions (append actions nil)) ;; gh#627
          (label (completing-read
                  (concat
@@ -1714,16 +1780,16 @@ COMMAND is a symbol naming the command."
 
 (cl-defmethod eglot-handle-notification
   (_server (_method (eql window/logMessage)) &key _type _message)
-  "Handle notification window/logMessage") ;; noop, use events buffer
+  "Handle notification window/logMessage.") ;; noop, use events buffer
 
 (cl-defmethod eglot-handle-notification
   (_server (_method (eql telemetry/event)) &rest _any)
-  "Handle notification telemetry/event") ;; noop, use events buffer
+  "Handle notification telemetry/event.") ;; noop, use events buffer
 
 (cl-defmethod eglot-handle-notification
   (server (_method (eql textDocument/publishDiagnostics)) &key uri diagnostics
           &allow-other-keys) ; FIXME: doesn't respect `eglot-strict-mode'
-  "Handle notification publishDiagnostics"
+  "Handle notification publishDiagnostics."
   (if-let ((buffer (find-buffer-visiting (eglot--uri-to-path uri))))
       (with-current-buffer buffer
         (cl-loop
@@ -1752,7 +1818,8 @@ COMMAND is a symbol naming the command."
                                 (point-at-eol
                                  (1+ (plist-get (plist-get range :end) :line)))))))
                      (eglot--make-diag (current-buffer) beg end
-                                       (cond ((<= sev 1) 'eglot-error)
+                                       (cond ((null sev) 'eglot-error)
+					     ((<= sev 1) 'eglot-error)
                                              ((= sev 2)  'eglot-warning)
                                              (t          'eglot-note))
                                        message `((eglot-lsp-diag . ,diag-spec)))))
@@ -1776,18 +1843,18 @@ THINGS are either registrations or unregisterations (sic)."
 
 (cl-defmethod eglot-handle-request
   (server (_method (eql client/registerCapability)) &key registrations)
-  "Handle server request client/registerCapability"
+  "Handle server request client/registerCapability."
   (eglot--register-unregister server registrations 'register))
 
 (cl-defmethod eglot-handle-request
   (server (_method (eql client/unregisterCapability))
           &key unregisterations) ;; XXX: "unregisterations" (sic)
-  "Handle server request client/unregisterCapability"
+  "Handle server request client/unregisterCapability."
   (eglot--register-unregister server unregisterations 'unregister))
 
 (cl-defmethod eglot-handle-request
   (_server (_method (eql workspace/applyEdit)) &key _label edit)
-  "Handle server request workspace/applyEdit"
+  "Handle server request workspace/applyEdit."
   (eglot--apply-workspace-edit edit eglot-confirm-server-initiated-edits))
 
 (defun eglot--TextDocumentIdentifier ()
@@ -1951,7 +2018,7 @@ When called interactively, use the currently active server"
                      (default-directory
                        (if (and (not (string-empty-p uri-path))
                                 (file-directory-p uri-path))
-                           uri-path
+                           (file-name-as-directory uri-path)
                          (project-root (eglot--project server)))))
                 (setq-local major-mode (eglot--major-mode server))
                 (hack-dir-local-variables-non-file-buffer)
@@ -2039,10 +2106,13 @@ Calls REPORT-FN (or arranges for it to be called) when the server
 publishes diagnostics.  Between calls to this function, REPORT-FN
 may be called multiple times (respecting the protocol of
 `flymake-backend-functions')."
-  (setq eglot--current-flymake-report-fn report-fn)
-  ;; Report anything unreported
-  (when eglot--unreported-diagnostics
-    (eglot--report-to-flymake (cdr eglot--unreported-diagnostics))))
+  (cond (eglot--managed-mode
+         (setq eglot--current-flymake-report-fn report-fn)
+         ;; Report anything unreported
+         (when eglot--unreported-diagnostics
+           (eglot--report-to-flymake (cdr eglot--unreported-diagnostics))))
+        (t
+         (funcall report-fn nil))))
 
 (defun eglot--report-to-flymake (diags)
   "Internal helper for `eglot-flymake-backend'."
@@ -2114,13 +2184,13 @@ Try to visit the target file for a richer summary line."
     (xref-make-match summary (xref-make-file-location file line column) length)))
 
 (cl-defmethod xref-backend-identifier-completion-table ((_backend (eql eglot)))
-  (eglot--error "cannot (yet) provide reliable completion table for LSP symbols"))
+  (eglot--error "Cannot (yet) provide reliable completion table for LSP symbols"))
 
 (cl-defmethod xref-backend-identifier-at-point ((_backend (eql eglot)))
   ;; JT@19/10/09: This is a totally dummy identifier that isn't even
   ;; passed to LSP.  The reason for this particular wording is to
   ;; construct a readable message "No references for LSP identifier at
-  ;; point.".   See http://github.com/joaotavora/eglot/issues/314
+  ;; point.".   See https://github.com/joaotavora/eglot/issues/314
   "LSP identifier at point.")
 
 (defvar eglot--lsp-xref-refs nil
@@ -2141,9 +2211,15 @@ Try to visit the target file for a richer summary line."
           method (append (eglot--TextDocumentPositionParams) extra-params))))
     (eglot--collecting-xrefs (collect)
       (mapc
-       (eglot--lambda ((Location) uri range)
-         (collect (eglot--xref-make-match (symbol-name (symbol-at-point))
-                                          uri range)))
+       (lambda (loc-or-loc-link)
+         (let ((sym-name (symbol-name (symbol-at-point))))
+           (eglot--dcase loc-or-loc-link
+             (((LocationLink) targetUri targetSelectionRange)
+              (collect (eglot--xref-make-match sym-name
+                                               targetUri targetSelectionRange)))
+             (((Location) uri range)
+              (collect (eglot--xref-make-match sym-name
+                                               uri range))))))
        (if (vectorp response) response (and response (list response)))))))
 
 (cl-defun eglot--lsp-xref-helper (method &key extra-params capability )
@@ -2298,14 +2374,15 @@ is not active."
           ((null action)                                 ; try-completion
            (try-completion probe (funcall proxies)))
           ((eq action t)                                 ; all-completions
-           (cl-remove-if-not
+           (all-completions
+            ""
+            (funcall proxies)
             (lambda (proxy)
               (let* ((item (get-text-property 0 'eglot--lsp-item proxy))
                      (filterText (plist-get item :filterText)))
                 (and (or (null pred) (funcall pred proxy))
                      (string-prefix-p
-                      probe (or filterText proxy) completion-ignore-case))))
-            (funcall proxies)))))
+                      probe (or filterText proxy) completion-ignore-case))))))))
        :annotation-function
        (lambda (proxy)
          (eglot--dbind ((CompletionItem) detail kind)
@@ -2348,6 +2425,7 @@ is not active."
             (regexp-opt
              (cl-coerce (cl-getf completion-capability :triggerCharacters) 'list))
             (line-beginning-position))))
+       :exclusive 'no
        :exit-function
        (lambda (proxy status)
          (when (eq status 'finished)
@@ -2504,7 +2582,7 @@ is not active."
 (defvar eglot--highlights nil "Overlays for textDocument/documentHighlight.")
 
 (defun eglot--highlight-piggyback (_cb)
-  "Request and handle `:textDocument/documentHighlight'"
+  "Request and handle `:textDocument/documentHighlight'."
   ;; FIXME: Obviously, this is just piggy backing on eldoc's calls for
   ;; convenience, as shown by the fact that we just ignore cb.
   (let ((buf (current-buffer)))
@@ -2747,7 +2825,7 @@ at point.  With prefix argument, prompt for ACTION-KIND."
 ;;;
 (cl-defmethod eglot-register-capability
   (server (method (eql workspace/didChangeWatchedFiles)) id &key watchers)
-  "Handle dynamic registration of workspace/didChangeWatchedFiles"
+  "Handle dynamic registration of workspace/didChangeWatchedFiles."
   (eglot-unregister-capability server method id)
   (let* (success
          (globs (mapcar
@@ -2755,7 +2833,9 @@ at point.  With prefix argument, prompt for ACTION-KIND."
                    (eglot--glob-compile globPattern t t))
                  watchers))
          (dirs-to-watch
-          (eglot--directories-matched-by-globs default-directory globs)))
+          (delete-dups (mapcar #'file-name-directory
+                               (project-files
+                                (eglot--project server))))))
     (cl-labels
         ((handle-event
           (event)
@@ -2787,7 +2867,7 @@ at point.  With prefix argument, prompt for ACTION-KIND."
 
 (cl-defmethod eglot-unregister-capability
   (server (_method (eql workspace/didChangeWatchedFiles)) id)
-  "Handle dynamic unregistration of workspace/didChangeWatchedFiles"
+  "Handle dynamic unregistration of workspace/didChangeWatchedFiles."
   (mapc #'file-notify-rm-watch (gethash id (eglot--file-watches server)))
   (remhash id (eglot--file-watches server))
   (list t "OK"))
@@ -2856,38 +2936,6 @@ If NOERROR, return predicate, else erroring function."
   (when (eq ?! (aref arg 1)) (aset arg 1 ?^))
   `(,self () (re-search-forward ,(concat "\\=" arg)) (,next)))
 
-(defun eglot--files-recursively (&optional dir)
-  "Because `directory-files-recursively' isn't complete in 26.3."
-  (cons (setq dir (expand-file-name (or dir default-directory)))
-        (cl-loop with default-directory = dir
-                 with completion-regexp-list = '("^[^.]")
-                 for f in (file-name-all-completions "" dir)
-                 if (file-directory-p f) append (eglot--files-recursively f)
-                 else collect (expand-file-name f))))
-
-(defun eglot--directories-recursively (&optional dir)
-  "Because `directory-files-recursively' isn't complete in 26.3."
-  (cons (setq dir (expand-file-name (or dir default-directory)))
-        (cl-loop with default-directory = dir
-                 with completion-regexp-list = '("^[^.]")
-                 for f in (file-name-all-completions "" dir)
-                 if (file-directory-p f) append (eglot--files-recursively f)
-                 else collect (expand-file-name f))))
-
-(defun eglot--directories-matched-by-globs (dir globs)
-  "Discover subdirectories of DIR with files matched by one of GLOBS.
-Each element of GLOBS is either an uncompiled glob-string or a
-compiled glob."
-  (setq globs (cl-loop for g in globs
-                       collect (if (stringp g) (eglot--glob-compile g t t) g)))
-  (cl-loop for f in (eglot--files-recursively dir)
-           for fdir = (file-name-directory f)
-           when (and
-                 (not (member fdir dirs))
-                 (cl-loop for g in globs thereis (funcall g f)))
-           collect fdir into dirs
-           finally (cl-return (delete-dups dirs))))
-
 
 ;;; Rust-specific
 ;;;
@@ -2904,7 +2952,7 @@ compiled glob."
 (cl-defmethod eglot-handle-notification
   ((server eglot-rls) (_method (eql window/progress))
    &key id done title message &allow-other-keys)
-  "Handle notification window/progress"
+  "Handle notification window/progress."
   (setf (eglot--spinner server) (list id title done message)))
 
 
@@ -2914,7 +2962,7 @@ compiled glob."
   :documentation "Eclipse's Java Development Tools Language Server.")
 
 (cl-defmethod eglot-initialization-options ((server eglot-eclipse-jdt))
-  "Passes through required jdt initialization options"
+  "Passes through required jdt initialization options."
   `(:workspaceFolders
     [,@(cl-delete-duplicates
         (mapcar #'eglot--path-to-uri
@@ -2973,8 +3021,8 @@ If INTERACTIVE, prompt user for details."
               (t "config_linux"))))
            (workspace
             (expand-file-name (md5 (project-root (eglot--current-project)))
-                              (concat user-emacs-directory
-                                      "eglot-eclipse-jdt-cache"))))
+                              (locate-user-emacs-file
+                               "eglot-eclipse-jdt-cache"))))
       (unless jar
         (setq jar
               (cl-find-if #'is-the-jar
