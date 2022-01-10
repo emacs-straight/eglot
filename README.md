@@ -70,6 +70,8 @@ find-library` can help you tell if that happened.
 * CSS's [css-languageserver][css-languageserver]
 * JSON's [vscode-json-languageserver][vscode-json-languageserver]
 * Dockerfile's [docker-langserver][docker-langserver]
+* CMake's [cmake-language-server][cmake-language-server]
+* VimScript's [vim-language-server][vim-language-server]
 
 I'll add to this list as I test more servers. In the meantime you can
 customize `eglot-server-programs`:
@@ -580,10 +582,12 @@ Under the hood:
 [dart_language_server]: https://github.com/natebosch/dart_language_server
 [elixir-ls]: https://github.com/elixir-lsp/elixir-ls
 [erlang_ls]: https://github.com/erlang-ls/erlang_ls
-[html-languageserver]: https://github.com/Microsoft/vscode/tree/master/extensions/html-language-features/server
-[css-languageserver]: https://github.com/Microsoft/vscode/tree/master/extensions/css-language-features/server
-[vscode-json-languageserver]: https://www.npmjs.com/package/vscode-json-languageserver
+[html-languageserver]: https://github.com/hrsh7th/vscode-langservers-extracted
+[css-languageserver]: https://github.com/hrsh7th/vscode-langservers-extracted
+[vscode-json-languageserver]: https://github.com/hrsh7th/vscode-langservers-extracted
 [docker-langserver]: https://github.com/rcjsuen/dockerfile-language-server-nodejs
+[cmake-language-server]: https://github.com/regen100/cmake-language-server
+[vim-language-server]: https://github.com/iamcco/vim-language-server
 [news]: https://github.com/joaotavora/eglot/blob/master/NEWS.md
 [ada_language_server]: https://github.com/AdaCore/ada_language_server
 [metals]: https://scalameta.org/metals/

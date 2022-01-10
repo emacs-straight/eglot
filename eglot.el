@@ -1,6 +1,6 @@
 ;;; eglot.el --- Client for Language Server Protocol (LSP) servers  -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2018-2021 Free Software Foundation, Inc.
+;; Copyright (C) 2018-2022 Free Software Foundation, Inc.
 
 ;; Version: 1.7
 ;; Author: João Távora <joaotavora@gmail.com>
@@ -9,23 +9,25 @@
 ;; Keywords: convenience, languages
 ;; Package-Requires: ((emacs "26.1") (jsonrpc "1.0.14") (flymake "1.0.9") (project "0.3.0") (xref "1.0.1") (eldoc "1.11.0"))
 
-;; This program is free software; you can redistribute it and/or modify
+;; This file is part of GNU Emacs.
+
+;; GNU Emacs is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
 ;; the Free Software Foundation, either version 3 of the License, or
 ;; (at your option) any later version.
 
-;; This program is distributed in the hope that it will be useful,
+;; GNU Emacs is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with this program.  If not, see <https://www.gnu.org/licenses/>.
+;; along with GNU Emacs.  If not, see <https://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 
 ;; Simply M-x eglot should be enough to get you started, but here's a
- ;; little info (see the accompanying README.md or the URL for more).
+;; little info (see the accompanying README.md or the URL for more).
 ;;
 ;; M-x eglot starts a server via a shell-command guessed from
 ;; `eglot-server-programs', using the current major-mode (for whatever
@@ -112,7 +114,7 @@ chosen (interactively or automatically)."
                                collect (if (listp a) a (list a))))
            (err (lambda ()
                   (error "None of '%s' are valid executables"
-                         (mapconcat #'identity alternatives ", ")))))
+                         (mapconcat #'car listified ", ")))))
       (cond (interactive
              (let* ((augmented (mapcar (lambda (a)
                                          (let ((found (eglot--executable-find
@@ -140,6 +142,8 @@ chosen (interactively or automatically)."
                       finally (funcall err)))))))
 
 (defvar eglot-server-programs `((rust-mode . (eglot-rls "rls"))
+                                (cmake-mode . ("cmake-language-server"))
+                                (vimrc-mode . ("vim-language-server" "--stdio"))
                                 (python-mode
                                  . ,(eglot-alternatives
                                      '("pylsp" "pyls" ("pyright-langserver" "--stdio"))))
@@ -178,9 +182,9 @@ language-server/bin/php-language-server.php"))
                                 ((fortran-mode f90-mode) . ("fortls"))
                                 (lua-mode . ("lua-lsp"))
                                 (zig-mode . ("zls"))
-                                (css-mode "css-languageserver" "--stdio")
-                                (html-mode "html-languageserver" "--stdio")
-                                (json-mode "json-languageserver" "--stdio")
+                                (css-mode . ,(eglot-alternatives '(("vscode-css-language-server" "--stdio") ("css-languageserver" "--stdio"))))
+                                (html-mode . ,(eglot-alternatives '(("vscode-html-language-server" "--stdio") ("html-languageserver" "--stdio"))))
+                                (json-mode . ,(eglot-alternatives '(("vscode-json-language-server" "--stdio") ("json-languageserver" "--stdio"))))
                                 (dockerfile-mode . ("docker-langserver" "--stdio")))
   "How the command `eglot' guesses the server to start.
 An association list of (MAJOR-MODE . CONTACT) pairs.  MAJOR-MODE
@@ -294,6 +298,10 @@ let the buffer grow forever."
 (defcustom eglot-extend-to-xref nil
   "If non-nil, activate Eglot in cross-referenced non-project files."
   :type 'boolean)
+
+(defvar eglot-withhold-process-id nil
+  "If non-nil, Eglot will not send the Emacs process id to the language server.
+This can be useful when using docker to run a language server.")
 
 ;; Customizable via `completion-category-overrides'.
 (when (assoc 'flex completion-styles-alist)
@@ -1110,7 +1118,8 @@ This docstring appeases checkdoc, that's all."
                       server
                       :initialize
                       (list :processId
-                            (unless (or (file-remote-p default-directory)
+                            (unless (or eglot-withhold-process-id
+                                        (file-remote-p default-directory)
                                         (eq (jsonrpc-process-type server)
                                             'network))
                               (emacs-pid))
@@ -2143,6 +2152,7 @@ may be called multiple times (respecting the protocol of
          (let (,collected)
            (cl-flet ((,collector (xref) (push xref ,collected)))
              ,@body)
+           (setq ,collected (nreverse ,collected))
            (sort ,collected eglot-xref-lessp-function))
        (maphash (lambda (_uri buf) (kill-buffer buf)) eglot--temp-location-buffers)
        (clrhash eglot--temp-location-buffers))))
