@@ -375,7 +375,6 @@ Pass TIMEOUT to `eglot--with-timeout'."
   "Start RLS server.  Notify it when a critical file changes."
   (skip-unless (executable-find "rls"))
   (skip-unless (executable-find "cargo"))
-  (skip-unless (null (getenv "TRAVIS_TESTING")))
   (let ((eglot-autoreconnect 1))
     (eglot--with-fixture
         '(("watch-project" . (("coiso.rs" . "bla")
@@ -409,9 +408,7 @@ Pass TIMEOUT to `eglot--with-timeout'."
 
 (ert-deftest basic-diagnostics ()
   "Test basic diagnostics."
-  (skip-unless (and (executable-find "pyls")
-                    ;; FIXME: Doesn't work in Github CI.
-                    (not (getenv "CI"))))
+  (skip-unless (executable-find "pyls"))
   (eglot--with-fixture
       `(("diag-project" .
                                         ; colon missing after True
@@ -467,14 +464,13 @@ Pass TIMEOUT to `eglot--with-timeout'."
                        (let ((bs (buffer-string)))
                          (unless (zerop (length bs)) bs))))
    when retval return retval
-   do (sit-for 0.1)
+   do (sit-for 0.5)
    finally (error "eglot--tests-force-full-eldoc didn't deliver")))
 
 (ert-deftest rls-hover-after-edit ()
   "Hover and highlightChanges are tricky in RLS."
   (skip-unless (executable-find "rls"))
   (skip-unless (executable-find "cargo"))
-  (skip-unless (null (getenv "TRAVIS_TESTING")))
   (eglot--with-fixture
       '(("hover-project" .
          (("main.rs" .
@@ -534,6 +530,8 @@ Pass TIMEOUT to `eglot--with-timeout'."
 (ert-deftest non-unique-completions ()
   "Test completion resulting in 'Complete, but not unique'."
   (skip-unless (executable-find "pyls"))
+  ;; FIXME: Doesn't work in Github CI.
+  (skip-unless (not (getenv "CI")))
   (eglot--with-fixture
       '(("project" . (("something.py" . "foo=1\nfoobar=2\nfoo"))))
     (with-current-buffer
@@ -624,10 +622,7 @@ def foobazquuz(d, e, f): pass
 
 (ert-deftest eglot-multiline-eldoc ()
   "Test if suitable amount of lines of hover info are shown."
-  :expected-result (if (getenv "TRAVIS_TESTING") :failed :passed)
-  (skip-unless (and (executable-find "pyls")
-                    ;; FIXME: Doesn't work in Github CI.
-                    (not (getenv "CI"))))
+  (skip-unless (executable-find "pyls"))
   (eglot--with-fixture
       `(("project" . (("hover-first.py" . "from datetime import datetime"))))
     (with-current-buffer
@@ -642,9 +637,7 @@ def foobazquuz(d, e, f): pass
 
 (ert-deftest eglot-single-line-eldoc ()
   "Test if suitable amount of lines of hover info are shown."
-  (skip-unless (and (executable-find "pyls")
-                    ;; FIXME: Doesn't work in Github CI.
-                    (not (getenv "CI"))))
+  (skip-unless (executable-find "pyls"))
   (eglot--with-fixture
       `(("project" . (("hover-first.py" . "from datetime import datetime"))))
     (with-current-buffer
@@ -1159,6 +1152,8 @@ are bound to the useful return values of
 (ert-deftest eglot--tramp-test ()
   "Ensure LSP servers can be used over TRAMP."
   (skip-unless (and (>= emacs-major-version 27) (executable-find "pyls")))
+  ;; FIXME: Doesn't work in Github CI.
+  (skip-unless (not (getenv "CI")))
   ;; Set up a loopback TRAMP method that’s just a shell so the remote
   ;; host is really just the local host.
   (let ((tramp-remote-path (cons 'tramp-own-remote-path tramp-remote-path))
