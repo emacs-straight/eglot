@@ -439,9 +439,6 @@ destructuring spec doesn't use all optional fields.
 If the symbol `disallow-unknown-methods' is present, Eglot warns
 on unknown notifications and errors on unknown requests."))
 
-(defun eglot--plist-keys (plist)
-  (cl-loop for (k _v) on plist by #'cddr collect k))
-
 (cl-defun eglot--check-object (interface-name
                                object
                                &optional
@@ -1469,7 +1466,7 @@ under cursor."
 (defun eglot--server-capable (&rest feats)
   "Determine if current server is capable of FEATS."
   (unless (cl-some (lambda (feat)
-                     (memq feat eglot-ignored-server-capabilites))
+                     (memq feat eglot-ignored-server-capabilities))
                    feats)
     (cl-loop for caps = (eglot--capabilities (eglot--current-server-or-lose))
              then (cadr probe)
@@ -1519,8 +1516,7 @@ and just return it.  PROMPT shouldn't end with a question mark."
 ;;;
 (defvar eglot-mode-map
   (let ((map (make-sparse-keymap)))
-    (when (fboundp 'eldoc-doc-buffer) ; Emacs 28.1 or later
-      (define-key map [remap display-local-help] #'eldoc-doc-buffer))
+    (define-key map [remap display-local-help] #'eldoc-doc-buffer)
     map))
 
 (defvar-local eglot--current-flymake-report-fn nil
@@ -1565,9 +1561,6 @@ For example, to keep your Company customization use
 (defun eglot-managed-p ()
   "Tell if current buffer is managed by EGLOT."
   eglot--managed-mode)
-
-(make-obsolete-variable
- 'eglot--managed-mode-hook 'eglot-managed-mode-hook "1.6")
 
 (defvar eglot-managed-mode-hook nil
   "A hook run by EGLOT after it started/stopped managing a buffer.
@@ -3104,11 +3097,25 @@ If INTERACTIVE, prompt user for details."
   "Eclipse JDT breaks spec and replies with edits as arguments."
   (mapc #'eglot--apply-workspace-edit arguments))
 
+
+;;; Obsolete
+;;;
+
+(make-obsolete-variable 'eglot--managed-mode-hook
+                        'eglot-managed-mode-hook "1.6")
+
+(if (< emacs-major-version 27)
+    (defun eglot--plist-keys (plist)
+      (cl-loop for (k _v) on plist by #'cddr collect k))
+  ;; Make into an obsolete alias once we drop support for Emacs 26.
+  (defalias 'eglot--plist-keys #'map-keys))
+
 (provide 'eglot)
-;;; eglot.el ends here
 
 ;; Local Variables:
 ;; bug-reference-bug-regexp: "\\(github#\\([0-9]+\\)\\)"
 ;; bug-reference-url-format: "https://github.com/joaotavora/eglot/issues/%s"
 ;; checkdoc-force-docstrings-flag: nil
 ;; End:
+
+;;; eglot.el ends here
