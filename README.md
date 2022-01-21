@@ -49,7 +49,6 @@ find-library` can help you tell if that happened.
 * Elixir's [elixir-ls][elixir-ls]
 * Elm's [elm-language-server][elm-language-server]
 * Erlang's [erlang_ls][erlang_ls]
-* FSharp's [fsharp-mode][fsharp-mode] (Needs to `(require 'eglot-fsharp)` first)
 * Fortran's [fortls][fortls]
 * Go's [gopls][gopls]
 * Godot Engine's [built-in LSP][godot]
@@ -358,7 +357,8 @@ primarily with Emacs' built-in libraries and _not_ with third-party
 replacements for those facilities.
 
 * definitions can be found via `xref-find-definitions`;
-* on-the-fly diagnostics are given by `flymake-mode`;
+* on-the-fly diagnostics for the buffer or project are given by
+  `flymake-mode`;
 * function signature hints are given by `eldoc-mode`;
 * completion can be summoned with `completion-at-point`.
 * projects are discovered via `project.el`'s API;
@@ -497,7 +497,6 @@ Under the hood:
 [css-languageserver]: https://github.com/hrsh7th/vscode-langservers-extracted
 [dart_language_server]: https://github.com/natebosch/dart_language_server
 [elixir-ls]: https://github.com/elixir-lsp/elixir-ls
-[fsharp-mode]: https://github.com/fsharp/emacs-fsharp-mode
 [elm-language-server]: https://github.com/elm-tooling/elm-language-server
 [fortls]: https://github.com/hansec/fortran-language-server
 [gopls]: https://github.com/golang/tools/tree/master/gopls
