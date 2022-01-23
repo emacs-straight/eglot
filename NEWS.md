@@ -7,6 +7,11 @@ diagnostics from buffers other than the currently visited one.  The
 command `M-x flymake-show-project-diagnostics` will now show all
 diagnostics relevant to a workspace.
 
+##### Support optional completion tags ([#797][github#797])
+A [completion-item tag][completiontag] can be used to tell the editor
+how to render a completion.  Presently, one kind of tag exists,
+denoting its corresponding completion as obsolete.
+
 ##### Support optional diagnostic tags ([#794][github#794])
 A [diagnostic tag][diagnostictag] can indicate either "unused or
 unnecessary code" or "deprecated or obsolete code".  Following the
@@ -240,6 +245,7 @@ TCP connection finds a listening server.
 ##### Assorted bugfixes
 
 [diagnostictag]: https://microsoft.github.io/language-server-protocol/specifications/specification-3-17/#diagnosticTag
+[completiontag]: https://microsoft.github.io/language-server-protocol/specifications/specification-3-17/#completionItemTag
 <!--- Now a bunch of references that I auto-generate with
 
 (cl-loop
@@ -339,5 +345,7 @@ and now said bunch of references-->
 [github#769]: https://github.com/joaotavora/eglot/issues/769
 [github#787]: https://github.com/joaotavora/eglot/issues/787
 [github#794]: https://github.com/joaotavora/eglot/issues/794
+[github#797]: https://github.com/joaotavora/eglot/issues/797
 [github#803]: https://github.com/joaotavora/eglot/issues/803
+[github#810]: https://github.com/joaotavora/eglot/issues/810
 [github#813]: https://github.com/joaotavora/eglot/issues/813
