@@ -218,17 +218,24 @@ CONTACT can be:
   PROGRAM is called with ARGS and is expected to serve LSP requests
   over the standard input/output channels.
 
+* A list (PROGRAM [ARGS...] :initializationOptions OPTIONS),
+  whereupon PROGRAM is called with ARGS as in the first option,
+  and the LSP \"initializationOptions\" JSON object is
+  constructed from OPTIONS.  If OPTIONS is a unary function, it
+  is called with the server instance and should return a JSON
+  object.
+
 * A list (HOST PORT [TCP-ARGS...]) where HOST is a string and
   PORT is a positive integer for connecting to a server via TCP.
   Remaining ARGS are passed to `open-network-stream' for
   upgrading the connection with encryption or other capabilities.
 
 * A list (PROGRAM [ARGS...] :autoport [MOREARGS...]), whereupon a
-  combination of the two previous options is used.  First, an
-  attempt is made to find an available server port, then PROGRAM
-  is launched with ARGS; the `:autoport' keyword substituted for
-  that number; and MOREARGS.  Eglot then attempts to establish a
-  TCP connection to that port number on the localhost.
+  combination of previous options is used.  First, an attempt is
+  made to find an available server port, then PROGRAM is launched
+  with ARGS; the `:autoport' keyword substituted for that number;
+  and MOREARGS.  Eglot then attempts to establish a TCP
+  connection to that port number on the localhost.
 
 * A cons (CLASS-NAME . INITARGS) where CLASS-NAME is a symbol
   designating a subclass of `eglot-lsp-server', for representing
@@ -627,7 +634,11 @@ treated as in `eglot-dbind'."
 
 (cl-defgeneric eglot-initialization-options (server)
   "JSON object to send under `initializationOptions'."
-  (:method (_s) eglot--{})) ; blank default
+  (:method (s)
+   (let ((probe (plist-get (eglot--saved-initargs s) :initializationOptions)))
+     (cond ((functionp probe) (funcall probe s))
+           (probe)
+           (t eglot--{})))))
 
 (cl-defgeneric eglot-register-capability (server method id &rest params)
   "Ask SERVER to register capability METHOD marked with ID."
@@ -1116,18 +1127,22 @@ This docstring appeases checkdoc, that's all."
                                  (setq autostart-inferior-process inferior)
                                  connection))))
                 ((stringp (car contact))
-                 `(:process
-                   ,(lambda ()
-                      (let ((default-directory default-directory))
-                        (make-process
-                         :name readable-name
-                         :command (setq server-info (eglot--cmd contact))
-                         :connection-type 'pipe
-                         :coding 'utf-8-emacs-unix
-                         :noquery t
-                         :stderr (get-buffer-create
-                                  (format "*%s stderr*" readable-name))
-                         :file-handler t)))))))
+                 (let* ((probe (cl-position-if #'keywordp contact))
+                        (more-initargs (and probe (cl-subseq contact probe)))
+                        (contact (cl-subseq contact 0 probe)))
+                   `(:process
+                     ,(lambda ()
+                        (let ((default-directory default-directory))
+                          (make-process
+                           :name readable-name
+                           :command (setq server-info (eglot--cmd contact))
+                           :connection-type 'pipe
+                           :coding 'utf-8-emacs-unix
+                           :noquery t
+                           :stderr (get-buffer-create
+                                    (format "*%s stderr*" readable-name))
+                           :file-handler t)))
+                     ,@more-initargs)))))
          (spread (lambda (fn) (lambda (server method params)
                                 (let ((eglot--cached-server server))
                                  (apply fn server method (append params nil))))))
@@ -1974,8 +1989,16 @@ THINGS are either registrations or unregisterations (sic)."
   "If non-nil, value of the last inserted character in buffer.")
 
 (defun eglot--post-self-insert-hook ()
-  "Set `eglot--last-inserted-char'."
-  (setq eglot--last-inserted-char last-input-event))
+  "Set `eglot--last-inserted-char', maybe call on-type-formatting."
+  (setq eglot--last-inserted-char last-input-event)
+  (let ((ot-provider (eglot--server-capable :documentOnTypeFormattingProvider)))
+    (when (and ot-provider
+               (or (eq last-input-event
+                       (elt (plist-get ot-provider :firstTriggerCharacter) 0))
+                   (cl-find last-input-event
+                            (plist-get ot-provider :moreTriggerCharacter)
+                            :key #'seq-first)))
+      (eglot-format (point) nil last-input-event))))
 
 (defun eglot--pre-command-hook ()
   "Reset `eglot--last-inserted-char'."
@@ -2357,14 +2380,22 @@ Try to visit the target file for a richer summary line."
   (interactive)
   (eglot-format nil nil))
 
-(defun eglot-format (&optional beg end)
+(defun eglot-format (&optional beg end on-type-format)
   "Format region BEG END.
 If either BEG or END is nil, format entire buffer.
 Interactively, format active region, or entire buffer if region
-is not active."
+is not active.
+
+If non-nil, ON-TYPE-FORMAT is a character just inserted at BEG
+for which LSP on-type-formatting should be requested."
   (interactive (and (region-active-p) (list (region-beginning) (region-end))))
   (pcase-let ((`(,method ,cap ,args)
                (cond
+                ((and beg on-type-format)
+                 `(:textDocument/onTypeFormatting
+                   :documentOnTypeFormattingProvider
+                   ,`(:position ,(eglot--pos-to-lsp-position beg)
+                      :ch ,(string on-type-format))))
                 ((and beg end)
                  `(:textDocument/rangeFormatting
                    :documentRangeFormattingProvider

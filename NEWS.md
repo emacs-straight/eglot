@@ -1,5 +1,14 @@
 # (upcoming)
 
+##### Easier to use LSP initialize.initializationOptions ([#901][github#901], [#845][github#845])
+In `eglot-server-programs` a plist may be appended to the usual list
+of strings passed as command line arguments.  The value of its
+`:initializationOptions` key constructs the corresponding LSP JSON
+object.  This may be easier than creating a `defclass` for a specific
+server and specializing `eglot-initialization-options` to that class.
+
+##### Support on-type-formatting ([#899][github#899])
+
 ##### Provide basic workspace-folders support ([#893][github#893])
 Eglot now advertises `project-root` and `project-external-roots` as
 workspace-folders.  (Configuring `tags-table-list` sets the external
@@ -24,7 +33,7 @@ rendering suggestions in the protocol, we fade out unnecessary code
 and strike-through deprecated code.
 
 ##### The Rust language server is now rust-analyzer by default ([#803][github#803])
-Eglot will now prefer starting "rust-analazyer" to "rls" when it is
+Eglot will now prefer starting "rust-analyzer" to "rls" when it is
 available.  The special support code for RLS has been removed.
 
 ##### New servers have been added to `eglot-server-programs`
@@ -354,4 +363,7 @@ and now said bunch of references-->
 [github#803]: https://github.com/joaotavora/eglot/issues/803
 [github#810]: https://github.com/joaotavora/eglot/issues/810
 [github#813]: https://github.com/joaotavora/eglot/issues/813
+[github#845]: https://github.com/joaotavora/eglot/issues/845
 [github#893]: https://github.com/joaotavora/eglot/issues/893
+[github#899]: https://github.com/joaotavora/eglot/issues/899
+[github#901]: https://github.com/joaotavora/eglot/issues/901
