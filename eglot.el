@@ -151,7 +151,7 @@ chosen (interactively or automatically)."
                                 (vimrc-mode . ("vim-language-server" "--stdio"))
                                 (python-mode
                                  . ,(eglot-alternatives
-                                     '("pylsp" "pyls" ("pyright-langserver" "--stdio"))))
+                                     '("pylsp" "pyls" ("pyright-langserver" "--stdio") "jedi-language-server")))
                                 ((js-mode typescript-mode)
                                  . ("typescript-language-server" "--stdio"))
                                 (sh-mode . ("bash-language-server" "start"))
@@ -2698,16 +2698,16 @@ for which LSP on-type-formatting should be requested."
                                        (eglot--range-region range)))
                             (delete-region beg end)
                             (goto-char beg)
-                            (funcall (or snippet-fn #'insert) newText)))
-                        (when (cl-plusp (length additionalTextEdits))
-                          (eglot--apply-text-edits additionalTextEdits)))
+                            (funcall (or snippet-fn #'insert) newText))))
                        (snippet-fn
                         ;; A snippet should be inserted, but using plain
                         ;; `insertText'.  This requires us to delete the
                         ;; whole completion, since `insertText' is the full
                         ;; completion's text.
                         (delete-region (- (point) (length proxy)) (point))
-                        (funcall snippet-fn (or insertText label)))))
+                        (funcall snippet-fn (or insertText label))))
+                 (when (cl-plusp (length additionalTextEdits))
+                   (eglot--apply-text-edits additionalTextEdits)))
                (eglot--signal-textDocument/didChange)
                (eldoc)))))))))
 
@@ -3168,6 +3168,17 @@ If NOERROR, return predicate, else erroring function."
 (defun eglot--glob-emit-range (arg self next)
   (when (eq ?! (aref arg 1)) (aset arg 1 ?^))
   `(,self () (re-search-forward ,(concat "\\=" arg)) (,next)))
+
+
+;;; Hacks
+;;;
+;; FIXME: Although desktop.el compatibility is Emacs bug#56407, the
+;; optimal solution agreed to there is a bit more work than what I
+;; have time to right now.  See
+;; e.g. https://debbugs.gnu.org/cgi/bugreport.cgi?bug=bug%2356407#68.
+;; For now, just use `with-eval-after-load'
+(with-eval-after-load 'desktop
+  (add-to-list 'desktop-minor-mode-handlers '(eglot--managed-mode . ignore)))
 
 
 ;;; Obsolete
