@@ -1,5 +1,12 @@
 # (upcoming)
 
+##### `eglot-workspace-configuration` can be a function ([#967][github#967])
+
+##### C-u M-. lists and completes arbitrary workspace symbols ([#131][github#131])
+
+A very old request, now made possible by a relatively recent change to
+the `workspace/symbol` RPC method.
+
 ##### Rework mode-line menus ([#792][github#792])
 
 New menus help discover Eglot's features and show which of them are
@@ -47,7 +54,6 @@ available.  The special support code for RLS has been removed.
 - racket-langserver ([#694][github#694])
 - futhark lsp ([#922](github#922))
 - purescript-language-server ([#905](github#905))
-- jedi-language-server ([#994](github#994))
 
 # 1.8 (12/1/2022)
 
@@ -318,6 +324,7 @@ and now said bunch of references-->
 [github#121]: https://github.com/joaotavora/eglot/issues/121
 [github#124]: https://github.com/joaotavora/eglot/issues/124
 [github#126]: https://github.com/joaotavora/eglot/issues/126
+[github#131]: https://github.com/joaotavora/eglot/issues/131
 [github#138]: https://github.com/joaotavora/eglot/issues/138
 [github#144]: https://github.com/joaotavora/eglot/issues/144
 [github#154]: https://github.com/joaotavora/eglot/issues/154
@@ -379,4 +386,4 @@ and now said bunch of references-->
 [github#901]: https://github.com/joaotavora/eglot/issues/901
 [github#905]: https://github.com/joaotavora/eglot/issues/905
 [github#922]: https://github.com/joaotavora/eglot/issues/922
-[github#961]: https://github.com/joaotavora/eglot/pull/961
+[github#967]: https://github.com/joaotavora/eglot/issues/967
