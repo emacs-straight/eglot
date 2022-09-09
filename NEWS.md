@@ -1,5 +1,13 @@
 # (upcoming)
 
+##### `eglot-imenu` no longer uses problematic "special elements" ([#758][github#758], [#536][github#536], [#535][github#535])
+
+Though Eglot's `eglot-imenu` returned a fully compliant `imenu`
+structure, that object was not understood by many other frontends
+other than `M-x imenu` itself.  Since the special functionality it
+enabled wasn't being used anyway, decided to remove it to fix these
+longstanding problems.
+
 ##### `eglot-workspace-configuration` can be a function ([#967][github#967])
 
 ##### C-u M-. lists and completes arbitrary workspace symbols ([#131][github#131])
@@ -55,6 +63,7 @@ available.  The special support code for RLS has been removed.
 - futhark lsp ([#922][github#922])
 - purescript-language-server ([#905][github#905])
 - Perl::LanguageServer ([#952][github#952])
+- marksman ([#1013][github#1013])
 
 # 1.8 (12/1/2022)
 
@@ -359,6 +368,8 @@ and now said bunch of references-->
 [github#463]: https://github.com/joaotavora/eglot/issues/463
 [github#481]: https://github.com/joaotavora/eglot/issues/481
 [github#494]: https://github.com/joaotavora/eglot/issues/494
+[github#535]: https://github.com/joaotavora/eglot/issues/535
+[github#536]: https://github.com/joaotavora/eglot/issues/536
 [github#603]: https://github.com/joaotavora/eglot/issues/603
 [github#637]: https://github.com/joaotavora/eglot/issues/637
 [github#643]: https://github.com/joaotavora/eglot/issues/643
@@ -373,6 +384,7 @@ and now said bunch of references-->
 [github#742]: https://github.com/joaotavora/eglot/issues/742
 [github#750]: https://github.com/joaotavora/eglot/issues/750
 [github#751]: https://github.com/joaotavora/eglot/issues/751
+[github#758]: https://github.com/joaotavora/eglot/issues/758
 [github#769]: https://github.com/joaotavora/eglot/issues/769
 [github#787]: https://github.com/joaotavora/eglot/issues/787
 [github#792]: https://github.com/joaotavora/eglot/issues/792
@@ -389,3 +401,4 @@ and now said bunch of references-->
 [github#922]: https://github.com/joaotavora/eglot/issues/922
 [github#952]: https://github.com/joaotavora/eglot/issues/952
 [github#967]: https://github.com/joaotavora/eglot/issues/967
+[github#1013]: https://github.com/joaotavora/eglot/pull/1013
