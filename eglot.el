@@ -151,7 +151,7 @@ chosen (interactively or automatically)."
                                 (vimrc-mode . ("vim-language-server" "--stdio"))
                                 (python-mode
                                  . ,(eglot-alternatives
-                                     '("pylsp" "pyls" ("pyright-langserver" "--stdio"))))
+                                     '("pylsp" "pyls" ("pyright-langserver" "--stdio") "jedi-language-server")))
                                 ((js-mode typescript-mode)
                                  . ("typescript-language-server" "--stdio"))
                                 (sh-mode . ("bash-language-server" "start"))
@@ -3016,8 +3016,12 @@ Returns a list as described in docstring of `imenu--index-alist'."
                          textDocument
                        (list (eglot--uri-to-path uri) edits version)))
                    documentChanges)))
-      (cl-loop for (uri edits) on changes by #'cddr
-               do (push (list (eglot--uri-to-path uri) edits) prepared))
+      (unless (and changes documentChanges)
+        ;; We don't want double edits, and some servers send both
+        ;; changes and documentChanges.  This unless ensures that we
+        ;; prefer documentChanges over changes.
+        (cl-loop for (uri edits) on changes by #'cddr
+                 do (push (list (eglot--uri-to-path uri) edits) prepared)))
       (if (or confirm
               (cl-notevery #'find-buffer-visiting
                            (mapcar #'car prepared)))
