@@ -1249,6 +1249,31 @@ are bound to the useful return values of
   (should (string-suffix-p "c%3A/Users/Foo/bar.lisp"
                            (eglot--path-to-uri "c:/Users/Foo/bar.lisp"))))
 
+(ert-deftest eglot--same-server-multi-mode ()
+  "Check single LSP instance manages multiple modes in same project."
+  (skip-unless (executable-find "clangd"))
+  (let (server)
+    (eglot--with-fixture
+        `(("project" . (("foo.cpp" .
+                         "#include \"foolib.h\"
+                        int main() { return foo(); }")
+                        ("foolib.h" .
+                         "#ifdef __cplusplus\nextern \"C\" {\n#endif
+                        int foo();
+                        #ifdef __cplusplus\n}\n#endif")
+                        ("foolib.c" .
+                         "#include \"foolib.h\"
+                        int foo() {return 42;}"))))
+      (with-current-buffer
+          (eglot--find-file-noselect "project/foo.cpp")
+        (should (setq server (eglot--tests-connect))))
+      (with-current-buffer
+          (eglot--find-file-noselect "project/foolib.h")
+        (should (eq (eglot-current-server) server)))
+      (with-current-buffer
+          (eglot--find-file-noselect "project/foolib.c")
+        (should (eq (eglot-current-server) server))))))
+
 (provide 'eglot-tests)
 ;;; eglot-tests.el ends here
 

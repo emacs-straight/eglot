@@ -9,6 +9,10 @@
 ;; Keywords: convenience, languages
 ;; Package-Requires: ((emacs "26.1") (jsonrpc "1.0.14") (flymake "1.2.1") (project "0.3.0") (xref "1.0.1") (eldoc "1.11.0") (seq "2.23"))
 
+;; This is (or will soon) be a GNU ELPA :core package.  Avoid using
+;; functionality that not compatible with the version of Emacs
+;; recorded above.
+
 ;; This file is part of GNU Emacs.
 
 ;; GNU Emacs is free software: you can redistribute it and/or modify
@@ -193,7 +197,8 @@ language-server/bin/php-language-server.php"))
                                 (html-mode . ,(eglot-alternatives '(("vscode-html-language-server" "--stdio") ("html-languageserver" "--stdio"))))
                                 (json-mode . ,(eglot-alternatives '(("vscode-json-language-server" "--stdio") ("json-languageserver" "--stdio"))))
                                 (dockerfile-mode . ("docker-langserver" "--stdio"))
-                                (clojure-mode . ("clojure-lsp"))
+                                ((clojure-mode clojurescript-mode clojurec-mode) 
+                                 . ("clojure-lsp"))
                                 (csharp-mode . ("omnisharp" "-lsp"))
                                 (purescript-mode . ("purescript-language-server" "--stdio"))
                                 (perl-mode . ("perl" "-MPerl::LanguageServer" "-e" "Perl::LanguageServer::run"))
@@ -214,7 +219,8 @@ MAJOR-MODE can be:
 
 * A list combining the previous two alternatives, meaning
   multiple major modes will be associated with a single server
-  program.
+  program.  This association is such that the same resulting
+  server process will manage buffers of different major modes.
 
 CONTACT can be:
 
@@ -756,9 +762,9 @@ treated as in `eglot-dbind'."
     :documentation "Short nickname for the associated project."
     :accessor eglot--project-nickname
     :reader eglot-project-nickname)
-   (major-mode
-    :documentation "Major mode symbol."
-    :accessor eglot--major-mode)
+   (major-modes
+    :documentation "Major modes server is responsible for in a given project."
+    :accessor eglot--major-modes)
    (language-id
     :documentation "Language ID string for the mode."
     :accessor eglot--language-id)
@@ -875,16 +881,31 @@ PRESERVE-BUFFERS as in `eglot-shutdown', which see."
 
 (defun eglot--lookup-mode (mode)
   "Lookup `eglot-server-programs' for MODE.
-Return (LANGUAGE-ID . CONTACT-PROXY).  If not specified,
-LANGUAGE-ID is determined from MODE."
+Return (MANAGED-MODES LANGUAGE-ID CONTACT-PROXY).
+
+MANAGED-MODES is a list with MODE as its first elements.
+Subsequent elements are other major modes also potentially
+managed by the server that is to manage MODE.
+
+If not specified in `eglot-server-programs' (which see),
+LANGUAGE-ID is determined from MODE's name.
+
+CONTACT-PROXY is the value of the corresponding
+`eglot-server-programs' entry."
   (cl-loop
    for (modes . contact) in eglot-server-programs
+   for mode-symbols = (cons mode
+                            (delete mode
+                                    (mapcar #'car
+                                            (mapcar #'eglot--ensure-list
+                                                    (eglot--ensure-list modes)))))
    thereis (cl-some
             (lambda (spec)
               (cl-destructuring-bind (probe &key language-id &allow-other-keys)
-                  (if (consp spec) spec (list spec))
+                  (eglot--ensure-list spec)
                 (and (provided-mode-derived-p mode probe)
-                     (cons
+                     (list
+                      mode-symbols
                       (or language-id
                           (or (get mode 'eglot-language-id)
                               (get spec 'eglot-language-id)
@@ -899,7 +920,7 @@ Return (MANAGED-MODE PROJECT CLASS CONTACT LANG-ID).  If INTERACTIVE is
 non-nil, maybe prompt user, else error as soon as something can't
 be guessed."
   (let* ((guessed-mode (if buffer-file-name major-mode))
-         (managed-mode
+         (main-mode
           (cond
            ((and interactive
                  (or (>= (prefix-numeric-value current-prefix-arg) 16)
@@ -912,10 +933,11 @@ be guessed."
            ((not guessed-mode)
             (eglot--error "Can't guess mode to manage for `%s'" (current-buffer)))
            (t guessed-mode)))
-         (lang-id-and-guess (eglot--lookup-mode guessed-mode))
-         (language-id (or (car lang-id-and-guess)
+         (triplet (eglot--lookup-mode main-mode))
+         (managed-modes (car triplet))
+         (language-id (or (cadr triplet)
                           (string-remove-suffix "-mode" (symbol-name guessed-mode))))
-         (guess (cdr lang-id-and-guess))
+         (guess (caddr triplet))
          (guess (if (functionp guess)
                     (funcall guess interactive)
                   guess))
@@ -941,7 +963,7 @@ be guessed."
                (cond (current-prefix-arg base-prompt)
                      ((null guess)
                       (format "[eglot] Sorry, couldn't guess for `%s'!\n%s"
-                              managed-mode base-prompt))
+                              main-mode base-prompt))
                      ((and program
                            (not (file-name-absolute-p program))
                            (not (eglot--executable-find program t)))
@@ -963,7 +985,7 @@ be guessed."
                      full-program-invocation
                      'eglot-command-history)))
               guess)))
-    (list managed-mode (eglot--current-project) class contact language-id)))
+    (list managed-modes (eglot--current-project) class contact language-id)))
 
 (defvar eglot-lsp-context)
 (put 'eglot-lsp-context 'variable-documentation
@@ -1034,7 +1056,7 @@ INTERACTIVE is t if called interactively."
   (interactive (list (eglot--current-server-or-lose) t))
   (when (jsonrpc-running-p server)
     (ignore-errors (eglot-shutdown server interactive nil 'preserve-buffers)))
-  (eglot--connect (eglot--major-mode server)
+  (eglot--connect (eglot--major-modes server)
                   (eglot--project server)
                   (eieio-object-class-name server)
                   (eglot--saved-initargs server)
@@ -1111,12 +1133,12 @@ Each function is passed the server as an argument")
 (defvar-local eglot--cached-server nil
   "A cached reference to the current EGLOT server.")
 
-(defun eglot--connect (managed-major-mode project class contact language-id)
-  "Connect to MANAGED-MAJOR-MODE, LANGUAGE-ID, PROJECT, CLASS and CONTACT.
+(defun eglot--connect (managed-modes project class contact language-id)
+  "Connect to MANAGED-MODES, LANGUAGE-ID, PROJECT, CLASS and CONTACT.
 This docstring appeases checkdoc, that's all."
   (let* ((default-directory (project-root project))
          (nickname (file-name-base (directory-file-name default-directory)))
-         (readable-name (format "EGLOT (%s/%s)" nickname managed-major-mode))
+         (readable-name (format "EGLOT (%s/%s)" nickname managed-modes))
          autostart-inferior-process
          server-info
          (contact (if (functionp contact) (funcall contact) contact))
@@ -1176,7 +1198,7 @@ This docstring appeases checkdoc, that's all."
     (setf (eglot--saved-initargs server) initargs)
     (setf (eglot--project server) project)
     (setf (eglot--project-nickname server) nickname)
-    (setf (eglot--major-mode server) managed-major-mode)
+    (setf (eglot--major-modes server) (eglot--ensure-list managed-modes))
     (setf (eglot--language-id server) language-id)
     (setf (eglot--inferior-process server) autostart-inferior-process)
     (run-hook-with-args 'eglot-server-initialized-hook server)
@@ -1232,7 +1254,7 @@ This docstring appeases checkdoc, that's all."
                                      (setf (eglot--inhibit-autoreconnect server)
                                            (null eglot-autoreconnect)))))))
                           (let ((default-directory (project-root project))
-                                (major-mode managed-major-mode))
+                                (major-mode (car managed-modes)))
                             (hack-dir-local-variables-non-file-buffer)
                             (run-hook-with-args 'eglot-connect-hook server))
                           (eglot--message
@@ -1240,7 +1262,7 @@ This docstring appeases checkdoc, that's all."
 in project `%s'."
                            (or (plist-get serverInfo :name)
                                (jsonrpc-name server))
-                           managed-major-mode
+                           managed-modes
                            (eglot-project-nickname server))
                           (when tag (throw tag t))))
                       :timeout eglot-connect-timeout
@@ -1336,7 +1358,7 @@ CONNECT-ARGS are passed as additional arguments to
   (let ((warning-minimum-level :error))
     (display-warning 'eglot (apply #'format format args) :warning)))
 
-(defun eglot-current-column () (- (point) (point-at-bol)))
+(defun eglot-current-column () (- (point) (line-beginning-position)))
 
 (defvar eglot-current-column-function #'eglot-lsp-abiding-column
   "Function to calculate the current column.
@@ -1541,8 +1563,8 @@ and just return it.  PROMPT shouldn't end with a question mark."
                           being hash-values of eglot--servers-by-project
                           append servers))
         (name (lambda (srv)
-                (format "%s/%s" (eglot-project-nickname srv)
-                        (eglot--major-mode srv)))))
+                (format "%s %s" (eglot-project-nickname srv)
+                        (eglot--major-modes srv)))))
     (cond ((null servers)
            (eglot--error "No servers!"))
           ((or (cdr servers) (not dont-if-just-the-one))
@@ -1565,6 +1587,8 @@ and just return it.  PROMPT shouldn't end with a question mark."
 
 (defun eglot--plist-keys (plist) "Get keys of a plist."
   (cl-loop for (k _v) on plist by #'cddr collect k))
+
+(defun eglot--ensure-list (x) (if (listp x) x (list x)))
 
 
 ;;; Minor modes
@@ -1696,7 +1720,8 @@ Use `eglot-managed-p' to determine if current buffer is managed.")
         (or eglot--cached-server
             (cl-find major-mode
                      (gethash (eglot--current-project) eglot--servers-by-project)
-                     :key #'eglot--major-mode)
+                     :key #'eglot--major-modes
+                     :test #'memq)
             (and eglot-extend-to-xref
                  buffer-file-name
                  (gethash (expand-file-name buffer-file-name)
@@ -1985,10 +2010,10 @@ COMMAND is a symbol naming the command."
                            (eglot--widening
                             (goto-char (point-min))
                             (setq beg
-                                  (point-at-bol
+                                  (line-beginning-position
                                    (1+ (plist-get (plist-get range :start) :line))))
                             (setq end
-                                  (point-at-eol
+                                  (line-end-position
                                    (1+ (plist-get (plist-get range :end) :line)))))))
                        (eglot--make-diag
                         (current-buffer) beg end
@@ -2284,7 +2309,7 @@ When called interactively, use the currently active server"
                                 (file-directory-p uri-path))
                            (file-name-as-directory uri-path)
                          (project-root (eglot--project server)))))
-                (setq-local major-mode (eglot--major-mode server))
+                (setq-local major-mode (car (eglot--major-modes server)))
                 (hack-dir-local-variables-non-file-buffer)
                 (cl-loop for (wsection o)
                          on (eglot--workspace-configuration-plist server)
@@ -2422,14 +2447,14 @@ Try to visit the target file for a richer summary line."
        (collect (lambda ()
                   (eglot--widening
                    (pcase-let* ((`(,beg . ,end) (eglot--range-region range))
-                                (bol (progn (goto-char beg) (point-at-bol)))
-                                (substring (buffer-substring bol (point-at-eol)))
+                                (bol (progn (goto-char beg) (line-beginning-position)))
+                                (substring (buffer-substring bol (line-end-position)))
                                 (hi-beg (- beg bol))
-                                (hi-end (- (min (point-at-eol) end) bol)))
+                                (hi-end (- (min (line-end-position) end) bol)))
                      (add-face-text-property hi-beg hi-end 'xref-match
                                              t substring)
-                     (list substring (1+ (current-line)) (eglot-current-column)
-                           (- end beg))))))
+                     (list substring (line-number-at-pos (point) t)
+                           (eglot-current-column) (- end beg))))))
        (`(,summary ,line ,column ,length)
         (cond
          (visiting (with-current-buffer visiting (funcall collect)))
