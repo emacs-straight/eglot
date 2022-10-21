@@ -1,4 +1,4 @@
-;;; eglot.el --- Client for Language Server Protocol (LSP) servers  -*- lexical-binding: t; -*-
+;;; eglot.el --- The Emacs Client for LSP servers  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2018-2022 Free Software Foundation, Inc.
 
@@ -7,11 +7,11 @@
 ;; Maintainer: João Távora <joaotavora@gmail.com>
 ;; URL: https://github.com/joaotavora/eglot
 ;; Keywords: convenience, languages
-;; Package-Requires: ((emacs "26.1") (jsonrpc "1.0.14") (flymake "1.2.1") (project "0.3.0") (xref "1.0.1") (eldoc "1.11.0") (seq "2.23"))
+;; Package-Requires: ((emacs "26.3") (jsonrpc "1.0.14") (flymake "1.2.1") (project "0.3.0") (xref "1.0.1") (eldoc "1.11.0") (seq "2.23"))
 
-;; This is (or will soon) be a GNU ELPA :core package.  Avoid using
-;; functionality that not compatible with the version of Emacs
-;; recorded above.
+;; This is is a GNU ELPA :core package.  Avoid adding functionality
+;; that is not available in the version of Emacs recorded above or any
+;; of the package dependencies.
 
 ;; This file is part of GNU Emacs.
 
@@ -33,32 +33,63 @@
 ;; Eglot ("Emacs Polyglot") is an Emacs LSP client that stays out of
 ;; your way.
 ;;
-;; Typing M-x eglot should be enough to get you started, but here's a
-;; little info (see the accompanying README.md or the URL for more).
+;; Typing M-x eglot in some source file is often enough to get you
+;; started, if the language server you're looking to use is installed
+;; in your system.  Please refer to the manual, available from
+;; https://joaotavora.github.io/eglot/ or from M-x info for more usage
+;; instructions.
 ;;
-;; M-x eglot starts a server via a shell command guessed from
-;; `eglot-server-programs', using the current major mode (for whatever
-;; language you're programming in) as a hint.  If it can't guess, it
-;; prompts you in the minibuffer for these things.  Actually, the
-;; server does not need to be running locally: you can connect to a
-;; running server via TCP by entering a <host:port> syntax.
+;; If you wish to contribute changes to Eglot, please do read the user
+;; manual first.  Additionally, take the following in consideration:
+
+;; * Eglot's main job is to hook up the information that language
+;;   servers offer via LSP to Emacs's UI facilities: Xref for
+;;   definition-chasing, Flymake for diagnostics, Eldoc for at-point
+;;   documentation, etc.  Eglot's job is generally *not* to provide
+;;   such a UI itself, though a small number of simple
+;;   counter-examples do exist, for example in the `eglot-rename'
+;;   command.  When a new UI is evidently needed, consider adding a
+;;   new package to Emacs, or extending an existing one.
 ;;
-;; If the connection is successful, you should see an `eglot'
-;; indicator pop up in your mode-line.  More importantly, this means
-;; that current *and future* file buffers of that major mode *inside
-;; your current project* automatically become \"managed\" by the LSP
-;; server.  In other words, information about their content is
-;; exchanged periodically to provide enhanced code analysis using
-;; `xref-find-definitions', `flymake-mode', `eldoc-mode',
-;; `completion-at-point', among others.
+;; * Eglot was designed to function with just the UI facilities found
+;;   in the latest Emacs core, as long as those facilities are also
+;;   available as GNU ELPA :core packages.  Historically, a number of
+;;   :core packages were added or reworked in Emacs to make this
+;;   possible.  This principle should be upheld when adding new LSP
+;;   features or tweaking exising ones.  Design any new facilities in
+;;   a way that they could work in the absence of LSP or using some
+;;   different protocol, then make sure Eglot can link up LSP
+;;   information to it.
+
+;; * There are few Eglot configuration variables.  This principle
+;;   should also be upheld.  If Eglot had these variables, it could be
+;;   duplicating configuration found elsewhere, bloating itself up,
+;;   and making it generally hard to integrate with the ever growing
+;;   set of LSP features and Emacs packages.  For instance, this is
+;;   why one finds a single variable
+;;   `eglot-ignored-server-capabilities' instead of a number of
+;;   capability-specific flags, or why customizing the display of
+;;   LSP-provided documentation is done via ElDoc's variables, not
+;;   Eglot's.
 ;;
-;; To "unmanage" these buffers, shutdown the server with
-;; M-x eglot-shutdown.
+;; * Linking up LSP information to other libraries is generally done
+;;   in the `eglot--managed-mode' minor mode function, by
+;;   buffer-locally setting the other library's variables to
+;;   Eglot-specific versions.  When deciding what to set the variable
+;;   to, the general idea is to choose a good default for beginners
+;;   that doesn't clash with Emacs's defaults.  The settings are only
+;;   in place during Eglot's LSP-enriched tenure over a project.  Even
+;;   so, some of those decisions will invariably aggravate a minority
+;;   of Emacs power users, but these users can use `eglot-stay-out-of'
+;;   and `eglot-managed-mode-hook' to quench their OCD.
 ;;
-;; To start an eglot session automatically when a foo-mode buffer is
-;; visited, you can put this in your init file:
-;;
-;;   (add-hook 'foo-mode-hook 'eglot-ensure)
+;; * On occasion, to enable new features, Eglot can have soft
+;;   dependencies on popular libraries that are not in Emacs core.
+;;   "Soft" means that the dependency doesn't impair any other use of
+;;   Eglot beyond that feature.  Such is the case of the snippet
+;;   functionality, via the Yasnippet package, Markdown formatting of
+;;   at-point documentation via the markdown-mode package, and nicer
+;;   looking completions when the Company package is used.
 
 ;;; Code:
 
@@ -375,6 +406,7 @@ This can be useful when using docker to run a language server.")
   `((1 . eglot-diagnostic-tag-unnecessary-face)
     (2 . eglot-diagnostic-tag-deprecated-face)))
 
+(defvaralias 'eglot-{} 'eglot--{})
 (defconst eglot--{} (make-hash-table :size 1) "The empty JSON object.")
 
 (defun eglot--executable-find (command &optional remote)
@@ -1007,26 +1039,30 @@ suitable root directory for a given LSP server's purposes."
 ;;;###autoload
 (defun eglot (managed-major-mode project class contact language-id
                                  &optional interactive)
-  "Manage a project with a Language Server Protocol (LSP) server.
+  "Start LSP server in support of PROJECT's buffers under MANAGED-MAJOR-MODE.
+
+This starts a Language Server Protocol (LSP) server suitable for the
+buffers of PROJECT whose `major-mode' is MANAGED-MAJOR-MODE.
+CLASS is the class of the LSP server to start and CONTACT specifies
+how to connect to the server.
+
+Interactively, the command attempts to guess MANAGED-MAJOR-MODE
+from the current buffer's `major-mode', CLASS and CONTACT from
+`eglot-server-programs' looked up by the major mode, and PROJECT from
+`project-find-functions'.  The search for active projects in this
+context binds `eglot-lsp-context' (which see).
+
+If it can't guess, it prompts the user for the mode and the server.
+With a single \\[universal-argument] prefix arg, it always prompts for COMMAND.
+With two \\[universal-argument], it also always prompts for MANAGED-MAJOR-MODE.
 
 The LSP server of CLASS is started (or contacted) via CONTACT.
 If this operation is successful, current *and future* file
 buffers of MANAGED-MAJOR-MODE inside PROJECT become \"managed\"
-by the LSP server, meaning information about their contents is
-exchanged periodically to provide enhanced code-analysis via
-`xref-find-definitions', `flymake-mode', `eldoc-mode',
-`completion-at-point', among others.
-
-Interactively, the command attempts to guess MANAGED-MAJOR-MODE
-from current buffer, CLASS and CONTACT from
-`eglot-server-programs' and PROJECT from
-`project-find-functions'.  The search for active projects in this
-context binds `eglot-lsp-context' (which see).
-
-If it can't guess, the user is prompted.  With a single
-\\[universal-argument] prefix arg, it always prompt for COMMAND.
-With two \\[universal-argument] prefix args, also prompts for
-MANAGED-MAJOR-MODE.
+by the LSP server, meaning the information about their contents is
+exchanged periodically with the server to provide enhanced
+code-analysis via `xref-find-definitions', `flymake-mode',
+`eldoc-mode', and `completion-at-point', among others.
 
 PROJECT is a project object as returned by `project-current'.
 
@@ -1282,7 +1318,8 @@ in project `%s'."
                      (cond ((numberp eglot-sync-connect)
                             (accept-process-output nil eglot-sync-connect))
                            (eglot-sync-connect
-                            (while t (accept-process-output nil 30)))))))
+                            (while t (accept-process-output
+                                      nil eglot-connect-timeout)))))))
               (pcase retval
                 (`(error . ,msg) (eglot--error msg))
                 (`nil (eglot--message "Waiting in background for server `%s'"
