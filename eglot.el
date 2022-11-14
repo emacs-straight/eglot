@@ -206,7 +206,7 @@ language-server/bin/php-language-server.php"))
                                 (elm-mode . ("elm-language-server"))
                                 (mint-mode . ("mint" "ls"))
                                 (kotlin-mode . ("kotlin-language-server"))
-                                (go-mode . ("gopls"))
+                                ((go-mode go-dot-mod-mode go-dot-work-mode) . ("gopls"))
                                 ((R-mode ess-r-mode) . ("R" "--slave" "-e"
                                                         "languageserver::run()"))
                                 (java-mode . ("jdtls"))
@@ -2368,10 +2368,11 @@ When called interactively, use the currently active server"
             (with-temp-buffer
               (let* ((uri-path (eglot--uri-to-path scopeUri))
                      (default-directory
-                       (if (and (not (string-empty-p uri-path))
-                                (file-directory-p uri-path))
-                           (file-name-as-directory uri-path)
-                         (project-root (eglot--project server)))))
+                      (if (and uri-path
+                               (not (string-empty-p uri-path))
+                               (file-directory-p uri-path))
+                          (file-name-as-directory uri-path)
+                        (project-root (eglot--project server)))))
                 (setq-local major-mode (car (eglot--major-modes server)))
                 (hack-dir-local-variables-non-file-buffer)
                 (cl-loop for (wsection o)
