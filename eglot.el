@@ -820,6 +820,7 @@ treated as in `eglot--dbind'."
                                        `(:valueSet
                                          [,@(mapcar
                                              #'car eglot--tag-faces)])))
+            :window `(:workDoneProgress t)
             :general (list :positionEncodings ["utf-32" "utf-8" "utf-16"])
             :experimental eglot--{})))
 
@@ -1312,6 +1313,7 @@ This docstring appeases checkdoc, that's all."
                                         (eq (jsonrpc-process-type server)
                                             'network))
                               (emacs-pid))
+                            :clientInfo '(:name "Eglot")
                             ;; Maybe turn trampy `/ssh:foo@bar:/path/to/baz.py'
                             ;; into `/path/to/baz.py', so LSP groks it.
                             :rootPath (file-local-name
@@ -2484,7 +2486,7 @@ use the root of SERVER's `eglot--project'."
                ;; Set the major mode to be the first of the managed
                ;; modes.  This is the one the user started eglot in.
                (setq major-mode (car (eglot--major-modes server)))
-               (hack-dir-local-variables-non-file-buffer)()
+               (hack-dir-local-variables-non-file-buffer)
                (if (functionp eglot-workspace-configuration)
                    (funcall eglot-workspace-configuration server)
                  eglot-workspace-configuration))))
