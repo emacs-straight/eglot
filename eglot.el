@@ -517,7 +517,10 @@ ACTION is the default value for commands not in the alist."
 (defcustom eglot-report-progress t
   "If non-nil, show progress of long running LSP server work.
 If set to `messages', use *Messages* buffer, else use Eglot's
-mode line indicator."
+mode line indicator.
+
+For changes on this variable to take effect, you need to restart
+the LSP connection.  That can be done by `eglot-reconnect'."
   :type '(choice (const :tag "Don't show progress" nil)
                  (const :tag "Show progress in *Messages*" messages)
                  (const :tag "Show progress in Eglot's mode line indicator" t))
@@ -2665,7 +2668,9 @@ Records BEG, END and PRE-CHANGE-LENGTH locally."
 (defun eglot--track-changes-signal (id &optional distance)
   (cl-incf eglot--versioned-identifier)
   (cond
-   (distance (eglot--track-changes-fetch id))
+   (distance
+    ;; When distance is <100, we may as well coalesce the changes.
+    (when (> distance 100) (eglot--track-changes-fetch id)))
    (eglot--recent-changes nil)
    ;; Note that there are pending changes, for the benefit of those
    ;; who check it as a boolean.
