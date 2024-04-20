@@ -2381,8 +2381,11 @@ still unanswered LSP requests to the server\n")))
                         (lambda ()
                           (remhash token (eglot--progress-reporters server))))))))))
 
+(defvar-local eglot--TextDocumentIdentifier-uri nil
+  "A cached LSP TextDocumentIdentifier URI string.")
+
 (cl-defmethod eglot-handle-notification
-  (_server (_method (eql textDocument/publishDiagnostics)) &key uri diagnostics
+  (server (_method (eql textDocument/publishDiagnostics)) &key uri diagnostics
            &allow-other-keys) ; FIXME: doesn't respect `eglot-strict-mode'
   "Handle notification publishDiagnostics."
   (cl-flet ((eglot--diag-type (sev)
@@ -2391,9 +2394,18 @@ still unanswered LSP requests to the server\n")))
                     ((= sev 2)  'eglot-warning)
                     (t          'eglot-note)))
             (mess (source code message)
-              (concat source (and code (format " [%s]" code)) ": " message)))
+              (concat source (and code (format " [%s]" code)) ": " message))
+            (find-it (uri)
+              ;; Search managed buffers with server-provided URIs since
+              ;; that's what we give them in the "didOpen" notification
+              ;; `find-buffer-visiting' would be nicer, but it calls the
+              ;; the potentially slow `file-truename' (bug#70036).
+              (cl-loop for b in (eglot--managed-buffers server)
+                       when (with-current-buffer b
+                              (equal eglot--TextDocumentIdentifier-uri uri))
+                       return b)))
     (if-let* ((path (expand-file-name (eglot-uri-to-path uri)))
-              (buffer (find-buffer-visiting path)))
+              (buffer (find-it uri)))
         (with-current-buffer buffer
           (cl-loop
            initially
@@ -2518,13 +2530,11 @@ THINGS are either registrations or unregisterations (sic)."
      (t (setq success :json-false)))
     `(:success ,success)))
 
-(defvar-local eglot--cached-tdi nil
-  "A cached LSP TextDocumentIdentifier URI string.")
-
 (defun eglot--TextDocumentIdentifier ()
-  "Compute TextDocumentIdentifier object for current buffer."
-  `(:uri ,(or eglot--cached-tdi
-              (setq eglot--cached-tdi
+  "Compute TextDocumentIdentifier object for current buffer.
+Sets `eglot--TextDocumentIdentifier-uri' (which see) as a side effect."
+  `(:uri ,(or eglot--TextDocumentIdentifier-uri
+              (setq eglot--TextDocumentIdentifier-uri
                     (eglot-path-to-uri (or buffer-file-name
                                            (ignore-errors
                                              (buffer-file-name
@@ -2625,6 +2635,7 @@ buffer."
 (defun eglot--after-change (beg end pre-change-length)
   "Hook onto `after-change-functions'.
 Records BEG, END and PRE-CHANGE-LENGTH locally."
+  (cl-incf eglot--versioned-identifier)
   (pcase (car-safe eglot--recent-changes)
     (`(,lsp-beg ,lsp-end
                 (,b-beg . ,b-beg-marker)
@@ -2658,6 +2669,7 @@ Records BEG, END and PRE-CHANGE-LENGTH locally."
   (if (eq eglot--recent-changes :pending) (setq eglot--recent-changes nil))
   (track-changes-fetch
    id (lambda (beg end before)
+        (cl-incf eglot--versioned-identifier)
         (cond
          ((eq eglot--recent-changes :emacs-messup) nil)
          ((eq before 'error) (setf eglot--recent-changes :emacs-messup))
@@ -2668,7 +2680,6 @@ Records BEG, END and PRE-CHANGE-LENGTH locally."
                   eglot--recent-changes))))))
 
 (defun eglot--track-changes-signal (id &optional distance)
-  (cl-incf eglot--versioned-identifier)
   (cond
    (distance
     ;; When distance is <100, we may as well coalesce the changes.
@@ -2789,9 +2800,9 @@ When called interactively, use the currently active server"
 
 (defun eglot--signal-textDocument/didChange ()
   "Send textDocument/didChange to server."
+  (when eglot--track-changes
+    (eglot--track-changes-fetch eglot--track-changes))
   (when eglot--recent-changes
-    (when eglot--track-changes
-      (eglot--track-changes-fetch eglot--track-changes))
     (let* ((server (eglot--current-server-or-lose))
            (sync-capability (eglot-server-capable :textDocumentSync))
            (sync-kind (if (numberp sync-capability) sync-capability
@@ -2823,7 +2834,7 @@ When called interactively, use the currently active server"
   "Send textDocument/didOpen to server."
   (setq eglot--recent-changes nil
         eglot--versioned-identifier 0
-        eglot--cached-tdi nil)
+        eglot--TextDocumentIdentifier-uri nil)
   (jsonrpc-notify
    (eglot--current-server-or-lose)
    :textDocument/didOpen `(:textDocument ,(eglot--TextDocumentItem))))
