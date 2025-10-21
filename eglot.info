@@ -1,4 +1,4 @@
-This is dochtZ38A.info, produced by makeinfo version 6.8 from
+This is docOjyT3O.info, produced by makeinfo version 6.8 from
 eglot.texi.
 
 This manual is for Eglot, the Emacs LSP client.
@@ -21,7 +21,7 @@ START-INFO-DIR-ENTRY
 END-INFO-DIR-ENTRY
 
 
-File: dochtZ38A.info,  Node: Top,  Next: Quick Start,  Up: (dir)
+File: docOjyT3O.info,  Node: Top,  Next: Quick Start,  Up: (dir)
 
 Eglot
 *****
@@ -80,7 +80,7 @@ major mode.
    (1) A “polyglot” is a person who is able to use several languages.
 
 
-File: dochtZ38A.info,  Node: Quick Start,  Next: Eglot and LSP Servers,  Prev: Top,  Up: Top
+File: docOjyT3O.info,  Node: Quick Start,  Next: Eglot and LSP Servers,  Prev: Top,  Up: Top
 
 1 Quick Start
 *************
@@ -140,7 +140,7 @@ common use patterns.
   4. That’s it!
 
 
-File: dochtZ38A.info,  Node: Eglot and LSP Servers,  Next: Using Eglot,  Prev: Quick Start,  Up: Top
+File: docOjyT3O.info,  Node: Eglot and LSP Servers,  Next: Using Eglot,  Prev: Quick Start,  Up: Top
 
 2 Eglot and LSP Servers
 ***********************
@@ -155,7 +155,7 @@ start it.
 * Shutting Down LSP Servers::
 
 
-File: dochtZ38A.info,  Node: Setting Up LSP Servers,  Next: Starting Eglot,  Up: Eglot and LSP Servers
+File: docOjyT3O.info,  Node: Setting Up LSP Servers,  Next: Starting Eglot,  Up: Eglot and LSP Servers
 
 2.1 Setting Up LSP Servers
 ==========================
@@ -262,7 +262,7 @@ a given major-mode.  In those cases, you may combine the helper function
 buffers.  Else it will use whichever is available.
 
 
-File: dochtZ38A.info,  Node: Starting Eglot,  Next: Shutting Down LSP Servers,  Prev: Setting Up LSP Servers,  Up: Eglot and LSP Servers
+File: docOjyT3O.info,  Node: Starting Eglot,  Next: Shutting Down LSP Servers,  Prev: Setting Up LSP Servers,  Up: Eglot and LSP Servers
 
 2.2 Starting Eglot
 ==================
@@ -314,7 +314,7 @@ Emacs session, it runs the hook ‘eglot-connect-hook’ (*note Other
 Variables::).
 
 
-File: dochtZ38A.info,  Node: Shutting Down LSP Servers,  Prev: Starting Eglot,  Up: Eglot and LSP Servers
+File: docOjyT3O.info,  Node: Shutting Down LSP Servers,  Prev: Starting Eglot,  Up: Eglot and LSP Servers
 
 2.3 Shutting Down LSP Servers
 =============================
@@ -345,7 +345,7 @@ associated with it.  This default allows you to start a server only once
 in each Emacs session.
 
 
-File: dochtZ38A.info,  Node: Using Eglot,  Next: Customizing Eglot,  Prev: Eglot and LSP Servers,  Up: Top
+File: docOjyT3O.info,  Node: Using Eglot,  Next: Customizing Eglot,  Prev: Eglot and LSP Servers,  Up: Top
 
 3 Using Eglot
 *************
@@ -361,7 +361,7 @@ commands and variables.
 * Eglot Commands::
 
 
-File: dochtZ38A.info,  Node: Eglot Features,  Next: Eglot and Buffers,  Up: Using Eglot
+File: docOjyT3O.info,  Node: Eglot Features,  Next: Eglot and Buffers,  Up: Using Eglot
 
 3.1 Eglot Features
 ==================
@@ -460,7 +460,7 @@ features via user options (*note Customizing Eglot::) and a hook that
 runs after Eglot starts managing a buffer (*note Eglot and Buffers::).
 
 
-File: dochtZ38A.info,  Node: Eglot and Buffers,  Next: Eglot Commands,  Prev: Eglot Features,  Up: Using Eglot
+File: docOjyT3O.info,  Node: Eglot and Buffers,  Next: Eglot Commands,  Prev: Eglot Features,  Up: Using Eglot
 
 3.2 Buffers, Projects, and Eglot
 ================================
@@ -567,7 +567,7 @@ specially in several ways:
      being managed or not.
 
 
-File: dochtZ38A.info,  Node: Eglot Commands,  Prev: Eglot and Buffers,  Up: Using Eglot
+File: docOjyT3O.info,  Node: Eglot Commands,  Prev: Eglot and Buffers,  Up: Using Eglot
 
 3.3 Eglot Commands
 ==================
@@ -747,7 +747,7 @@ Eglot-managed buffers:
      Request completion of the symbol at point.
 
 
-File: dochtZ38A.info,  Node: Customizing Eglot,  Next: Advanced server configuration,  Prev: Using Eglot,  Up: Top
+File: docOjyT3O.info,  Node: Customizing Eglot,  Next: Advanced server configuration,  Prev: Using Eglot,  Up: Top
 
 4 Customizing Eglot
 *******************
@@ -775,7 +775,7 @@ interaction with these features.  *Note More Customization::.
 * More Customization::
 
 
-File: dochtZ38A.info,  Node: Customization Variables,  Next: Other Variables,  Up: Customizing Eglot
+File: docOjyT3O.info,  Node: Customization Variables,  Next: Other Variables,  Up: Customizing Eglot
 
 4.1 Customization Variables
 ===========================
@@ -905,7 +905,7 @@ This section provides a reference for the Eglot user options.
           point.
 
 
-File: dochtZ38A.info,  Node: Other Variables,  Next: More Customization,  Prev: Customization Variables,  Up: Customizing Eglot
+File: docOjyT3O.info,  Node: Other Variables,  Next: More Customization,  Prev: Customization Variables,  Up: Customizing Eglot
 
 4.2 Other Variables
 ===================
@@ -955,7 +955,7 @@ be changed from Elisp snippets.
      other mechanism.
 
 
-File: dochtZ38A.info,  Node: More Customization,  Prev: Other Variables,  Up: Customizing Eglot
+File: docOjyT3O.info,  Node: More Customization,  Prev: Other Variables,  Up: Customizing Eglot
 
 4.3 More Customization
 ======================
@@ -1042,7 +1042,7 @@ override Eglot’s setting of these variables.
      ‘yas-minor-mode’ when needed to expand server-provided snippets.
 
 
-File: dochtZ38A.info,  Node: Advanced server configuration,  Next: Extending Eglot,  Prev: Customizing Eglot,  Up: Top
+File: docOjyT3O.info,  Node: Advanced server configuration,  Next: Extending Eglot,  Prev: Customizing Eglot,  Up: Top
 
 5 Advanced server configuration
 *******************************
@@ -1088,7 +1088,7 @@ other LSP clients and may be easier to debug than options riding on the
 LSP wire.
 
 
-File: dochtZ38A.info,  Node: Project-specific configuration,  Next: User-specific configuration,  Up: Advanced server configuration
+File: docOjyT3O.info,  Node: Project-specific configuration,  Next: User-specific configuration,  Up: Advanced server configuration
 
 5.1 Project-specific configuration
 ==================================
@@ -1164,14 +1164,23 @@ file method, the contents of that file could be:
       (python-base-mode . ((indent-tabs-mode . nil)))
       (go-mode          . ((indent-tabs-mode . t))))
 
-This sets the value of ‘eglot-workspace-configuration’ in all the
-buffers inside the project; each server will use only the section of the
-parameters intended for that server, and ignore the rest.  Note how
-alists are used for associating Emacs mode names with alists associating
-variable names with variable values.  Then notice how plists are used
-inside the value of ‘eglot-workspace-configuration’.
+Note how alists are used for associating Emacs mode names with other
+alists, associating variable names with variable values.  Then, pay
+special attention to how the value of ‘eglot-workspace-configuration’ is
+a plist and _not_ an alist.
 
-   This following form may also be used:
+   The above form sets the value of ‘eglot-workspace-configuration’ in
+all the buffers inside the project; each language server will then use
+only the section of the parameters intended for it, and ignore the rest.
+In our example, ‘pylsp’ and ‘gopls’ are solely interested in the
+‘:pylsp’ and ‘:gopls’ parameter section names, respectively.  However,
+section names don’t have to match the server name and some servers may
+be even interested in multiple sections: the
+‘typescript-language-server’ server is known to be interested in the
+‘:javascript’ and ‘:typescript’ section names.
+
+   To avoid sending whole configuration sections to servers who are
+decidedly not interested in them, the following form may also be used:
 
      ((python-base-mode
        . ((eglot-workspace-configuration
@@ -1190,11 +1199,11 @@ depending on the major mode of each of that project’s buffers.
 (:plugins ...))’.  ‘go-mode’ buffers will have the variable set to
 ‘(:gopls (:usePlaceholders t))’.
 
-   Some servers will issue workspace configuration for specific files
-inside your project.  For example, if you know ‘gopls’ is asking about
-specific files in the ‘src/imported’ subdirectory and you want to set a
-different option for ‘gopls.usePlaceholders’ , you may use something
-like:
+   Some servers will issue workspace configuration for specific source
+files inside your project.  For example, if you know ‘gopls’ is asking
+about specific files in the ‘src/imported’ subdirectory and you want to
+set a different option for ‘gopls.usePlaceholders’ , you may use
+something like:
 
      ((python-base-mode
        . ((eglot-workspace-configuration
@@ -1212,13 +1221,13 @@ like:
 
    Finally, if one needs to determine the workspace configuration based
 on some dynamic context, ‘eglot-workspace-configuration’ can be set to a
-function.  The function is called with the ‘eglot-lsp-server’ instance
-of the connected server (if any) and with ‘default-directory’ set to the
-root of the project.  The function should return a plist suitable for
-use as the variable’s value.
+function instead of a plist.  The function is called with the
+‘eglot-lsp-server’ instance of the connected server (if any) and with
+‘default-directory’ set to the root of the project.  The function should
+return a plist suitable for use as the variable’s value.
 
 
-File: dochtZ38A.info,  Node: User-specific configuration,  Next: JSONRPC objects in Elisp,  Prev: Project-specific configuration,  Up: Advanced server configuration
+File: docOjyT3O.info,  Node: User-specific configuration,  Next: JSONRPC objects in Elisp,  Prev: Project-specific configuration,  Up: Advanced server configuration
 
 5.2 User-specific configuration
 ===============================
@@ -1271,7 +1280,7 @@ Project-specific configuration::.  Here is an example:
 always overridden if a directory-local value is detected.
 
 
-File: dochtZ38A.info,  Node: JSONRPC objects in Elisp,  Prev: User-specific configuration,  Up: Advanced server configuration
+File: docOjyT3O.info,  Node: JSONRPC objects in Elisp,  Prev: User-specific configuration,  Up: Advanced server configuration
 
 5.3 JSONRPC objects in Elisp
 ============================
@@ -1317,7 +1326,7 @@ is serialized by Eglot to the following JSON text:
      }
 
 
-File: dochtZ38A.info,  Node: Extending Eglot,  Next: Troubleshooting Eglot,  Prev: Advanced server configuration,  Up: Top
+File: docOjyT3O.info,  Node: Extending Eglot,  Next: Troubleshooting Eglot,  Prev: Advanced server configuration,  Up: Top
 
 6 Extending Eglot
 *****************
@@ -1451,7 +1460,7 @@ code in the buffer will be nicely grayed out using the LSP server
 knowledge about current compile time preprocessor defines.
 
 
-File: dochtZ38A.info,  Node: Troubleshooting Eglot,  Next: GNU Free Documentation License,  Prev: Extending Eglot,  Up: Top
+File: docOjyT3O.info,  Node: Troubleshooting Eglot,  Next: GNU Free Documentation License,  Prev: Extending Eglot,  Up: Top
 
 7 Troubleshooting Eglot
 ***********************
@@ -1473,7 +1482,7 @@ problems or at least provide a hint.
 * Reporting bugs::
 
 
-File: dochtZ38A.info,  Node: Performance,  Next: Getting the latest version,  Up: Troubleshooting Eglot
+File: docOjyT3O.info,  Node: Performance,  Next: Getting the latest version,  Up: Troubleshooting Eglot
 
 7.1 Performance
 ===============
@@ -1493,7 +1502,7 @@ changing the server configuration (*note Advanced server
 configuration::).
 
 
-File: dochtZ38A.info,  Node: Getting the latest version,  Next: Reporting bugs,  Prev: Performance,  Up: Troubleshooting Eglot
+File: docOjyT3O.info,  Node: Getting the latest version,  Next: Reporting bugs,  Prev: Performance,  Up: Troubleshooting Eglot
 
 7.2 Getting the latest version
 ==============================
@@ -1517,7 +1526,7 @@ the same way across Emacs versions, meaning your configuration may be
 not portable.
 
 
-File: dochtZ38A.info,  Node: Reporting bugs,  Prev: Getting the latest version,  Up: Troubleshooting Eglot
+File: docOjyT3O.info,  Node: Reporting bugs,  Prev: Getting the latest version,  Up: Troubleshooting Eglot
 
 7.3 Reporting bugs
 ==================
@@ -1604,7 +1613,7 @@ that used Eglot to communicate with the language server.  Eglot is, in
 many cases, just a frontend to that functionality.
 
 
-File: dochtZ38A.info,  Node: GNU Free Documentation License,  Next: Index,  Prev: Troubleshooting Eglot,  Up: Top
+File: docOjyT3O.info,  Node: GNU Free Documentation License,  Next: Index,  Prev: Troubleshooting Eglot,  Up: Top
 
 Appendix A GNU Free Documentation License
 *****************************************
@@ -2086,7 +2095,7 @@ software license, such as the GNU General Public License, to permit
 their use in free software.
 
 
-File: dochtZ38A.info,  Node: Index,  Prev: GNU Free Documentation License,  Up: Top
+File: docOjyT3O.info,  Node: Index,  Prev: GNU Free Documentation License,  Up: Top
 
 Index
 *****
@@ -2235,15 +2244,15 @@ Node: Other Variables43459
 Node: More Customization45631
 Node: Advanced server configuration49496
 Node: Project-specific configuration51506
-Node: User-specific configuration57430
-Node: JSONRPC objects in Elisp59888
-Node: Extending Eglot61430
-Node: Troubleshooting Eglot68176
-Node: Performance68951
-Node: Getting the latest version69845
-Node: Reporting bugs70963
-Node: GNU Free Documentation License75266
-Node: Index100630
+Node: User-specific configuration58003
+Node: JSONRPC objects in Elisp60461
+Node: Extending Eglot62003
+Node: Troubleshooting Eglot68749
+Node: Performance69524
+Node: Getting the latest version70418
+Node: Reporting bugs71536
+Node: GNU Free Documentation License75839
+Node: Index101203
 
 End Tag Table
 
