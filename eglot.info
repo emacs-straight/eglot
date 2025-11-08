@@ -1,4 +1,4 @@
-This is docUaGY9B.info, produced by makeinfo version 6.8 from
+This is doc7gceqx.info, produced by makeinfo version 6.8 from
 eglot.texi.
 
 This manual is for Eglot, the Emacs LSP client.
@@ -21,7 +21,7 @@ START-INFO-DIR-ENTRY
 END-INFO-DIR-ENTRY
 
 
-File: docUaGY9B.info,  Node: Top,  Next: Quick Start,  Up: (dir)
+File: doc7gceqx.info,  Node: Top,  Next: Quick Start,  Up: (dir)
 
 Eglot
 *****
@@ -80,7 +80,7 @@ major mode.
    (1) A “polyglot” is a person who is able to use several languages.
 
 
-File: docUaGY9B.info,  Node: Quick Start,  Next: Eglot and LSP Servers,  Prev: Top,  Up: Top
+File: doc7gceqx.info,  Node: Quick Start,  Next: Eglot and LSP Servers,  Prev: Top,  Up: Top
 
 1 Quick Start
 *************
@@ -140,7 +140,7 @@ common use patterns.
   4. That’s it!
 
 
-File: docUaGY9B.info,  Node: Eglot and LSP Servers,  Next: Using Eglot,  Prev: Quick Start,  Up: Top
+File: doc7gceqx.info,  Node: Eglot and LSP Servers,  Next: Using Eglot,  Prev: Quick Start,  Up: Top
 
 2 Eglot and LSP Servers
 ***********************
@@ -155,7 +155,7 @@ start it.
 * Shutting Down LSP Servers::
 
 
-File: docUaGY9B.info,  Node: Setting Up LSP Servers,  Next: Starting Eglot,  Up: Eglot and LSP Servers
+File: doc7gceqx.info,  Node: Setting Up LSP Servers,  Next: Starting Eglot,  Up: Eglot and LSP Servers
 
 2.1 Setting Up LSP Servers
 ==========================
@@ -262,7 +262,7 @@ a given major-mode.  In those cases, you may combine the helper function
 buffers.  Else it will use whichever is available.
 
 
-File: docUaGY9B.info,  Node: Starting Eglot,  Next: Shutting Down LSP Servers,  Prev: Setting Up LSP Servers,  Up: Eglot and LSP Servers
+File: doc7gceqx.info,  Node: Starting Eglot,  Next: Shutting Down LSP Servers,  Prev: Setting Up LSP Servers,  Up: Eglot and LSP Servers
 
 2.2 Starting Eglot
 ==================
@@ -314,7 +314,7 @@ Emacs session, it runs the hook ‘eglot-connect-hook’ (*note Other
 Variables::).
 
 
-File: docUaGY9B.info,  Node: Shutting Down LSP Servers,  Prev: Starting Eglot,  Up: Eglot and LSP Servers
+File: doc7gceqx.info,  Node: Shutting Down LSP Servers,  Prev: Starting Eglot,  Up: Eglot and LSP Servers
 
 2.3 Shutting Down LSP Servers
 =============================
@@ -345,7 +345,7 @@ associated with it.  This default allows you to start a server only once
 in each Emacs session.
 
 
-File: docUaGY9B.info,  Node: Using Eglot,  Next: Customizing Eglot,  Prev: Eglot and LSP Servers,  Up: Top
+File: doc7gceqx.info,  Node: Using Eglot,  Next: Customizing Eglot,  Prev: Eglot and LSP Servers,  Up: Top
 
 3 Using Eglot
 *************
@@ -361,7 +361,7 @@ commands and variables.
 * Eglot Commands::
 
 
-File: docUaGY9B.info,  Node: Eglot Features,  Next: Eglot and Buffers,  Up: Using Eglot
+File: doc7gceqx.info,  Node: Eglot Features,  Next: Eglot and Buffers,  Up: Using Eglot
 
 3.1 Eglot Features
 ==================
@@ -411,7 +411,7 @@ directly (*note Eglot Commands::).
    • On-the-fly succinct informative annotations, so-called “inlay
      hints”.  Eglot adds special intangible text nearby certain
      identifiers, be it the type of a variable, or the name of a formal
-     parameter in a function call.  *Note Eglot Commands:: and the
+     parameter in a function call.  *Note Eglot Commands::, and the
      ‘eglot-inlay-hints-mode’ minor mode.
 
    • Display of function call and type hierarchies via the
@@ -460,7 +460,7 @@ features via user options (*note Customizing Eglot::) and a hook that
 runs after Eglot starts managing a buffer (*note Eglot and Buffers::).
 
 
-File: docUaGY9B.info,  Node: Eglot and Buffers,  Next: Eglot Commands,  Prev: Eglot Features,  Up: Using Eglot
+File: doc7gceqx.info,  Node: Eglot and Buffers,  Next: Eglot Commands,  Prev: Eglot Features,  Up: Using Eglot
 
 3.2 Buffers, Projects, and Eglot
 ================================
@@ -567,7 +567,7 @@ specially in several ways:
      being managed or not.
 
 
-File: docUaGY9B.info,  Node: Eglot Commands,  Prev: Eglot and Buffers,  Up: Using Eglot
+File: doc7gceqx.info,  Node: Eglot Commands,  Prev: Eglot and Buffers,  Up: Using Eglot
 
 3.3 Eglot Commands
 ==================
@@ -747,7 +747,7 @@ Eglot-managed buffers:
      Request completion of the symbol at point.
 
 
-File: docUaGY9B.info,  Node: Customizing Eglot,  Next: Advanced server configuration,  Prev: Using Eglot,  Up: Top
+File: doc7gceqx.info,  Node: Customizing Eglot,  Next: Advanced server configuration,  Prev: Using Eglot,  Up: Top
 
 4 Customizing Eglot
 *******************
@@ -775,7 +775,7 @@ interaction with these features.  *Note More Customization::.
 * More Customization::
 
 
-File: docUaGY9B.info,  Node: Customization Variables,  Next: Other Variables,  Up: Customizing Eglot
+File: doc7gceqx.info,  Node: Customization Variables,  Next: Other Variables,  Up: Customizing Eglot
 
 4.1 Customization Variables
 ===========================
@@ -905,7 +905,7 @@ This section provides a reference for the Eglot user options.
           point.
 
 
-File: docUaGY9B.info,  Node: Other Variables,  Next: More Customization,  Prev: Customization Variables,  Up: Customizing Eglot
+File: doc7gceqx.info,  Node: Other Variables,  Next: More Customization,  Prev: Customization Variables,  Up: Customizing Eglot
 
 4.2 Other Variables
 ===================
@@ -955,7 +955,7 @@ be changed from Elisp snippets.
      other mechanism.
 
 
-File: docUaGY9B.info,  Node: More Customization,  Prev: Other Variables,  Up: Customizing Eglot
+File: doc7gceqx.info,  Node: More Customization,  Prev: Other Variables,  Up: Customizing Eglot
 
 4.3 More Customization
 ======================
@@ -1042,7 +1042,7 @@ override Eglot’s setting of these variables.
      ‘yas-minor-mode’ when needed to expand server-provided snippets.
 
 
-File: docUaGY9B.info,  Node: Advanced server configuration,  Next: Extending Eglot,  Prev: Customizing Eglot,  Up: Top
+File: doc7gceqx.info,  Node: Advanced server configuration,  Next: Extending Eglot,  Prev: Customizing Eglot,  Up: Top
 
 5 Advanced server configuration
 *******************************
@@ -1088,7 +1088,7 @@ other LSP clients and may be easier to debug than options riding on the
 LSP wire.
 
 
-File: docUaGY9B.info,  Node: Project-specific configuration,  Next: User-specific configuration,  Up: Advanced server configuration
+File: doc7gceqx.info,  Node: Project-specific configuration,  Next: User-specific configuration,  Up: Advanced server configuration
 
 5.1 Project-specific configuration
 ==================================
@@ -1227,7 +1227,7 @@ function instead of a plist.  The function is called with the
 return a plist suitable for use as the variable’s value.
 
 
-File: docUaGY9B.info,  Node: User-specific configuration,  Next: JSONRPC objects in Elisp,  Prev: Project-specific configuration,  Up: Advanced server configuration
+File: doc7gceqx.info,  Node: User-specific configuration,  Next: JSONRPC objects in Elisp,  Prev: Project-specific configuration,  Up: Advanced server configuration
 
 5.2 User-specific configuration
 ===============================
@@ -1280,7 +1280,7 @@ Project-specific configuration::.  Here is an example:
 always overridden if a directory-local value is detected.
 
 
-File: docUaGY9B.info,  Node: JSONRPC objects in Elisp,  Prev: User-specific configuration,  Up: Advanced server configuration
+File: doc7gceqx.info,  Node: JSONRPC objects in Elisp,  Prev: User-specific configuration,  Up: Advanced server configuration
 
 5.3 JSONRPC objects in Elisp
 ============================
@@ -1326,7 +1326,7 @@ is serialized by Eglot to the following JSON text:
      }
 
 
-File: docUaGY9B.info,  Node: Extending Eglot,  Next: Troubleshooting Eglot,  Prev: Advanced server configuration,  Up: Top
+File: doc7gceqx.info,  Node: Extending Eglot,  Next: Troubleshooting Eglot,  Prev: Advanced server configuration,  Up: Top
 
 6 Extending Eglot
 *****************
@@ -1460,7 +1460,7 @@ code in the buffer will be nicely grayed out using the LSP server
 knowledge about current compile time preprocessor defines.
 
 
-File: docUaGY9B.info,  Node: Troubleshooting Eglot,  Next: GNU Free Documentation License,  Prev: Extending Eglot,  Up: Top
+File: doc7gceqx.info,  Node: Troubleshooting Eglot,  Next: GNU Free Documentation License,  Prev: Extending Eglot,  Up: Top
 
 7 Troubleshooting Eglot
 ***********************
@@ -1482,7 +1482,7 @@ problems or at least provide a hint.
 * Reporting bugs::
 
 
-File: docUaGY9B.info,  Node: Performance,  Next: Getting the latest version,  Up: Troubleshooting Eglot
+File: doc7gceqx.info,  Node: Performance,  Next: Getting the latest version,  Up: Troubleshooting Eglot
 
 7.1 Performance
 ===============
@@ -1502,7 +1502,7 @@ changing the server configuration (*note Advanced server
 configuration::).
 
 
-File: docUaGY9B.info,  Node: Getting the latest version,  Next: Reporting bugs,  Prev: Performance,  Up: Troubleshooting Eglot
+File: doc7gceqx.info,  Node: Getting the latest version,  Next: Reporting bugs,  Prev: Performance,  Up: Troubleshooting Eglot
 
 7.2 Getting the latest version
 ==============================
@@ -1526,7 +1526,7 @@ the same way across Emacs versions, meaning your configuration may be
 not portable.
 
 
-File: docUaGY9B.info,  Node: Reporting bugs,  Prev: Getting the latest version,  Up: Troubleshooting Eglot
+File: doc7gceqx.info,  Node: Reporting bugs,  Prev: Getting the latest version,  Up: Troubleshooting Eglot
 
 7.3 Reporting bugs
 ==================
@@ -1613,7 +1613,7 @@ that used Eglot to communicate with the language server.  Eglot is, in
 many cases, just a frontend to that functionality.
 
 
-File: docUaGY9B.info,  Node: GNU Free Documentation License,  Next: Index,  Prev: Troubleshooting Eglot,  Up: Top
+File: doc7gceqx.info,  Node: GNU Free Documentation License,  Next: Index,  Prev: Troubleshooting Eglot,  Up: Top
 
 Appendix A GNU Free Documentation License
 *****************************************
@@ -2095,7 +2095,7 @@ software license, such as the GNU General Public License, to permit
 their use in free software.
 
 
-File: docUaGY9B.info,  Node: Index,  Prev: GNU Free Documentation License,  Up: Top
+File: doc7gceqx.info,  Node: Index,  Prev: GNU Free Documentation License,  Up: Top
 
 Index
 *****
@@ -2236,23 +2236,23 @@ Node: Starting Eglot11943
 Node: Shutting Down LSP Servers14621
 Node: Using Eglot16175
 Node: Eglot Features16544
-Node: Eglot and Buffers21677
-Node: Eglot Commands27634
-Node: Customizing Eglot35875
-Node: Customization Variables36935
-Node: Other Variables43459
-Node: More Customization45631
-Node: Advanced server configuration49496
-Node: Project-specific configuration51506
-Node: User-specific configuration58003
-Node: JSONRPC objects in Elisp60461
-Node: Extending Eglot62003
-Node: Troubleshooting Eglot68749
-Node: Performance69524
-Node: Getting the latest version70418
-Node: Reporting bugs71536
-Node: GNU Free Documentation License75839
-Node: Index101203
+Node: Eglot and Buffers21678
+Node: Eglot Commands27635
+Node: Customizing Eglot35876
+Node: Customization Variables36936
+Node: Other Variables43460
+Node: More Customization45632
+Node: Advanced server configuration49497
+Node: Project-specific configuration51507
+Node: User-specific configuration58004
+Node: JSONRPC objects in Elisp60462
+Node: Extending Eglot62004
+Node: Troubleshooting Eglot68750
+Node: Performance69525
+Node: Getting the latest version70419
+Node: Reporting bugs71537
+Node: GNU Free Documentation License75840
+Node: Index101204
 
 End Tag Table
 
