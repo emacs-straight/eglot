@@ -1,41 +1,41 @@
-This is doce0R0Up.info, produced by makeinfo version 6.8 from
+This is doclQQGgt.info, produced by makeinfo version 7.1.1 from
 eglot.texi.
 
 This manual is for Eglot, the Emacs LSP client.
 
-   Copyright © 2022–2025 Free Software Foundation, Inc.
+   Copyright © 2022-2025 Free Software Foundation, Inc.
 
      Permission is granted to copy, distribute and/or modify this
      document under the terms of the GNU Free Documentation License,
      Version 1.3 or any later version published by the Free Software
      Foundation; with no Invariant Sections, with the Front-Cover Texts
-     being “A GNU Manual”, and with the Back-Cover Texts as in (a)
+     being "A GNU Manual", and with the Back-Cover Texts as in (a)
      below.  A copy of the license is included in the section entitled
-     “GNU Free Documentation License”.
+     "GNU Free Documentation License".
 
-     (a) The FSF’s Back-Cover Text is: “You have the freedom to copy and
-     modify this GNU manual.”
+     (a) The FSF's Back-Cover Text is: "You have the freedom to copy and
+     modify this GNU manual."
 INFO-DIR-SECTION Emacs misc features
 START-INFO-DIR-ENTRY
 * Eglot: (eglot).             Language Server Protocol client for Emacs.
 END-INFO-DIR-ENTRY
 
 
-File: doce0R0Up.info,  Node: Top,  Next: Quick Start,  Up: (dir)
+File: doclQQGgt.info,  Node: Top,  Next: Quick Start,  Up: (dir)
 
 Eglot
 *****
 
 Eglot is the Emacs client for the “Language Server Protocol” (LSP).  The
-name “Eglot” is an acronym that stands for “Emacs polyGLOT”.  (1)  Eglot
+name "Eglot" is an acronym that stands for "Emacs polyGLOT". (1) Eglot
 provides infrastructure and a set of commands for enriching the source
 code editing capabilities of Emacs via LSP.  LSP is a standardized
 communications protocol between source code editors (such as Emacs) and
-language servers—programs external to Emacs which analyze the source
+language servers--programs external to Emacs which analyze the source
 code on behalf of Emacs.  The protocol allows Emacs to receive various
 source code services from the server, such as description and location
 of function calls, types of variables, class definitions, syntactic
-errors, etc.  This way, Emacs doesn’t need to implement the
+errors, etc.  This way, Emacs doesn't need to implement the
 language-specific parsing and analysis capabilities in its own code, but
 is still capable of providing sophisticated editing features that rely
 on such capabilities, such as automatic code completion, go-to
@@ -50,18 +50,18 @@ major mode.
 
    This manual is for Eglot, the Emacs LSP client.
 
-   Copyright © 2022–2025 Free Software Foundation, Inc.
+   Copyright © 2022-2025 Free Software Foundation, Inc.
 
      Permission is granted to copy, distribute and/or modify this
      document under the terms of the GNU Free Documentation License,
      Version 1.3 or any later version published by the Free Software
      Foundation; with no Invariant Sections, with the Front-Cover Texts
-     being “A GNU Manual”, and with the Back-Cover Texts as in (a)
+     being "A GNU Manual", and with the Back-Cover Texts as in (a)
      below.  A copy of the license is included in the section entitled
-     “GNU Free Documentation License”.
+     "GNU Free Documentation License".
 
-     (a) The FSF’s Back-Cover Text is: “You have the freedom to copy and
-     modify this GNU manual.”
+     (a) The FSF's Back-Cover Text is: "You have the freedom to copy and
+     modify this GNU manual."
 
 * Menu:
 
@@ -80,7 +80,7 @@ major mode.
    (1) A “polyglot” is a person who is able to use several languages.
 
 
-File: doce0R0Up.info,  Node: Quick Start,  Next: Eglot and LSP Servers,  Prev: Top,  Up: Top
+File: doclQQGgt.info,  Node: Quick Start,  Next: Eglot and LSP Servers,  Prev: Top,  Up: Top
 
 1 Quick Start
 *************
@@ -92,7 +92,7 @@ Servers::.  *Note Using Eglot::, for detailed description of using
 Eglot, and see *note Customizing Eglot::, for adapting Eglot to less
 common use patterns.
 
-   Here’s how to start using Eglot with your programming project:
+   Here's how to start using Eglot with your programming project:
 
   1. Select and install a language server.
 
@@ -118,8 +118,8 @@ common use patterns.
      already visited at the time the ‘eglot’ command is invoked, as well
      as any files visited after this invocation.
 
-     The notion of a “project” used by Eglot is the same Emacs uses
-     (*note (emacs)Projects::): in the simplest case, the “project” is
+     The notion of a "project" used by Eglot is the same Emacs uses
+     (*note (emacs)Projects::): in the simplest case, the "project" is
      the single file you are editing, but it can also be all the files
      in a single directory or a directory tree under some version
      control system, such as Git.
@@ -137,10 +137,10 @@ common use patterns.
      code), and some others.  *Note Eglot Commands::, for the detailed
      list of Eglot commands.
 
-  4. That’s it!
+  4. That's it!
 
 
-File: doce0R0Up.info,  Node: Eglot and LSP Servers,  Next: Using Eglot,  Prev: Quick Start,  Up: Top
+File: doclQQGgt.info,  Node: Eglot and LSP Servers,  Next: Using Eglot,  Prev: Quick Start,  Up: Top
 
 2 Eglot and LSP Servers
 ***********************
@@ -155,7 +155,7 @@ start it.
 * Shutting Down LSP Servers::
 
 
-File: doce0R0Up.info,  Node: Setting Up LSP Servers,  Next: Starting Eglot,  Up: Eglot and LSP Servers
+File: doclQQGgt.info,  Node: Setting Up LSP Servers,  Next: Starting Eglot,  Up: Eglot and LSP Servers
 
 2.1 Setting Up LSP Servers
 ==========================
@@ -189,7 +189,7 @@ commonly provided by the variable ‘eglot-server-programs’.
      the language to the server (if Eglot cannot by itself convert the
      major-mode to the language identifier string required by the
      server).  In addition, MAJOR-MODE can be a list of several major
-     modes specified in one of the above forms – this means a running
+     modes specified in one of the above forms - this means a running
      instance of the associated server is responsible for files of
      multiple major modes or languages in the project.
 
@@ -262,18 +262,18 @@ a given major-mode.  In those cases, you may combine the helper function
 buffers.  Else it will use whichever is available.
 
 
-File: doce0R0Up.info,  Node: Starting Eglot,  Next: Shutting Down LSP Servers,  Prev: Setting Up LSP Servers,  Up: Eglot and LSP Servers
+File: doclQQGgt.info,  Node: Starting Eglot,  Next: Shutting Down LSP Servers,  Prev: Setting Up LSP Servers,  Up: Eglot and LSP Servers
 
 2.2 Starting Eglot
 ==================
 
 The most common way to start Eglot is to simply visit a source file of a
 given language and use the command ‘M-x eglot’.  This starts the
-language server suitable for the visited file’s major-mode, and attempts
+language server suitable for the visited file's major-mode, and attempts
 to connect to it.  If the connection to the language server is
 successful, you will see the ‘[eglot:PROJECT]’ indicator on the mode
 line which reflects the server that was started.  If the server program
-couldn’t be started or connection to it failed, you will see an error
+couldn't be started or connection to it failed, you will see an error
 message; in that case, try to troubleshoot the problem as described in
 *note Troubleshooting Eglot::.  Once a language server was successfully
 started and Eglot connected to it, you can immediately start using the
@@ -282,7 +282,7 @@ Features::.
 
    A single Eglot session for a certain major-mode usually serves all
 the buffers under that mode which visit files from the same project, so
-you don’t need to invoke ‘M-x eglot’ again when you visit another file
+you don't need to invoke ‘M-x eglot’ again when you visit another file
 from the same project which is edited using the same major-mode.  This
 is because Eglot uses the Emacs project infrastructure, as described in
 *note Eglot and Buffers::, and this knows about files that belong to the
@@ -291,19 +291,19 @@ that session is automatically reused when visiting files in the same
 project with the same major-mode.
 
    Alternatively, you could configure Eglot to start automatically for
-one or more major-modes from the respective mode hooks.  Here’s an
+one or more major-modes from the respective mode hooks.  Here's an
 example for a hypothetical ‘foo-mode’:
 
       (add-hook 'foo-mode-hook 'eglot-ensure)
 
 The function ‘eglot-ensure’ will start an Eglot session for each buffer
-in which ‘foo-mode’ is turned on, if there isn’t already an Eglot
+in which ‘foo-mode’ is turned on, if there isn't already an Eglot
 session that handles the buffer.  Note that this variant of starting an
 Eglot session is non-interactive, so it should be used only when you are
 confident that Eglot can be started reliably for any file which may be
 visited with the major-mode in question.
 
-   Note that it’s often difficult to establish this confidence fully, so
+   Note that it's often difficult to establish this confidence fully, so
 it may be wise to use the interactive command ‘eglot’ instead.  You only
 need to invoke it once per project, as all other files visited within
 the same project will automatically be managed with no further user
@@ -314,7 +314,7 @@ Emacs session, it runs the hook ‘eglot-connect-hook’ (*note Other
 Variables::).
 
 
-File: doce0R0Up.info,  Node: Shutting Down LSP Servers,  Prev: Starting Eglot,  Up: Eglot and LSP Servers
+File: doclQQGgt.info,  Node: Shutting Down LSP Servers,  Prev: Starting Eglot,  Up: Eglot and LSP Servers
 
 2.3 Shutting Down LSP Servers
 =============================
@@ -330,8 +330,8 @@ buffer entails.
 
    You can also shut down a language server manually, by using the
 command ‘M-x eglot-shutdown’.  This prompts for the server (unless
-there’s only one connection and it’s used in the current buffer), and
-then shuts it down.  By default, it also kills the server’s events
+there's only one connection and it's used in the current buffer), and
+then shuts it down.  By default, it also kills the server's events
 buffer (*note Troubleshooting Eglot::), but a prefix argument prevents
 that.
 
@@ -345,7 +345,7 @@ associated with it.  This default allows you to start a server only once
 in each Emacs session.
 
 
-File: doce0R0Up.info,  Node: Using Eglot,  Next: Customizing Eglot,  Prev: Eglot and LSP Servers,  Up: Top
+File: doclQQGgt.info,  Node: Using Eglot,  Next: Customizing Eglot,  Prev: Eglot and LSP Servers,  Up: Top
 
 3 Using Eglot
 *************
@@ -361,7 +361,7 @@ commands and variables.
 * Eglot Commands::
 
 
-File: doce0R0Up.info,  Node: Eglot Features,  Next: Eglot and Buffers,  Up: Using Eglot
+File: doclQQGgt.info,  Node: Eglot Features,  Next: Eglot and Buffers,  Up: Using Eglot
 
 3.1 Eglot Features
 ==================
@@ -372,23 +372,23 @@ activate and enhance modern IDE features in Emacs.  Some of these
 features are provided via other Emacs packages, and some via Eglot
 directly (*note Eglot Commands::).
 
-   Here’s an overview of the main features that Eglot provides:
+   Here's an overview of the main features that Eglot provides:
 
    • At-point documentation: when point is near a symbol or an
-     identifier, information about the identifier’s significance in the
+     identifier, information about the identifier's significance in the
      program (its function or method signature, its type, its custom
      documentation string, etc.)  is made available via the ElDoc
      package (*note (emacs)Programming Language Doc::).
 
    • On-the-fly diagnostic annotations, via the Flymake package (*note
-     (Flymake)Top::).  Eglot’s Flymake backend replaces other Flymake
+     (Flymake)Top::).  Eglot's Flymake backend replaces other Flymake
      backends while it is managing a buffer, and enhances diagnostics
      with interactive server-suggested fixes (so-called “code actions”,
      *note Eglot Commands::).
 
    • Finding definitions and uses of identifiers, via Xref (*note
      (emacs)Xref::).  Eglot provides a backend for the Xref capabilities
-     which uses the language server’s understanding of the program
+     which uses the language server's understanding of the program
      source.  In particular, it eliminates the need to generate tags
      tables (*note (emacs)Tags tables::) for languages which are only
      supported by the ‘etags’ backend.
@@ -396,11 +396,11 @@ directly (*note Eglot Commands::).
    • Buffer navigation by name of function, class, method, etc., via
      Imenu (*note (emacs)Imenu::).  Eglot provides its own variant of
      ‘imenu-create-index-function’, which generates the index for the
-     buffer based on the language server’s program source analysis.
+     buffer based on the language server's program source analysis.
 
    • Enhanced completion of symbol at point by the ‘completion-at-point’
      command (*note (emacs)Symbol Completion::).  This uses the language
-     server’s parser data for the completion candidates.
+     server's parser data for the completion candidates.
 
    • Server-suggested code refactorings.  The ElDoc package is also
      leveraged to retrieve so-called “code actions” nearby point.  When
@@ -415,7 +415,7 @@ directly (*note Eglot Commands::).
      ‘eglot-inlay-hints-mode’ minor mode.
 
    • Enhanced source code fontification via LSP “semantic tokens”.
-     Eglot can leverage the language server’s understanding of the role
+     Eglot can leverage the language server's understanding of the role
      and meaning of identifiers in the code to provide more accurate
      syntax highlighting.  *Note Eglot Commands::, and the
      ‘eglot-semantic-tokens-mode’ minor mode.
@@ -431,7 +431,7 @@ directly (*note Eglot Commands::).
    • If a completion package such as the Company package (a popular
      third-party completion package providing ‘company-mode’), is
      installed, Eglot enhances it by providing completion candidates
-     based on the language server’s analysis of the source code.
+     based on the language server's analysis of the source code.
      (Company can be installed from GNU ELPA.)
 
    • If YASnippet, a popular third-party package for automatic insertion
@@ -460,14 +460,14 @@ them support enough to enable the basic set of features mentioned above.
 Emacs package exists yet, and so Eglot cannot (yet) expose these
 capabilities to Emacs users.  However, *Note Extending Eglot::.
 
-   Finally, it’s worth noting that, by default, Eglot generally turns on
-all features that it _can_ turn on.  It’s possible to opt out of
+   Finally, it's worth noting that, by default, Eglot generally turns on
+all features that it _can_ turn on.  It's possible to opt out of
 features via the ‘eglot-ignored-server-capabilities’ user option (*note
 Customizing Eglot::) and the ‘eglot-managed-mode-hook’ hook that runs
 after Eglot starts managing a buffer (*note Eglot and Buffers::).
 
 
-File: doce0R0Up.info,  Node: Eglot and Buffers,  Next: Eglot Commands,  Prev: Eglot Features,  Up: Using Eglot
+File: doclQQGgt.info,  Node: Eglot and Buffers,  Next: Eglot Commands,  Prev: Eglot Features,  Up: Using Eglot
 
 3.2 Buffers, Projects, and Eglot
 ================================
@@ -493,14 +493,14 @@ consists of a single file.  But there are other more complex projects:
    • An EDE project: source files in a directory hierarchy managed via
      the Emacs Development Environment (*note (emacs)EDE::).
 
-   Eglot uses Emacs’s project management infrastructure to figure out
+   Eglot uses Emacs's project management infrastructure to figure out
 which files and buffers belong to what project, so any kind of project
 supported by that infrastructure is automatically supported by Eglot.
 
-   When Eglot starts a server program, it does so in the project’s root
-directory, which is usually the top-level directory of the project’s
+   When Eglot starts a server program, it does so in the project's root
+directory, which is usually the top-level directory of the project's
 directory hierarchy.  This ensures the language server has the same
-comprehensive view of the project’s files as you do.
+comprehensive view of the project's files as you do.
 
    For example, if you visit the file ‘~/projects/fooey/lib/x.foo’ and
 ‘x.foo’ belongs to a project rooted at ‘~/projects/fooey’ (perhaps
@@ -516,10 +516,10 @@ variable ‘eglot-workspace-configuration’ (*note Customizing Eglot::)
 exists for that purpose.  It specifies the parameters and their values
 to communicate to each language server which needs that.
 
-   When Eglot is active for a project, the project’s buffers are treated
+   When Eglot is active for a project, the project's buffers are treated
 specially in several ways:
 
-   • All of the project’s file-visiting buffers under the same
+   • All of the project's file-visiting buffers under the same
      major-mode are served by a single language server connection.  (If
      the project uses several programming languages, there will usually
      be a separate server connection for each group of files written in
@@ -534,7 +534,7 @@ specially in several ways:
 
    • For each buffer in which Eglot is active, it notifies the language
      server that Eglot is “managing” the file visited by that buffer.
-     This tells the language server that the file’s contents on disk may
+     This tells the language server that the file's contents on disk may
      no longer be up-to-date due to unsaved edits.  Eglot reports to the
      server any changes in the text of each managed buffer, to make the
      server aware of unsaved changes.  This includes your editing of the
@@ -545,9 +545,9 @@ specially in several ways:
    • When you visit a file under the same project, whether an existing
      or a new file, its buffer is automatically added to the set of
      buffers managed by Eglot, and the server which supports the
-     buffer’s major-mode is notified about that.  Thus, visiting a
+     buffer's major-mode is notified about that.  Thus, visiting a
      non-existent file ‘/home/joe/projects/fooey/lib/y.foo’ in the above
-     example will notify the server of the ‘*.foo’ files’ language that
+     example will notify the server of the ‘*.foo’ files' language that
      a new file was added to the project, even before the file appears
      on disk.  The special Eglot minor mode is also turned on
      automatically in the buffer visiting the file.
@@ -561,15 +561,15 @@ specially in several ways:
      the settings that Eglot changed are restored to their original
      values.
 
-   • The minor mode’s main job is to “hook up” Eglot to other Emacs
+   • The minor mode's main job is to "hook up" Eglot to other Emacs
      functionality, i.e.  arrange for these features to receive
      information from the language server, by changing special variables
      controlling these features.  *Note Eglot Features::.
 
-   • To customize this, Eglot’s special minor mode provides a hook
-     variable ‘eglot-managed-mode-hook’ specifically to alter Eglot’s
+   • To customize this, Eglot's special minor mode provides a hook
+     variable ‘eglot-managed-mode-hook’ specifically to alter Eglot's
      interaction with these variables in each buffer.  This hook is run
-     both when the minor mode is turned on and when it’s turned off; use
+     both when the minor mode is turned on and when it's turned off; use
      the function ‘eglot-managed-p’ to tell if current buffer is still
      being managed or not.
 
@@ -583,7 +583,7 @@ use this:
            (eglot-semantic-tokens-mode -1)))
 
 
-File: doce0R0Up.info,  Node: Eglot Commands,  Prev: Eglot and Buffers,  Up: Using Eglot
+File: doclQQGgt.info,  Node: Eglot Commands,  Prev: Eglot and Buffers,  Up: Using Eglot
 
 3.3 Eglot Commands
 ==================
@@ -594,12 +594,12 @@ commands:
 ‘M-x eglot’
      This command adds the current buffer and the file it visits to the
      group of buffers and files managed by Eglot on behalf of a suitable
-     language server.  If a language server for the buffer’s
+     language server.  If a language server for the buffer's
      ‘major-mode’ (*note (emacs)Major Modes::) is not yet running, it
      will be started; otherwise the buffer and its file will be added to
      those managed by an existing server session.
 
-     The command attempts to figure out the buffer’s major mode and the
+     The command attempts to figure out the buffer's major mode and the
      suitable language server; in case it fails, it might prompt for the
      major mode to use and for the server program to start.  If invoked
      with ‘C-u’, it always prompts for the server program, and if
@@ -625,7 +625,7 @@ commands:
 
 ‘M-x eglot-shutdown’
      This command shuts down a language server.  It prompts for a
-     language server to shut down (unless there’s only one server
+     language server to shut down (unless there's only one server
      session, and it manages the current buffer).  Then the command
      shuts down the server and stops managing the buffers the server was
      used for.  Emacs features (*note Eglot Features::) that Eglot
@@ -634,7 +634,7 @@ commands:
 
      Normally, this command kills the buffers used for communicating
      with the language server, but if invoked with a prefix argument
-     ‘C-u’, the command doesn’t kill those buffers, allowing them to be
+     ‘C-u’, the command doesn't kill those buffers, allowing them to be
      used for diagnostics and problem reporting (*note Troubleshooting
      Eglot::).
 
@@ -683,8 +683,8 @@ commands:
      ‘eglot-diagnostics-map’ can be used to control the mouse binding.
 
      Other commands execute a specific code action.  For example,
-     ‘eglot-code-action-organize-imports’ rearranges the program’s
-     “imports”—declarations of modules whose capabilities the program
+     ‘eglot-code-action-organize-imports’ rearranges the program's
+     “imports”--declarations of modules whose capabilities the program
      uses.
 
 ‘M-x eglot-inlay-hints-mode’
@@ -693,13 +693,13 @@ commands:
      of the whole buffer, not unlike diagnostics, but designed to help
      readability instead of indicating problems.  For example, a C++
      language server can serve hints about positional parameter names in
-     function calls and a variable’s automatically deduced type.  Inlay
+     function calls and a variable's automatically deduced type.  Inlay
      hints help the user not have to remember these things by heart.
 
 ‘M-x eglot-semantic-tokens-mode’
      This command toggles LSP “semantic tokens” fontification on and off
      for the current buffer.  Semantic tokens provide enhanced syntax
-     highlighting based on the language server’s semantic analysis of
+     highlighting based on the language server's semantic analysis of
      the code, going beyond traditional regular-expression-based
      fontification.  For example, the server can distinguish between
      different kinds of variables (parameters, local variables, fields)
@@ -748,14 +748,14 @@ diagnostic and troubleshooting purposes:
      in its mode-line indication so that the user may inspect the
      communication leading up to it (*note Troubleshooting Eglot::).  If
      the situation is deemed uninteresting or temporary, this command
-     can be used to “forget” the error.  Note that the command ‘M-x
+     can be used to "forget" the error.  Note that the command ‘M-x
      eglot-reconnect’ can sometimes be used to unclog a temporarily
      malfunctioning server.
 
    As described in *note Eglot Features:: most features associated with
 Eglot are actually provided by other Emacs packages and features, and
 Eglot only enhances them by allowing them to use the information coming
-from the language servers.  For completeness, here’s the list of
+from the language servers.  For completeness, here's the list of
 commands of those other packages that are very commonly used in
 Eglot-managed buffers:
 
@@ -781,7 +781,7 @@ Eglot-managed buffers:
      Request completion of the symbol at point.
 
 
-File: doce0R0Up.info,  Node: Customizing Eglot,  Next: Advanced server configuration,  Prev: Using Eglot,  Up: Top
+File: doclQQGgt.info,  Node: Customizing Eglot,  Next: Advanced server configuration,  Prev: Using Eglot,  Up: Top
 
 4 Customizing Eglot
 *******************
@@ -799,7 +799,7 @@ relatively small number of customization variables.  There is
 additionally a set of variables that are usually set from Elisp snippets
 (*note (emacs)Init File::).
 
-   Other times, it’s necessary to have finer control of Eglot’s
+   Other times, it's necessary to have finer control of Eglot's
 interaction with these features.  *Note More Customization::.
 
 * Menu:
@@ -809,7 +809,7 @@ interaction with these features.  *Note More Customization::.
 * More Customization::
 
 
-File: doce0R0Up.info,  Node: Customization Variables,  Next: Other Variables,  Up: Customizing Eglot
+File: doclQQGgt.info,  Node: Customization Variables,  Next: Other Variables,  Up: Customizing Eglot
 
 4.1 Customization Variables
 ===========================
@@ -836,10 +836,10 @@ This section provides a reference for the Eglot user options.
      This setting is mainly important for connections which are slow to
      establish.  Whereas the variable ‘eglot-connect-timeout’ controls
      how long to wait for, this variable controls whether to block
-     Emacs’s user interface while waiting.  The default value is ‘3’; a
+     Emacs's user interface while waiting.  The default value is ‘3’; a
      positive value means block for that many seconds, then wait for the
      connection in the background.  The value of ‘t’ means block during
-     the whole waiting period.  The value of ‘nil’ or ‘0’ means don’t
+     the whole waiting period.  The value of ‘nil’ or ‘0’ means don't
      block at all during the waiting period.
 
 ‘eglot-events-buffer-config’
@@ -858,15 +858,15 @@ This section provides a reference for the Eglot user options.
 
 ‘eglot-confirm-server-edits’
      Various Eglot commands and code actions result in the language
-     server sending editing commands to Emacs.  If this option’s value
+     server sending editing commands to Emacs.  If this option's value
      is non-‘nil’, Eglot will ask for confirmation before performing
-     edits proposed by the language server.  This option’s value can be
+     edits proposed by the language server.  This option's value can be
      crafted to require this confirmation for specific commands or only
      when the edit affects files not yet visited by the user.  Consult
-     this option’s docstring for more information.
+     this option's docstring for more information.
 
 ‘eglot-ignored-server-capabilities’
-     This variable’s value is a list of language server capabilities
+     This variable's value is a list of language server capabilities
      that Eglot should not use.  The default is ‘nil’: Eglot uses all of
      the capabilities supported by each server.
 
@@ -875,7 +875,7 @@ This section provides a reference for the Eglot user options.
      in a file outside of your project, such as a system-installed
      library or header file, transiently consider that file as managed
      by the same language server.  That file is still outside your
-     project (i.e.  ‘project-find-file’ won’t find it), but Eglot and
+     project (i.e.  ‘project-find-file’ won't find it), but Eglot and
      the server will consider it to be part of the workspace.  The
      default is ‘nil’.
 
@@ -892,8 +892,8 @@ This section provides a reference for the Eglot user options.
             (define-key eglot-mode-map (kbd "<f6>") 'xref-find-definitions)
 
 ‘eglot-report-progress’
-     Set this variable to non-nil if you’d like progress notifications
-     coming from the language server to be handled by Emacs’s progress
+     Set this variable to non-nil if you'd like progress notifications
+     coming from the language server to be handled by Emacs's progress
      reporting facilities.  If the value is the symbol ‘messages’ the
      message buffer is used, else the progress is reported in the mode
      line.
@@ -923,14 +923,14 @@ This section provides a reference for the Eglot user options.
      looks like.
 
 ‘eglot-mode-line-format’
-     This variables controls the shape and look of Eglot’s mode line.
-     Its value is a mode line “construct”, generally a list of symbols
+     This variables controls the shape and look of Eglot's mode line.
+     Its value is a mode line "construct", generally a list of symbols
      and strings.  The following symbols are meaningful and useful for
-     Eglot’s mode line:
-        − ‘eglot-mode-line-menu’: access Eglot’s main menu.  See also
+     Eglot's mode line:
+        − ‘eglot-mode-line-menu’: access Eglot's main menu.  See also
           ‘eglot-menu-string’;
         − ‘eglot-mode-line-session’: indicate current project and access
-          current session’s menu;
+          current session's menu;
         − ‘eglot-mode-line-error’: an indication of recent LSP errors;
         − ‘eglot-mode-line-pending-requests’: number of pending LSP
           requests;
@@ -939,7 +939,7 @@ This section provides a reference for the Eglot user options.
           point.
 
 
-File: doce0R0Up.info,  Node: Other Variables,  Next: More Customization,  Prev: Customization Variables,  Up: Customizing Eglot
+File: doclQQGgt.info,  Node: Other Variables,  Next: More Customization,  Prev: Customization Variables,  Up: Customizing Eglot
 
 4.2 Other Variables
 ===================
@@ -949,7 +949,7 @@ be changed from Elisp snippets.
 
 ‘eglot-server-programs’
      This variable determines which language server to start for each
-     supported major mode, and how to invoke that server’s program.
+     supported major mode, and how to invoke that server's program.
      *Note Setting Up LSP Servers::, for the details.
 
 ‘eglot-strict-mode’
@@ -973,14 +973,14 @@ be changed from Elisp snippets.
      Eglot and Buffers::, for details of its usage.
 
 ‘eglot-stay-out-of’
-     This variable’s value lists Emacs features that Eglot shouldn’t
-     automatically try to manage on the user’s behalf.  It is useful,
+     This variable's value lists Emacs features that Eglot shouldn't
+     automatically try to manage on the user's behalf.  It is useful,
      for example, when you need to use non-LSP Flymake or Company
      back-ends.  To have Eglot stay away from some Emacs feature, add
-     that feature’s symbol or a regexp that will match a symbol’s name
+     that feature's symbol or a regexp that will match a symbol's name
      to the list: for example, the symbol ‘xref’ to leave Xref alone, or
      the string ‘company’ to stay away from your Company customizations.
-     Here’s an example:
+     Here's an example:
 
           (add-to-list 'eglot-stay-out-of 'flymake)
 
@@ -989,18 +989,18 @@ be changed from Elisp snippets.
      other mechanism.
 
 
-File: doce0R0Up.info,  Node: More Customization,  Prev: Other Variables,  Up: Customizing Eglot
+File: doclQQGgt.info,  Node: More Customization,  Prev: Other Variables,  Up: Customizing Eglot
 
 4.3 More Customization
 ======================
 
 As explained earlier (*note Eglot and Buffers::), Eglot hooks onto
 existing Emacs packages and features by setting special variables in its
-special minor mode.  To gain finer control of Eglot’s operation, the
+special minor mode.  To gain finer control of Eglot's operation, the
 ‘eglot-managed-mode-hook’ should be used to tweak, subdue or completely
-override Eglot’s setting of these variables.
+override Eglot's setting of these variables.
 
-   • Eglot hooks onto ElDoc’s ‘eldoc-documentation-functions’ variable,
+   • Eglot hooks onto ElDoc's ‘eldoc-documentation-functions’ variable,
      adding a number of functions to it:
         − ‘eglot-hover-eldoc-function’, to display general information
           about an identifier.
@@ -1023,7 +1023,7 @@ override Eglot’s setting of these variables.
                                nil t))
                 nil t)))
 
-     For more sophisticated changes, we can take advantage of ElDoc’s
+     For more sophisticated changes, we can take advantage of ElDoc's
      well-defined protocols.  *Note (emacs)Programming Language Doc::.
      For instance, the functions in ‘eldoc-display-functions’ control
      displays of the at-point documentation produced by
@@ -1047,10 +1047,10 @@ override Eglot’s setting of these variables.
                                          'eglot-hover-eldoc-function
                                          eldoc-documentation-functions))))
 
-   • Eglot hooks onto Flymake’s ‘flymake-diagnostic-functions’ variable,
-     completely replacing its value with Eglot’s own
+   • Eglot hooks onto Flymake's ‘flymake-diagnostic-functions’ variable,
+     completely replacing its value with Eglot's own
      ‘eglot-flymake-backend’ function.  Additional backends may be added
-     to work alongside Eglot’s.
+     to work alongside Eglot's.
 
           (add-hook 'foo-mode-hook
             (lambda ()
@@ -1061,14 +1061,14 @@ override Eglot’s setting of these variables.
                             nil t))
                 nil t)))
 
-   • Eglot hooks onto Xref’s ‘xref-backend-functions’ variable, adding
+   • Eglot hooks onto Xref's ‘xref-backend-functions’ variable, adding
      its own ‘eglot-xref-backend’ function to it.
 
-   • Eglot hooks onto Imenu’s ‘imenu-create-index-function’.
+   • Eglot hooks onto Imenu's ‘imenu-create-index-function’.
 
-   • Eglot hooks onto Emacs’s ‘completion-at-point-functions’.
+   • Eglot hooks onto Emacs's ‘completion-at-point-functions’.
 
-   • Eglot hooks onto Company’s ‘company-backends’ variable, ensuring
+   • Eglot hooks onto Company's ‘company-backends’ variable, ensuring
      only the ‘company-capf’ backend lives there.  This ensures the same
      set of completions as regular ‘completion-at-point’.
 
@@ -1076,7 +1076,7 @@ override Eglot’s setting of these variables.
      ‘yas-minor-mode’ when needed to expand server-provided snippets.
 
 
-File: doce0R0Up.info,  Node: Advanced server configuration,  Next: Extending Eglot,  Prev: Customizing Eglot,  Up: Top
+File: doclQQGgt.info,  Node: Advanced server configuration,  Next: Extending Eglot,  Prev: Customizing Eglot,  Up: Top
 
 5 Advanced server configuration
 *******************************
@@ -1098,7 +1098,7 @@ configuration:
    • User-specific, applying to all projects the server is used for.
 
    When you have decided which kind you need, the following sections
-teach how Eglot’s user variables can be used to achieve it:
+teach how Eglot's user variables can be used to achieve it:
 
 * Menu:
 
@@ -1106,23 +1106,23 @@ teach how Eglot’s user variables can be used to achieve it:
 * User-specific configuration::
 * JSONRPC objects in Elisp::
 
-   It’s important to note that not all servers allow both kinds of
+   It's important to note that not all servers allow both kinds of
 configuration, nor is it guaranteed that user options can be copied over
 to project options, and vice-versa.  When in doubt, consult your
-language server’s documentation.
+language server's documentation.
 
-   It’s also worth noting that some language servers can read these
-settings from configuration files in the user’s ‘HOME’ directory or in a
-project’s directory.  For example, the ‘pylsp’ Python server reads the
+   It's also worth noting that some language servers can read these
+settings from configuration files in the user's ‘HOME’ directory or in a
+project's directory.  For example, the ‘pylsp’ Python server reads the
 file ‘~/.config/pycodestyle’ for user configuration.  The ‘clangd’ C/C++
 server reads both ‘~/.config/clangd/config.yaml’ for user configuration
 and ‘.clangd’ for project configuration.  It may be advantageous to use
-these mechanisms instead of Eglot’s, as this will probably work with
+these mechanisms instead of Eglot's, as this will probably work with
 other LSP clients and may be easier to debug than options riding on the
 LSP wire.
 
 
-File: doce0R0Up.info,  Node: Project-specific configuration,  Next: User-specific configuration,  Up: Advanced server configuration
+File: doclQQGgt.info,  Node: Project-specific configuration,  Next: User-specific configuration,  Up: Advanced server configuration
 
 5.1 Project-specific configuration
 ==================================
@@ -1132,18 +1132,18 @@ To set project-specific settings, which the LSP specification calls
 may be used.
 
    This variable is a directory-local variable (*note Per-directory
-Local Variables: (emacs)Directory Variables.).  It’s important to
+Local Variables: (emacs)Directory Variables.).  It's important to
 recognize that this variable really only makes sense when set
 directory-locally.  It usually does not make sense to set it
 file-locally or in a major-mode hook.
 
    The most common way to set ‘eglot-workspace-configuration ’ is using
-a ‘.dir-locals.el’ file in the root of your project.  If you can’t do
+a ‘.dir-locals.el’ file in the root of your project.  If you can't do
 that, you may also set it from Elisp code via the
 ‘dir-locals-set-class-variables’ function.  (*note (elisp)Directory
 Local Variables::).
 
-   However you choose to set it, the variable’s value is a plist (*note
+   However you choose to set it, the variable's value is a plist (*note
 (elisp)Property Lists::) with the following format:
 
       (:SERVER1 PLIST1 :SERVER2 PLIST2 ...)
@@ -1159,7 +1159,7 @@ of this variable in its final JSON form, ready to be sent to the server
 (*note JSONRPC objects in Elisp::).  This helper command works even
 before actually connecting to the server.
 
-   These variable’s value doesn’t take effect immediately.  That happens
+   These variable's value doesn't take effect immediately.  That happens
 upon establishing the connection, in response to an explicit query from
 the server, or when issuing the command ‘M-x
 eglot-signal-didChangeConfiguration’ which notifies the server during an
@@ -1171,13 +1171,13 @@ ongoing Eglot session.
 For some users, setting ‘eglot-workspace-configuration’ is a somewhat
 daunting task.  One of the reasons is having to manage the general Elisp
 syntax of per-mode directory-local variables, which uses alists (*note
-(elisp)Association Lists::), and the specific syntax of Eglot’s
+(elisp)Association Lists::), and the specific syntax of Eglot's
 variable, which uses plists.  Some examples are useful.
 
-   Let’s say you want to configure two language servers to be used in a
+   Let's say you want to configure two language servers to be used in a
 project written in a combination of the Python and Go languages.  You
 want to use the ‘pylsp’ and ‘gopls’ languages servers.  In the
-documentation of the servers in question (or in some other editor’s
+documentation of the servers in question (or in some other editor's
 configuration file, or in some blog article), you find the following
 configuration options in informal dotted-notation syntax:
 
@@ -1208,7 +1208,7 @@ all the buffers inside the project; each language server will then use
 only the section of the parameters intended for it, and ignore the rest.
 In our example, ‘pylsp’ and ‘gopls’ are solely interested in the
 ‘:pylsp’ and ‘:gopls’ parameter section names, respectively.  However,
-section names don’t have to match the server name and some servers may
+section names don't have to match the server name and some servers may
 be even interested in multiple sections: the
 ‘typescript-language-server’ server is known to be interested in the
 ‘:javascript’ and ‘:typescript’ section names.
@@ -1228,7 +1228,7 @@ decidedly not interested in them, the following form may also be used:
           (indent-tabs-mode . t))))
 
 This sets up the value of ‘eglot-workspace-configuration’ separately
-depending on the major mode of each of that project’s buffers.
+depending on the major mode of each of that project's buffers.
 ‘python-base-mode’ buffers will have the variable set to ‘(:pylsp
 (:plugins ...))’.  ‘go-mode’ buffers will have the variable set to
 ‘(:gopls (:usePlaceholders t))’.
@@ -1258,10 +1258,10 @@ on some dynamic context, ‘eglot-workspace-configuration’ can be set to a
 function instead of a plist.  The function is called with the
 ‘eglot-lsp-server’ instance of the connected server (if any) and with
 ‘default-directory’ set to the root of the project.  The function should
-return a plist suitable for use as the variable’s value.
+return a plist suitable for use as the variable's value.
 
 
-File: doce0R0Up.info,  Node: User-specific configuration,  Next: JSONRPC objects in Elisp,  Prev: Project-specific configuration,  Up: Advanced server configuration
+File: doclQQGgt.info,  Node: User-specific configuration,  Next: JSONRPC objects in Elisp,  Prev: Project-specific configuration,  Up: Advanced server configuration
 
 5.2 User-specific configuration
 ===============================
@@ -1270,7 +1270,7 @@ This kind of configuration applies to all projects the server is used
 for.  Here, there are a number of ways to do this inside Eglot.
 
    A common way is to pass command-line options to the server invocation
-via ‘eglot-server-programs’.  Let’s say we want to configure where the
+via ‘eglot-server-programs’.  Let's say we want to configure where the
 ‘clangd’ server reads its ‘compile_commands.json’ from.  This can be
 done like so:
 
@@ -1288,13 +1288,13 @@ of ‘eglot-server-programs’:
                     `(c++-mode . ("clangd" :initializationOptions
                                            (:compilationDatabasePath "/tmp")))))
 
-The argument ‘(:compilationDatabasePath "/tmp")’ is Emacs’s
+The argument ‘(:compilationDatabasePath "/tmp")’ is Emacs's
 representation in plist format of a simple JSON object
 ‘{"compilationDatabasePath": "/tmp"}’.  To learn how to represent more
 deeply nested options in this format, *note JSONRPC objects in Elisp::.
 
    In this case, the two examples achieve exactly the same, but notice
-how the option’s name has changed between them.
+how the option's name has changed between them.
 
    Finally there is another way to do user-specific configuration of
 language servers, which may be used if the methods above are not
@@ -1314,12 +1314,12 @@ Project-specific configuration::.  Here is an example:
 always overridden if a directory-local value is detected.
 
 
-File: doce0R0Up.info,  Node: JSONRPC objects in Elisp,  Prev: User-specific configuration,  Up: Advanced server configuration
+File: doclQQGgt.info,  Node: JSONRPC objects in Elisp,  Prev: User-specific configuration,  Up: Advanced server configuration
 
 5.3 JSONRPC objects in Elisp
 ============================
 
-Emacs’s preferred way of representing JSON is via Lisp lists.  In Eglot,
+Emacs's preferred way of representing JSON is via Lisp lists.  In Eglot,
 the syntax of this list is the simplest possible (the one with fewer
 parenthesis), a plist (*note (elisp)Property Lists::).
 
@@ -1360,7 +1360,7 @@ is serialized by Eglot to the following JSON text:
      }
 
 
-File: doce0R0Up.info,  Node: Extending Eglot,  Next: Troubleshooting Eglot,  Prev: Advanced server configuration,  Up: Top
+File: doclQQGgt.info,  Node: Extending Eglot,  Next: Troubleshooting Eglot,  Prev: Advanced server configuration,  Up: Top
 
 6 Extending Eglot
 *****************
@@ -1371,7 +1371,7 @@ adding support for a custom LSP protocol extension only implemented by a
 specific server.
 
    The best source of documentation for this is probably Eglot source
-code itself, particularly the section marked “API”.
+code itself, particularly the section marked "API".
 
    Most of the functionality is implemented with Common-Lisp style
 generic functions (*note (eieio)Generics::) that can be easily extended
@@ -1382,7 +1382,7 @@ the ‘inactiveRegions’ experimental feature introduced in version 17 of
 the ‘clangd’ C/C++ language server++.
 
    Summarily, the feature works by first having the server detect the
-Eglot’s advertisement of the ‘inactiveRegions’ client capability during
+Eglot's advertisement of the ‘inactiveRegions’ client capability during
 startup, whereupon the language server will report a list of regions of
 inactive code for each buffer.  This is usually code surrounded by C/C++
 ‘#ifdef’ macros that the preprocessor removes based on compile-time
@@ -1391,7 +1391,7 @@ information.
    The language server reports the regions by periodically sending a
 ‘textDocument/inactiveRegions’ notification for each managed buffer
 (*note Eglot and Buffers::).  Normally, unknown server notifications are
-ignored by Eglot, but we’re going change that.
+ignored by Eglot, but we're going change that.
 
    Both the announcement of the client capability and the handling of
 the new notification is done by adding methods to generic functions.
@@ -1424,8 +1424,8 @@ the new notification is done by adding methods to generic functions.
      However, this would require that users tweak ‘eglot-server-program’
      to tell Eglot instantiate such sub-classes instead of the generic
      ‘eglot-lsp-server’ (*note Setting Up LSP Servers::).  For the
-     purposes of this particular demonstration, we’re going to use the
-     more hacky regexp route which doesn’t require that.
+     purposes of this particular demonstration, we're going to use the
+     more hacky regexp route which doesn't require that.
 
      Note, however, that detecting server versions before announcing new
      capabilities is generally not needed, as both server and client are
@@ -1439,8 +1439,8 @@ the new notification is done by adding methods to generic functions.
      Overlays are recreated every time a new notification of this kind
      is received.
 
-     To learn about how ‘clangd’’s special JSONRPC notification message
-     is structured in detail you could consult that server’s
+     To learn about how ‘clangd’'s special JSONRPC notification message
+     is structured in detail you could consult that server's
      documentation.  Another possibility is to evaluate the first
      capability-announcing method, reconnect to the server and peek in
      the events buffer (*note eglot-events-buffer: Eglot Commands.).
@@ -1464,7 +1464,7 @@ the new notification is done by adding methods to generic functions.
 
      The Eglot generic function machinery will automatically destructure
      the incoming message, so these two properties can simply be added
-     to the new method’s lambda list as ‘&key’ arguments.  Also, the
+     to the new method's lambda list as ‘&key’ arguments.  Also, the
      ‘eglot-uri-to-path’ and ‘eglot-range-region’ may be used to easily
      parse the LSP ‘:uri’ and ‘:start ... :end ...’ objects to obtain
      Emacs objects for file names and positions.
@@ -1494,7 +1494,7 @@ code in the buffer will be nicely grayed out using the LSP server
 knowledge about current compile time preprocessor defines.
 
 
-File: doce0R0Up.info,  Node: Troubleshooting Eglot,  Next: GNU Free Documentation License,  Prev: Extending Eglot,  Up: Top
+File: doclQQGgt.info,  Node: Troubleshooting Eglot,  Next: GNU Free Documentation License,  Prev: Extending Eglot,  Up: Top
 
 7 Troubleshooting Eglot
 ***********************
@@ -1516,7 +1516,7 @@ problems or at least provide a hint.
 * Reporting bugs::
 
 
-File: doce0R0Up.info,  Node: Performance,  Next: Getting the latest version,  Up: Troubleshooting Eglot
+File: doclQQGgt.info,  Node: Performance,  Next: Getting the latest version,  Up: Troubleshooting Eglot
 
 7.1 Performance
 ===============
@@ -1536,7 +1536,7 @@ changing the server configuration (*note Advanced server
 configuration::).
 
 
-File: doce0R0Up.info,  Node: Getting the latest version,  Next: Reporting bugs,  Prev: Performance,  Up: Troubleshooting Eglot
+File: doclQQGgt.info,  Node: Getting the latest version,  Next: Reporting bugs,  Prev: Performance,  Up: Troubleshooting Eglot
 
 7.2 Getting the latest version
 ==============================
@@ -1560,7 +1560,7 @@ the same way across Emacs versions, meaning your configuration may be
 not portable.
 
 
-File: doce0R0Up.info,  Node: Reporting bugs,  Prev: Getting the latest version,  Up: Troubleshooting Eglot
+File: doclQQGgt.info,  Node: Reporting bugs,  Prev: Getting the latest version,  Up: Troubleshooting Eglot
 
 7.3 Reporting bugs
 ==================
@@ -1573,14 +1573,14 @@ maintainers reproduce bugs exactly as they happened to you, the user.
 
    To report an Eglot bug, send e-mail to <bug-gnu-emacs@gnu.org>.
 
-   To understand how to write this email, get acquainted with Emacs’s
+   To understand how to write this email, get acquainted with Emacs's
 bug reporting guidelines (*note (emacs)Bugs::).  Then, follow this
 Eglot-specific checklist:
 
   1. Include the transcript of JSONRPC events obtained from the buffer
      popped up by ‘M-x eglot-events-buffer’.  You may narrow down the
      transcript if you are sure of where the problematic exchange is,
-     but it’s safer to include the whole transcript, either attached or
+     but it's safer to include the whole transcript, either attached or
      inline.
 
   2. If Emacs signaled an error (an error message was seen or heard),
@@ -1597,7 +1597,7 @@ Eglot-specific checklist:
      easy to install.
 
   4. Describe how to setup a _minimal_ project directory where Eglot
-     should be started for the problem to happen.  Describe each file’s
+     should be started for the problem to happen.  Describe each file's
      name and its contents.  Alternatively, you can supply the address
      of a public Git repository.
 
@@ -1605,14 +1605,14 @@ Eglot-specific checklist:
      obtained with ‘M-x emacs-version’.
 
      We welcome bug reports about all Eglot versions, but it is helpful
-     to first check if the problem isn’t already fixed in the latest
+     to first check if the problem isn't already fixed in the latest
      version (*note Getting the latest version::).
 
-     It’s also essential to include the version of ELPA packages that
+     It's also essential to include the version of ELPA packages that
      are explicitly or implicitly loaded.  The optional but popular
      Company or Markdown packages are distributed as GNU ELPA packages,
      not to mention Eglot itself in some situations.  Some major modes
-     (Go, Rust, etc.)  are provided by ELPA packages.  It’s sometimes
+     (Go, Rust, etc.)  are provided by ELPA packages.  It's sometimes
      easy to miss these, since they are usually implicitly loaded when
      visiting a file in that language.
 
@@ -1628,7 +1628,7 @@ Eglot-specific checklist:
      and good means to describe changes to variables.
 
      There is usually no need to include ‘require’ statements in the
-     recipe, as Eglot’s functionality uses autoloads.
+     recipe, as Eglot's functionality uses autoloads.
 
      Likewise, there is rarely the need to use things like ‘use-package’
      or ‘eglot-ensure’.  This just makes the recipe harder to follow.
@@ -1647,7 +1647,7 @@ that used Eglot to communicate with the language server.  Eglot is, in
 many cases, just a frontend to that functionality.
 
 
-File: doce0R0Up.info,  Node: GNU Free Documentation License,  Next: Index,  Prev: Troubleshooting Eglot,  Up: Top
+File: doclQQGgt.info,  Node: GNU Free Documentation License,  Next: Index,  Prev: Troubleshooting Eglot,  Up: Top
 
 Appendix A GNU Free Documentation License
 *****************************************
@@ -1670,7 +1670,7 @@ Appendix A GNU Free Documentation License
      author and publisher a way to get credit for their work, while not
      being considered responsible for modifications made by others.
 
-     This License is a kind of “copyleft”, which means that derivative
+     This License is a kind of "copyleft", which means that derivative
      works of the document must themselves be free in the same sense.
      It complements the GNU General Public License, which is a copyleft
      license designed for free software.
@@ -1691,18 +1691,18 @@ Appendix A GNU Free Documentation License
      be distributed under the terms of this License.  Such a notice
      grants a world-wide, royalty-free license, unlimited in duration,
      to use that work under the conditions stated herein.  The
-     “Document”, below, refers to any such manual or work.  Any member
-     of the public is a licensee, and is addressed as “you”.  You accept
+     "Document", below, refers to any such manual or work.  Any member
+     of the public is a licensee, and is addressed as "you".  You accept
      the license if you copy, modify or distribute the work in a way
      requiring permission under copyright law.
 
-     A “Modified Version” of the Document means any work containing the
+     A "Modified Version" of the Document means any work containing the
      Document or a portion of it, either copied verbatim, or with
      modifications and/or translated into another language.
 
-     A “Secondary Section” is a named appendix or a front-matter section
+     A "Secondary Section" is a named appendix or a front-matter section
      of the Document that deals exclusively with the relationship of the
-     publishers or authors of the Document to the Document’s overall
+     publishers or authors of the Document to the Document's overall
      subject (or to related matters) and contains nothing that could
      fall directly within that overall subject.  (Thus, if the Document
      is in part a textbook of mathematics, a Secondary Section may not
@@ -1711,7 +1711,7 @@ Appendix A GNU Free Documentation License
      of legal, commercial, philosophical, ethical or political position
      regarding them.
 
-     The “Invariant Sections” are certain Secondary Sections whose
+     The "Invariant Sections" are certain Secondary Sections whose
      titles are designated, as being those of Invariant Sections, in the
      notice that says that the Document is released under this License.
      If a section does not fit the above definition of Secondary then it
@@ -1719,13 +1719,13 @@ Appendix A GNU Free Documentation License
      contain zero Invariant Sections.  If the Document does not identify
      any Invariant Sections then there are none.
 
-     The “Cover Texts” are certain short passages of text that are
+     The "Cover Texts" are certain short passages of text that are
      listed, as Front-Cover Texts or Back-Cover Texts, in the notice
      that says that the Document is released under this License.  A
      Front-Cover Text may be at most 5 words, and a Back-Cover Text may
      be at most 25 words.
 
-     A “Transparent” copy of the Document means a machine-readable copy,
+     A "Transparent" copy of the Document means a machine-readable copy,
      represented in a format whose specification is available to the
      general public, that is suitable for revising the document
      straightforwardly with generic text editors or (for images composed
@@ -1737,7 +1737,7 @@ Appendix A GNU Free Documentation License
      been arranged to thwart or discourage subsequent modification by
      readers is not Transparent.  An image format is not Transparent if
      used for any substantial amount of text.  A copy that is not
-     “Transparent” is called “Opaque”.
+     "Transparent" is called "Opaque".
 
      Examples of suitable formats for Transparent copies include plain
      ASCII without markup, Texinfo input format, LaTeX input format,
@@ -1750,23 +1750,23 @@ Appendix A GNU Free Documentation License
      the machine-generated HTML, PostScript or PDF produced by some word
      processors for output purposes only.
 
-     The “Title Page” means, for a printed book, the title page itself,
+     The "Title Page" means, for a printed book, the title page itself,
      plus such following pages as are needed to hold, legibly, the
      material this License requires to appear in the title page.  For
-     works in formats which do not have any title page as such, “Title
-     Page” means the text near the most prominent appearance of the
-     work’s title, preceding the beginning of the body of the text.
+     works in formats which do not have any title page as such, "Title
+     Page" means the text near the most prominent appearance of the
+     work's title, preceding the beginning of the body of the text.
 
-     The “publisher” means any person or entity that distributes copies
+     The "publisher" means any person or entity that distributes copies
      of the Document to the public.
 
-     A section “Entitled XYZ” means a named subunit of the Document
+     A section "Entitled XYZ" means a named subunit of the Document
      whose title either is precisely XYZ or contains XYZ in parentheses
      following text that translates XYZ in another language.  (Here XYZ
      stands for a specific section name mentioned below, such as
-     “Acknowledgements”, “Dedications”, “Endorsements”, or “History”.)
-     To “Preserve the Title” of such a section when you modify the
-     Document means that it remains a section “Entitled XYZ” according
+     "Acknowledgements", "Dedications", "Endorsements", or "History".)
+     To "Preserve the Title" of such a section when you modify the
+     Document means that it remains a section "Entitled XYZ" according
      to this definition.
 
      The Document may include Warranty Disclaimers next to the notice
@@ -1796,7 +1796,7 @@ Appendix A GNU Free Documentation License
 
      If you publish printed copies (or copies in media that commonly
      have printed covers) of the Document, numbering more than 100, and
-     the Document’s license notice requires Cover Texts, you must
+     the Document's license notice requires Cover Texts, you must
      enclose the copies in covers that carry, clearly and legibly, all
      these Cover Texts: Front-Cover Texts on the front cover, and
      Back-Cover Texts on the back cover.  Both covers must also clearly
@@ -1868,15 +1868,15 @@ Appendix A GNU Free Documentation License
           the Addendum below.
 
        G. Preserve in that license notice the full lists of Invariant
-          Sections and required Cover Texts given in the Document’s
+          Sections and required Cover Texts given in the Document's
           license notice.
 
        H. Include an unaltered copy of this License.
 
-       I. Preserve the section Entitled “History”, Preserve its Title,
+       I. Preserve the section Entitled "History", Preserve its Title,
           and add to it an item stating at least the title, year, new
           authors, and publisher of the Modified Version as given on the
-          Title Page.  If there is no section Entitled “History” in the
+          Title Page.  If there is no section Entitled "History" in the
           Document, create one stating the title, year, authors, and
           publisher of the Document as given on its Title Page, then add
           an item describing the Modified Version as stated in the
@@ -1886,12 +1886,12 @@ Appendix A GNU Free Documentation License
           for public access to a Transparent copy of the Document, and
           likewise the network locations given in the Document for
           previous versions it was based on.  These may be placed in the
-          “History” section.  You may omit a network location for a work
+          "History" section.  You may omit a network location for a work
           that was published at least four years before the Document
           itself, or if the original publisher of the version it refers
           to gives permission.
 
-       K. For any section Entitled “Acknowledgements” or “Dedications”,
+       K. For any section Entitled "Acknowledgements" or "Dedications",
           Preserve the Title of the section, and preserve in the section
           all the substance and tone of each of the contributor
           acknowledgements and/or dedications given therein.
@@ -1900,11 +1900,11 @@ Appendix A GNU Free Documentation License
           in their text and in their titles.  Section numbers or the
           equivalent are not considered part of the section titles.
 
-       M. Delete any section Entitled “Endorsements”.  Such a section
+       M. Delete any section Entitled "Endorsements".  Such a section
           may not be included in the Modified Version.
 
        N. Do not retitle any existing section to be Entitled
-          “Endorsements” or to conflict in title with any Invariant
+          "Endorsements" or to conflict in title with any Invariant
           Section.
 
        O. Preserve any Warranty Disclaimers.
@@ -1913,15 +1913,15 @@ Appendix A GNU Free Documentation License
      appendices that qualify as Secondary Sections and contain no
      material copied from the Document, you may at your option designate
      some or all of these sections as invariant.  To do this, add their
-     titles to the list of Invariant Sections in the Modified Version’s
+     titles to the list of Invariant Sections in the Modified Version's
      license notice.  These titles must be distinct from any other
      section titles.
 
-     You may add a section Entitled “Endorsements”, provided it contains
+     You may add a section Entitled "Endorsements", provided it contains
      nothing but endorsements of your Modified Version by various
-     parties—for example, statements of peer review or that the text has
-     been approved by an organization as the authoritative definition of
-     a standard.
+     parties--for example, statements of peer review or that the text
+     has been approved by an organization as the authoritative
+     definition of a standard.
 
      You may add a passage of up to five words as a Front-Cover Text,
      and a passage of up to 25 words as a Back-Cover Text, to the end of
@@ -1959,10 +1959,10 @@ Appendix A GNU Free Documentation License
      combined work.
 
      In the combination, you must combine any sections Entitled
-     “History” in the various original documents, forming one section
-     Entitled “History”; likewise combine any sections Entitled
-     “Acknowledgements”, and any sections Entitled “Dedications”.  You
-     must delete all sections Entitled “Endorsements.”
+     "History" in the various original documents, forming one section
+     Entitled "History"; likewise combine any sections Entitled
+     "Acknowledgements", and any sections Entitled "Dedications".  You
+     must delete all sections Entitled "Endorsements."
 
   6. COLLECTIONS OF DOCUMENTS
 
@@ -1983,16 +1983,16 @@ Appendix A GNU Free Documentation License
 
      A compilation of the Document or its derivatives with other
      separate and independent documents or works, in or on a volume of a
-     storage or distribution medium, is called an “aggregate” if the
+     storage or distribution medium, is called an "aggregate" if the
      copyright resulting from the compilation is not used to limit the
-     legal rights of the compilation’s users beyond what the individual
+     legal rights of the compilation's users beyond what the individual
      works permit.  When the Document is included in an aggregate, this
      License does not apply to the other works in the aggregate which
      are not themselves derivative works of the Document.
 
      If the Cover Text requirement of section 3 is applicable to these
      copies of the Document, then if the Document is less than one half
-     of the entire aggregate, the Document’s Cover Texts may be placed
+     of the entire aggregate, the Document's Cover Texts may be placed
      on covers that bracket the Document within the aggregate, or the
      electronic equivalent of covers if the Document is in electronic
      form.  Otherwise they must appear on printed covers that bracket
@@ -2014,8 +2014,8 @@ Appendix A GNU Free Documentation License
      this License or a notice or disclaimer, the original version will
      prevail.
 
-     If a section in the Document is Entitled “Acknowledgements”,
-     “Dedications”, or “History”, the requirement (section 4) to
+     If a section in the Document is Entitled "Acknowledgements",
+     "Dedications", or "History", the requirement (section 4) to
      Preserve its Title (section 1) will typically require changing the
      actual title.
 
@@ -2056,7 +2056,7 @@ Appendix A GNU Free Documentation License
 
      Each version of the License is given a distinguishing version
      number.  If the Document specifies that a particular numbered
-     version of this License “or any later version” applies to it, you
+     version of this License "or any later version" applies to it, you
      have the option of following the terms and conditions either of
      that specified version or of any later version that has been
      published (not as a draft) by the Free Software Foundation.  If the
@@ -2064,29 +2064,29 @@ Appendix A GNU Free Documentation License
      choose any version ever published (not as a draft) by the Free
      Software Foundation.  If the Document specifies that a proxy can
      decide which future versions of this License can be used, that
-     proxy’s public statement of acceptance of a version permanently
+     proxy's public statement of acceptance of a version permanently
      authorizes you to choose that version for the Document.
 
   11. RELICENSING
 
-     “Massive Multiauthor Collaboration Site” (or “MMC Site”) means any
+     "Massive Multiauthor Collaboration Site" (or "MMC Site") means any
      World Wide Web server that publishes copyrightable works and also
      provides prominent facilities for anybody to edit those works.  A
      public wiki that anybody can edit is an example of such a server.
-     A “Massive Multiauthor Collaboration” (or “MMC”) contained in the
+     A "Massive Multiauthor Collaboration" (or "MMC") contained in the
      site means any set of copyrightable works thus published on the MMC
      site.
 
-     “CC-BY-SA” means the Creative Commons Attribution-Share Alike 3.0
+     "CC-BY-SA" means the Creative Commons Attribution-Share Alike 3.0
      license published by Creative Commons Corporation, a not-for-profit
      corporation with a principal place of business in San Francisco,
      California, as well as future copyleft versions of that license
      published by that same organization.
 
-     “Incorporate” means to publish or republish a Document, in whole or
+     "Incorporate" means to publish or republish a Document, in whole or
      in part, as part of another Document.
 
-     An MMC is “eligible for relicensing” if it is licensed under this
+     An MMC is "eligible for relicensing" if it is licensed under this
      License, and if all works that were first published under this
      License somewhere other than this MMC, and subsequently
      incorporated in whole or in part into the MMC, (1) had no cover
@@ -2113,7 +2113,7 @@ notices just after the title page:
        Free Documentation License''.
 
    If you have Invariant Sections, Front-Cover Texts and Back-Cover
-Texts, replace the “with...Texts.” line with this:
+Texts, replace the "with...Texts." line with this:
 
          with the Invariant Sections being LIST THEIR TITLES, with
          the Front-Cover Texts being LIST, and with the Back-Cover Texts
@@ -2129,7 +2129,7 @@ software license, such as the GNU General Public License, to permit
 their use in free software.
 
 
-File: doce0R0Up.info,  Node: Index,  Prev: GNU Free Documentation License,  Up: Top
+File: doclQQGgt.info,  Node: Index,  Prev: GNU Free Documentation License,  Up: Top
 
 Index
 *****
@@ -2266,32 +2266,32 @@ Index
 
 
 Tag Table:
-Node: Top906
-Ref: Top-Footnote-13519
-Node: Quick Start3594
-Node: Eglot and LSP Servers6279
-Node: Setting Up LSP Servers6700
-Node: Starting Eglot11943
-Node: Shutting Down LSP Servers14621
-Node: Using Eglot16175
-Node: Eglot Features16544
-Node: Eglot and Buffers22090
-Node: Eglot Commands28337
-Node: Customizing Eglot37649
-Node: Customization Variables38709
-Node: Other Variables45233
-Node: More Customization47405
-Node: Advanced server configuration51270
-Node: Project-specific configuration53280
-Node: User-specific configuration59777
-Node: JSONRPC objects in Elisp62235
-Node: Extending Eglot63777
-Node: Troubleshooting Eglot70523
-Node: Performance71298
-Node: Getting the latest version72192
-Node: Reporting bugs73310
-Node: GNU Free Documentation License77613
-Node: Index102977
+Node: Top892
+Ref: Top-Footnote-13476
+Node: Quick Start3551
+Node: Eglot and LSP Servers6224
+Node: Setting Up LSP Servers6645
+Node: Starting Eglot11886
+Node: Shutting Down LSP Servers14552
+Node: Using Eglot16100
+Node: Eglot Features16469
+Node: Eglot and Buffers21995
+Node: Eglot Commands28212
+Node: Customizing Eglot37503
+Node: Customization Variables38559
+Node: Other Variables45053
+Node: More Customization47211
+Node: Advanced server configuration51054
+Node: Project-specific configuration53050
+Node: User-specific configuration59525
+Node: JSONRPC objects in Elisp61977
+Node: Extending Eglot63517
+Node: Troubleshooting Eglot70245
+Node: Performance71020
+Node: Getting the latest version71914
+Node: Reporting bugs73032
+Node: GNU Free Documentation License77321
+Node: Index102484
 
 End Tag Table
 
