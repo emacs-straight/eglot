@@ -2355,7 +2355,9 @@ diagnostics, used for incremental updates.")
   (when revert-buffer-preserve-modes
     (eglot--signal-textDocument/didOpen)
     (when eglot-semantic-tokens-mode
-      (eglot-semantic-tokens-mode))))
+      (trace-values "OH YEAH!?")
+      (eglot-semantic-tokens-mode))
+    ))
 
 (defun eglot--maybe-activate-editing-mode ()
   "Maybe activate `eglot--managed-mode'.
@@ -4330,8 +4332,9 @@ the directory to watch (nil means entire project).  IN-ROOT says if DIR
 happens to be inside or maching the project root."
   (cl-labels
       ((subdirs-using-project ()
-         (mapcar #'file-name-directory
-                 (project-files project (and dir (list dir)))))
+         (delete-dups
+          (mapcar #'file-name-directory
+                  (project-files project (and dir (list dir))))))
        (subdirs-using-find ()
          (with-temp-buffer
            (call-process find-program nil t nil dir "-type" "d" "-print0")
@@ -4677,7 +4680,7 @@ If NOERROR, return predicate, else erroring function."
 ;;; Semantic tokens
 (defmacro eglot--semtok-define-things ()
   (cl-flet ((def-it (name def)
-              `(defface ,(intern (format "eglot-semantic-%s-face" name))
+              `(defface ,(intern (format "eglot-semantic-%s" name))
                  '((t (:inherit ,def)))
                  ,(format "Face for painting a `%s' LSP semantic token" name)
                  :group 'eglot-semantic-fontification)))
@@ -4715,10 +4718,10 @@ If NOERROR, return predicate, else erroring function."
               when (cl-plusp (logand (cdr tok) (ash 1 j)))
                 collect m into names
                 and when (member m eglot-semantic-token-modifiers)
-                  collect (intern (format "eglot-semantic-%s-face" m)) into faces
+                  collect (intern (format "eglot-semantic-%s" m)) into faces
               finally
               (when (member tname eglot-semantic-token-types)
-                (push (intern (format "eglot-semantic-%s-face" tname)) faces))
+                (push (intern (format "eglot-semantic-%s" tname)) faces))
               (cl-return (cons (cons tname names) faces))))
            semtok-cache)
         probe))))
