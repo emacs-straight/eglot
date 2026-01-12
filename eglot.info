@@ -1,4 +1,4 @@
-This is docqmuYaR.info, produced by makeinfo version 7.1.1 from
+This is doc40EHEQ.info, produced by makeinfo version 7.1.1 from
 eglot.texi.
 
 This manual is for Eglot, the Emacs LSP client.
@@ -21,7 +21,7 @@ START-INFO-DIR-ENTRY
 END-INFO-DIR-ENTRY
 
 
-File: docqmuYaR.info,  Node: Top,  Next: Quick Start,  Up: (dir)
+File: doc40EHEQ.info,  Node: Top,  Next: Quick Start,  Up: (dir)
 
 Eglot
 *****
@@ -71,6 +71,7 @@ read this manual from within Emacs, type ‘M-x eglot-manual <RET>’.
 * Using Eglot::                 Important Eglot commands and variables.
 * Customizing Eglot::           Eglot customization and advanced features.
 * Advanced server configuration::  Fine-tune a specific language server
+* Multi-server support:: Use more than one server in a buffer
 * Extending Eglot::             Writing Eglot extensions in Elisp
 * Troubleshooting Eglot::       Troubleshooting and reporting bugs.
 * GNU Free Documentation License::  The license for this manual.
@@ -81,7 +82,7 @@ read this manual from within Emacs, type ‘M-x eglot-manual <RET>’.
    (1) A “polyglot” is a person who is able to use several languages.
 
 
-File: docqmuYaR.info,  Node: Quick Start,  Next: Eglot and LSP Servers,  Prev: Top,  Up: Top
+File: doc40EHEQ.info,  Node: Quick Start,  Next: Eglot and LSP Servers,  Prev: Top,  Up: Top
 
 1 Quick Start
 *************
@@ -141,7 +142,7 @@ common use patterns.
   4. That's it!
 
 
-File: docqmuYaR.info,  Node: Eglot and LSP Servers,  Next: Using Eglot,  Prev: Quick Start,  Up: Top
+File: doc40EHEQ.info,  Node: Eglot and LSP Servers,  Next: Using Eglot,  Prev: Quick Start,  Up: Top
 
 2 Eglot and LSP Servers
 ***********************
@@ -156,7 +157,7 @@ start it.
 * Shutting Down LSP Servers::
 
 
-File: docqmuYaR.info,  Node: Setting Up LSP Servers,  Next: Starting Eglot,  Up: Eglot and LSP Servers
+File: doc40EHEQ.info,  Node: Setting Up LSP Servers,  Next: Starting Eglot,  Up: Eglot and LSP Servers
 
 2.1 Setting Up LSP Servers
 ==========================
@@ -263,7 +264,7 @@ a given major-mode.  In those cases, you may combine the helper function
 buffers.  Else it will use whichever is available.
 
 
-File: docqmuYaR.info,  Node: Starting Eglot,  Next: Shutting Down LSP Servers,  Prev: Setting Up LSP Servers,  Up: Eglot and LSP Servers
+File: doc40EHEQ.info,  Node: Starting Eglot,  Next: Shutting Down LSP Servers,  Prev: Setting Up LSP Servers,  Up: Eglot and LSP Servers
 
 2.2 Starting Eglot
 ==================
@@ -315,7 +316,7 @@ Emacs session, it runs the hook ‘eglot-connect-hook’ (*note Other
 Variables::).
 
 
-File: docqmuYaR.info,  Node: Shutting Down LSP Servers,  Prev: Starting Eglot,  Up: Eglot and LSP Servers
+File: doc40EHEQ.info,  Node: Shutting Down LSP Servers,  Prev: Starting Eglot,  Up: Eglot and LSP Servers
 
 2.3 Shutting Down LSP Servers
 =============================
@@ -346,7 +347,7 @@ associated with it.  This default allows you to start a server only once
 in each Emacs session.
 
 
-File: docqmuYaR.info,  Node: Using Eglot,  Next: Customizing Eglot,  Prev: Eglot and LSP Servers,  Up: Top
+File: doc40EHEQ.info,  Node: Using Eglot,  Next: Customizing Eglot,  Prev: Eglot and LSP Servers,  Up: Top
 
 3 Using Eglot
 *************
@@ -362,7 +363,7 @@ commands and variables.
 * Eglot Commands::
 
 
-File: docqmuYaR.info,  Node: Eglot Features,  Next: Eglot and Buffers,  Up: Using Eglot
+File: doc40EHEQ.info,  Node: Eglot Features,  Next: Eglot and Buffers,  Up: Using Eglot
 
 3.1 Eglot Features
 ==================
@@ -468,7 +469,7 @@ Customizing Eglot::) and the ‘eglot-managed-mode-hook’ hook that runs
 after Eglot starts managing a buffer (*note Eglot and Buffers::).
 
 
-File: docqmuYaR.info,  Node: Eglot and Buffers,  Next: Eglot Commands,  Prev: Eglot Features,  Up: Using Eglot
+File: doc40EHEQ.info,  Node: Eglot and Buffers,  Next: Eglot Commands,  Prev: Eglot Features,  Up: Using Eglot
 
 3.2 Buffers, Projects, and Eglot
 ================================
@@ -584,7 +585,7 @@ use this:
            (eglot-semantic-tokens-mode -1)))
 
 
-File: docqmuYaR.info,  Node: Eglot Commands,  Prev: Eglot and Buffers,  Up: Using Eglot
+File: doc40EHEQ.info,  Node: Eglot Commands,  Prev: Eglot and Buffers,  Up: Using Eglot
 
 3.3 Eglot Commands
 ==================
@@ -697,6 +698,18 @@ commands:
      function calls and a variable's automatically deduced type.  Inlay
      hints help the user not have to remember these things by heart.
 
+‘eglot-momentary-inlay-hints’
+     When bound to a single key in ‘eglot-mode-map’ (*note Customization
+     Variables::), this will arrange for inlay hints to be displayed as
+     long as the key is held down, and then hidden shortly after it is
+     released.  The best way to set it up is something like this:
+
+          (define-key eglot-mode-map [f7] 'eglot-momentary-inlay-hints)
+
+     Note that Emacs doesn't support binding to \"key up\" events, so
+     this command offers an approximation by estimating your system
+     keyboard delay and repeat rate.
+
 ‘M-x eglot-semantic-tokens-mode’
      This command toggles LSP “semantic tokens” fontification on and off
      for the current buffer.  Semantic tokens provide enhanced syntax
@@ -782,7 +795,7 @@ Eglot-managed buffers:
      Request completion of the symbol at point.
 
 
-File: docqmuYaR.info,  Node: Customizing Eglot,  Next: Advanced server configuration,  Prev: Using Eglot,  Up: Top
+File: doc40EHEQ.info,  Node: Customizing Eglot,  Next: Advanced server configuration,  Prev: Using Eglot,  Up: Top
 
 4 Customizing Eglot
 *******************
@@ -810,7 +823,7 @@ interaction with these features.  *Note More Customization::.
 * More Customization::
 
 
-File: docqmuYaR.info,  Node: Customization Variables,  Next: Other Variables,  Up: Customizing Eglot
+File: doc40EHEQ.info,  Node: Customization Variables,  Next: Other Variables,  Up: Customizing Eglot
 
 4.1 Customization Variables
 ===========================
@@ -891,6 +904,7 @@ This section provides a reference for the Eglot user options.
             (define-key eglot-mode-map (kbd "C-c o") 'eglot-code-action-organize-imports)
             (define-key eglot-mode-map (kbd "C-c h") 'eldoc)
             (define-key eglot-mode-map (kbd "<f6>") 'xref-find-definitions)
+            (define-key eglot-mode-map (kbd "<f7>") 'eglot-momentary-inlay-hints)
 
 ‘eglot-report-progress’
      Set this variable to non-nil if you'd like progress notifications
@@ -940,7 +954,7 @@ This section provides a reference for the Eglot user options.
           point.
 
 
-File: docqmuYaR.info,  Node: Other Variables,  Next: More Customization,  Prev: Customization Variables,  Up: Customizing Eglot
+File: doc40EHEQ.info,  Node: Other Variables,  Next: More Customization,  Prev: Customization Variables,  Up: Customizing Eglot
 
 4.2 Other Variables
 ===================
@@ -990,7 +1004,7 @@ be changed from Elisp snippets.
      other mechanism.
 
 
-File: docqmuYaR.info,  Node: More Customization,  Prev: Other Variables,  Up: Customizing Eglot
+File: doc40EHEQ.info,  Node: More Customization,  Prev: Other Variables,  Up: Customizing Eglot
 
 4.3 More Customization
 ======================
@@ -1077,7 +1091,7 @@ override Eglot's setting of these variables.
      ‘yas-minor-mode’ when needed to expand server-provided snippets.
 
 
-File: docqmuYaR.info,  Node: Advanced server configuration,  Next: Extending Eglot,  Prev: Customizing Eglot,  Up: Top
+File: doc40EHEQ.info,  Node: Advanced server configuration,  Next: Multi-server support,  Prev: Customizing Eglot,  Up: Top
 
 5 Advanced server configuration
 *******************************
@@ -1123,7 +1137,7 @@ other LSP clients and may be easier to debug than options riding on the
 LSP wire.
 
 
-File: docqmuYaR.info,  Node: Project-specific configuration,  Next: User-specific configuration,  Up: Advanced server configuration
+File: doc40EHEQ.info,  Node: Project-specific configuration,  Next: User-specific configuration,  Up: Advanced server configuration
 
 5.1 Project-specific configuration
 ==================================
@@ -1262,7 +1276,7 @@ function instead of a plist.  The function is called with the
 return a plist suitable for use as the variable's value.
 
 
-File: docqmuYaR.info,  Node: User-specific configuration,  Next: JSONRPC objects in Elisp,  Prev: Project-specific configuration,  Up: Advanced server configuration
+File: doc40EHEQ.info,  Node: User-specific configuration,  Next: JSONRPC objects in Elisp,  Prev: Project-specific configuration,  Up: Advanced server configuration
 
 5.2 User-specific configuration
 ===============================
@@ -1315,7 +1329,7 @@ Project-specific configuration::.  Here is an example:
 always overridden if a directory-local value is detected.
 
 
-File: docqmuYaR.info,  Node: JSONRPC objects in Elisp,  Prev: User-specific configuration,  Up: Advanced server configuration
+File: doc40EHEQ.info,  Node: JSONRPC objects in Elisp,  Prev: User-specific configuration,  Up: Advanced server configuration
 
 5.3 JSONRPC objects in Elisp
 ============================
@@ -1361,9 +1375,147 @@ is serialized by Eglot to the following JSON text:
      }
 
 
-File: docqmuYaR.info,  Node: Extending Eglot,  Next: Troubleshooting Eglot,  Prev: Advanced server configuration,  Up: Top
+File: doc40EHEQ.info,  Node: Multi-server support,  Next: Extending Eglot,  Prev: Advanced server configuration,  Up: Top
 
-6 Extending Eglot
+6 Multi-server support
+**********************
+
+One of the most frequently requested features for Eglot in close to a
+decade of existence is the ability to use more than one LSP server in a
+single buffer.  This is distinct from using multiple servers in a
+project, where each server manages a disjoint set of files written in
+different languages.
+
+   The latter case--multiple servers for different files--is
+intrinsically supported by Eglot.  For example, in a web project with
+JavaScript, CSS, and Python files, Eglot can seamlessly manage separate
+language servers for each file type within the same project (*note
+Starting Eglot::).  Each buffer communicates with its appropriate
+server, and this works out-of-the-box.
+
+   However, there are several scenarios where multiple servers per
+buffer are useful:
+
+   • Combining a spell-checking language server like ‘codebook-lsp’ with
+     language-specific servers for C++, Go, or Python files.  The
+     spell-checker provides diagnostics for comments and strings, while
+     the language server handles syntax and semantics.
+
+   • One might want multiple servers to cover different aspects of the
+     same language.  For Python, you might combine ‘ty’ for type
+     checking with ‘ruff’ for linting and formatting.  For JavaScript,
+     you might use ‘typescript-language-server’ for language features
+     together with ‘eslint’ for linting.
+
+   • When working on multi-language files like Vue ‘.vue’ files, which
+     contain JavaScript, CSS, and HTML embedded in a single file,
+     multiple servers can manage the different areas of the buffer.
+
+   These use cases are not directly supported by Eglot's architecture,
+however, you can use a language-agnostic “LSP server multiplexer” that
+sits between Eglot and the actual language servers.  Eglot still
+communicates with a single LSP server process in each buffer, but that
+process mediates communication to multiple language-specific servers,
+meaning that for practical purposes, it's _as if_ Eglot was connected to
+them directly.
+
+   This approach is more powerful and user-friendly than current
+workarounds that combine one LSP server in a buffer with additional
+non-LSP mechanisms such as extra Flymake backends (*note (Flymake)Top::)
+for the same buffer.
+
+* Menu:
+
+* Using Rassumfrassum::   Setup the ‘rass’ LSP multiplexer
+* Design rationale::      Benefits and drawbacks of LSP multiplexers
+
+
+File: doc40EHEQ.info,  Node: Using Rassumfrassum,  Next: Design rationale,  Up: Multi-server support
+
+6.1 Using Rassumfrassum
+=======================
+
+Rassumfrassum (https://github.com/joaotavora/rassumfrassum) is an LSP
+server multiplexer program that fits the bill.  Like most language
+servers, it must be installed separately since it is not bundled with
+Emacs (at time of writing).  The installation is similar to installing
+any other language server, and usually amounts to making sure the
+program executable is somewhere in ‘PATH’ or ‘exec-path’.
+
+   The Rassumfrassum program, invoked via the ‘rass’ command, works by
+spawning multiple LSP server subprocesses and aggregating their
+capabilities, requests, and responses into a single unified LSP
+interface.  From Eglot's perspective, it appears to be communicating
+with a single server.
+
+   To use Rassumfrassum with Eglot, you can start it interactively with
+a prefix argument to ‘eglot’ and specify the ‘rass’ command followed by
+the actual servers you want to use, separated by ‘--’:
+
+     C-u M-x eglot RET rass -- clangd -- codebook-lsp serve RET
+
+This starts ‘clangd’ for C++ language support and ‘codebook-lsp’ for
+spell-checking in the same buffer.
+
+   For Python, you might use:
+
+     C-u M-x eglot RET rass -- ty server -- ruff server RET
+
+or simply ‘C-u M-x eglot RET rass python’, using the "preset" feature.
+This combines ‘ty’ for type checking with ‘ruff’ for linting and
+formatting.
+
+   These configurations can be integrated into the
+‘eglot-server-programs’ variable (*note Setting Up LSP Servers::) for
+automatic use:
+
+     (with-eval-after-load 'eglot
+       (add-to-list 'eglot-server-programs
+                    '(c-ts-base-mode . ("rass" "--" "clangd" "--"
+                                        "codebook-lsp" "serve")))
+       (add-to-list 'eglot-server-programs
+                    '(python-mode . ("rass" "--" "ty" "server" "--"
+                                     "ruff" "server"))))
+
+
+File: doc40EHEQ.info,  Node: Design rationale,  Prev: Using Rassumfrassum,  Up: Multi-server support
+
+6.2 Design rationale
+====================
+
+Using an LSP server multiplexer like ‘rass’ relieves Eglot from knowing
+about the specific characteristics of individual servers and the
+complexity of managing multiple simultaneous server connections per
+buffer.  This helps preserve the essential features that distinguish
+Eglot's code base from other LSP offers for Emacs: simple, performant
+and mindful of the core tenet of LSP, which is for a client to be
+language-agnostic.
+
+   This approach has an additional benefit: because the multiplexer
+mediates all communication between Eglot and the servers, it can take
+advantage of different optimization opportunities.  For instance, at the
+system level it may be multi-threaded to process different JSONRPC
+streams in with true parallelism, something which is currently
+impossible to do in plain Elisp.  At the LSP-level it can merge server
+responses intelligently, truncate unnecessarily large objects, and cache
+significant amounts of information in efficient ways.  In many cases,
+this can reduce the amount of JSONRPC traffic exchanged with Emacs to
+levels well below what would occur if a client connected to multiple
+servers separately.  Some of these optimizations may apply even when a
+program like ‘rass’ is mediating communication to a single server.
+
+   The multiplexer approach is not without drawbacks.  Since LSP is a
+relatively large protocol with a decade of existence and many backward
+compatibility concerns, combining the responses of servers using
+completely different mechanisms of the protocol to respond to the same
+request sometimes leads to complexity in covering the corner cases.
+However, offloading this complexity to a completely separate layer has
+proven very effective in practice.
+
+
+File: doc40EHEQ.info,  Node: Extending Eglot,  Next: Troubleshooting Eglot,  Prev: Multi-server support,  Up: Top
+
+7 Extending Eglot
 *****************
 
 Sometimes it may be useful to extend existing Eglot functionality using
@@ -1495,9 +1647,9 @@ code in the buffer will be nicely grayed out using the LSP server
 knowledge about current compile time preprocessor defines.
 
 
-File: docqmuYaR.info,  Node: Troubleshooting Eglot,  Next: GNU Free Documentation License,  Prev: Extending Eglot,  Up: Top
+File: doc40EHEQ.info,  Node: Troubleshooting Eglot,  Next: GNU Free Documentation License,  Prev: Extending Eglot,  Up: Top
 
-7 Troubleshooting Eglot
+8 Troubleshooting Eglot
 ***********************
 
 This chapter documents commands and variables that can be used to
@@ -1517,9 +1669,9 @@ problems or at least provide a hint.
 * Reporting bugs::
 
 
-File: docqmuYaR.info,  Node: Performance,  Next: Getting the latest version,  Up: Troubleshooting Eglot
+File: doc40EHEQ.info,  Node: Performance,  Next: Getting the latest version,  Up: Troubleshooting Eglot
 
-7.1 Performance
+8.1 Performance
 ===============
 
 A common and easy-to-fix cause of performance problems in Eglot
@@ -1531,15 +1683,19 @@ Variables::) and set its ‘:size’ property to 0.  This will disable
 recording any events and may speed things up.
 
    In other situations, the cause of poor performance lies in the
-language server itself.  Servers use aggressive caching and other
+language server itself.  Some servers use aggressive caching and other
 techniques to improve their performance.  Often, this can be tweaked by
 changing the server configuration (*note Advanced server
 configuration::).
 
-
-File: docqmuYaR.info,  Node: Getting the latest version,  Next: Reporting bugs,  Prev: Performance,  Up: Troubleshooting Eglot
+   Another aspect that may cause performance degradation is the amount
+of JSONRPC information exchanged with Emacs.  Using an LSP program like
+*note Rassumfrassum: Using Rassumfrassum. may alleviate such problems.
 
-7.2 Getting the latest version
+
+File: doc40EHEQ.info,  Node: Getting the latest version,  Next: Reporting bugs,  Prev: Performance,  Up: Troubleshooting Eglot
+
+8.2 Getting the latest version
 ==============================
 
 To install the latest Eglot in an Emacs version that does not bundle
@@ -1561,9 +1717,9 @@ the same way across Emacs versions, meaning your configuration may be
 not portable.
 
 
-File: docqmuYaR.info,  Node: Reporting bugs,  Prev: Getting the latest version,  Up: Troubleshooting Eglot
+File: doc40EHEQ.info,  Node: Reporting bugs,  Prev: Getting the latest version,  Up: Troubleshooting Eglot
 
-7.3 Reporting bugs
+8.3 Reporting bugs
 ==================
 
 If you think you have found a bug, we want to hear about it.  Before
@@ -1597,12 +1753,18 @@ Eglot-specific checklist:
      the problem with the C/C++ or Python servers, as these are very
      easy to install.
 
-  4. Describe how to setup a _minimal_ project directory where Eglot
-     should be started for the problem to happen.  Describe each file's
-     name and its contents.  Alternatively, you can supply the address
-     of a public Git repository.
+  4. If using an LSP multiplexer server like *note Rassumfrassum: Using
+     Rassumfrassum, first verify if the program replicates by using one
+     of the multiplexed servers directly.  If it doesn't the problem
+     lies in the LSP multiplexer program and should be reported there.
 
-  5. Include versions of the software used.  The Emacs version can be
+  5. Include a description of a _minimal_ project directory where Eglot
+     should be started for the problem to happen.  Describe each file's
+     name and its contents, or--sometimes better-- zip that project
+     directory completely and attach it.  Alternatively, you can supply
+     the address of a public Git repository.
+
+  6. Include versions of the software used.  The Emacs version can be
      obtained with ‘M-x emacs-version’.
 
      We welcome bug reports about all Eglot versions, but it is helpful
@@ -1612,17 +1774,19 @@ Eglot-specific checklist:
      It's also essential to include the version of ELPA packages that
      are explicitly or implicitly loaded.  The optional but popular
      Company or Markdown packages are distributed as GNU ELPA packages,
-     not to mention Eglot itself in some situations.  Some major modes
-     (Go, Rust, etc.)  are provided by ELPA packages.  It's sometimes
-     easy to miss these, since they are usually implicitly loaded when
-     visiting a file in that language.
+     not to mention Eglot itself in some situations.  Prefer reproducing
+     the problem with built-in Treesit major modes like ‘go-ts-mode’ or
+     ‘rust-ts-mode’ since the non-ts modes for such languages are
+     usually provided by ELPA packages, and it's often easy to miss
+     them.
 
-     ELPA packages usually live in ‘~/.emacs.d/elpa’ (or what is in
+     If you can't reproduce your bug without ELPA packages, you may find
+     the ones you're using in ‘~/.emacs.d/elpa’ (or what is in
      ‘package-user-dir’).  Including a listing of files in that
      directory is a way to tell the maintainers about ELPA package
      versions.
 
-  6. Include a recipe to replicate the problem with _a clean Emacs run_.
+  7. Include a recipe to replicate the problem with _a clean Emacs run_.
      The invocation ‘emacs -Q -f package-initialize’ starts Emacs with
      no configuration and initializes the ELPA packages.  A very minimal
      ‘.emacs’ initialization file (10 lines or less) is also acceptable
@@ -1636,7 +1800,7 @@ Eglot-specific checklist:
      Prefer setting variables with ‘setq’ and adding to hooks with
      ‘add-hook’.  Prefer starting Eglot with ‘M-x eglot’.
 
-  7. Make sure to double check all the above elements and re-run the
+  8. Make sure to double check all the above elements and re-run the
      recipe to see that the problem is reproducible.  Following the
      recipe should produce event transcript and error backtraces that
      are very similar to the ones you included.  If the problem only
@@ -1648,7 +1812,7 @@ that used Eglot to communicate with the language server.  Eglot is, in
 many cases, just a frontend to that functionality.
 
 
-File: docqmuYaR.info,  Node: GNU Free Documentation License,  Next: Index,  Prev: Troubleshooting Eglot,  Up: Top
+File: doc40EHEQ.info,  Node: GNU Free Documentation License,  Next: Index,  Prev: Troubleshooting Eglot,  Up: Top
 
 Appendix A GNU Free Documentation License
 *****************************************
@@ -2130,7 +2294,7 @@ software license, such as the GNU General Public License, to permit
 their use in free software.
 
 
-File: docqmuYaR.info,  Node: Index,  Prev: GNU Free Documentation License,  Up: Top
+File: doc40EHEQ.info,  Node: Index,  Prev: GNU Free Documentation License,  Up: Top
 
 Index
 *****
@@ -2141,24 +2305,24 @@ Index
 * activating Eglot for a project:        Starting Eglot.      (line   6)
 * buffers managed by Eglot:              Eglot and Buffers.   (line   6)
 * bug reports:                           Reporting bugs.      (line   6)
-* call hierarchy:                        Eglot Commands.      (line 137)
+* call hierarchy:                        Eglot Commands.      (line 149)
 * code actions:                          Eglot Commands.      (line  78)
 * command-line arguments:                User-specific configuration.
                                                               (line   6)
 * commands, Eglot:                       Eglot Commands.      (line   6)
 * customizing Eglot:                     Customizing Eglot.   (line   6)
-* documentation using Eglot:             Eglot Commands.      (line 177)
+* documentation using Eglot:             Eglot Commands.      (line 189)
 * eglot:                                 Starting Eglot.      (line   6)
 * eglot-advertise-cancellation:          Customization Variables.
-                                                              (line  90)
+                                                              (line  91)
 * eglot-autoreconnect:                   Customization Variables.
                                                               (line   8)
 * eglot-autoshutdown:                    Customization Variables.
                                                               (line  42)
 * eglot-code-action-indications:         Customization Variables.
-                                                              (line  96)
+                                                              (line  97)
 * eglot-code-action-indicator:           Customization Variables.
-                                                              (line 110)
+                                                              (line 111)
 * eglot-confirm-server-edits:            Customization Variables.
                                                               (line  48)
 * eglot-connect-hook:                    Other Variables.     (line  25)
@@ -2175,13 +2339,14 @@ Index
 * eglot-managed-p:                       Eglot and Buffers.   (line  95)
 * eglot-menu:                            Eglot and Buffers.   (line  53)
 * eglot-mode-line-format:                Customization Variables.
-                                                              (line 114)
+                                                              (line 115)
 * eglot-mode-map:                        Customization Variables.
                                                               (line  71)
+* eglot-momentary-inlay-hints:           Eglot Commands.      (line 114)
 * eglot-report-progress:                 Customization Variables.
-                                                              (line  83)
-* eglot-semantic-token-modifiers:        Eglot Commands.      (line 123)
-* eglot-semantic-token-types:            Eglot Commands.      (line 123)
+                                                              (line  84)
+* eglot-semantic-token-modifiers:        Eglot Commands.      (line 135)
+* eglot-semantic-token-types:            Eglot Commands.      (line 135)
 * eglot-server-initialized-hook:         Other Variables.     (line  19)
 * eglot-server-programs:                 Setting Up LSP Servers.
                                                               (line  19)
@@ -2197,12 +2362,12 @@ Index
                                                               (line   6)
 * eglot-workspace-configuration <1>:     User-specific configuration.
                                                               (line  36)
-* ElDoc, and Eglot:                      Eglot Commands.      (line 177)
+* ElDoc, and Eglot:                      Eglot Commands.      (line 189)
 * features in buffers supported by Eglot: Eglot Features.     (line   6)
 * finding definitions of identifiers using Eglot: Eglot Commands.
-                                                              (line 187)
-* Flymake, and Eglot:                    Eglot Commands.      (line 180)
-* imenu navigation using Eglot:          Eglot Commands.      (line 190)
+                                                              (line 199)
+* Flymake, and Eglot:                    Eglot Commands.      (line 192)
+* imenu navigation using Eglot:          Eglot Commands.      (line 202)
 * initializationOptions:                 User-specific configuration.
                                                               (line   6)
 * inlay hints:                           Eglot Commands.      (line 105)
@@ -2212,49 +2377,56 @@ Index
 * LSP:                                   Top.                 (line   6)
 * LSP server for Eglot, setting up:      Setting Up LSP Servers.
                                                               (line   6)
+* LSP server multiplexer:                Multi-server support.
+                                                              (line   6)
 * M-x eglot:                             Eglot Commands.      (line   9)
-* M-x eglot-call-type-hierarchy:         Eglot Commands.      (line 137)
-* M-x eglot-clear-status:                Eglot Commands.      (line 160)
+* M-x eglot-call-type-hierarchy:         Eglot Commands.      (line 149)
+* M-x eglot-clear-status:                Eglot Commands.      (line 172)
 * M-x eglot-code-action-extract:         Eglot Commands.      (line  81)
 * M-x eglot-code-action-inline:          Eglot Commands.      (line  82)
 * M-x eglot-code-action-organize-imports: Eglot Commands.     (line  79)
 * M-x eglot-code-action-quickfix:        Eglot Commands.      (line  80)
 * M-x eglot-code-action-rewrite:         Eglot Commands.      (line  83)
 * M-x eglot-code-actions:                Eglot Commands.      (line  78)
-* M-x eglot-events-buffer:               Eglot Commands.      (line 144)
-* M-x eglot-forget-pending-continuations: Eglot Commands.     (line 152)
+* M-x eglot-events-buffer:               Eglot Commands.      (line 156)
+* M-x eglot-forget-pending-continuations: Eglot Commands.     (line 164)
 * M-x eglot-format:                      Eglot Commands.      (line  69)
 * M-x eglot-format-buffer:               Eglot Commands.      (line  74)
 * M-x eglot-inlay-hints-mode:            Eglot Commands.      (line 105)
 * M-x eglot-reconnect:                   Eglot Commands.      (line  35)
 * M-x eglot-rename:                      Eglot Commands.      (line  62)
-* M-x eglot-semantic-tokens-mode:        Eglot Commands.      (line 114)
-* M-x eglot-show-type-hierarchy:         Eglot Commands.      (line 133)
+* M-x eglot-semantic-tokens-mode:        Eglot Commands.      (line 126)
+* M-x eglot-show-type-hierarchy:         Eglot Commands.      (line 145)
 * M-x eglot-shutdown:                    Eglot Commands.      (line  41)
 * M-x eglot-shutdown-all:                Eglot Commands.      (line  56)
-* M-x eglot-signal-didChangeConfiguration: Eglot Commands.    (line 155)
-* M-x eglot-stderr-buffer:               Eglot Commands.      (line 148)
+* M-x eglot-signal-didChangeConfiguration: Eglot Commands.    (line 167)
+* M-x eglot-stderr-buffer:               Eglot Commands.      (line 160)
 * mode-line indication of language server: Eglot and Buffers. (line  53)
+* momentary inlay hints:                 Eglot Commands.      (line 114)
 * mouse clicks on mode-line, and Eglot:  Eglot and Buffers.   (line  53)
-* on-the-fly diagnostics using Eglot:    Eglot Commands.      (line 180)
+* multiple servers per buffer:           Multi-server support.
+                                                              (line   6)
+* on-the-fly diagnostics using Eglot:    Eglot Commands.      (line 192)
+* per-buffer multiple servers:           Multi-server support.
+                                                              (line   6)
 * performance problems, with Eglot:      Performance.         (line   6)
 * progress:                              Customization Variables.
-                                                              (line  83)
+                                                              (line  84)
 * projects and Eglot:                    Eglot and Buffers.   (line   6)
 * quick start:                           Quick Start.         (line   6)
 * request cancellation:                  Customization Variables.
-                                                              (line  90)
-* semantic token faces:                  Eglot Commands.      (line 130)
-* semantic tokens:                       Eglot Commands.      (line 114)
+                                                              (line  91)
+* semantic token faces:                  Eglot Commands.      (line 142)
+* semantic tokens:                       Eglot Commands.      (line 126)
 * setting up LSP server for Eglot:       Setting Up LSP Servers.
                                                               (line   6)
 * shutting down LSP server:              Shutting Down LSP Servers.
                                                               (line   6)
 * starting Eglot:                        Starting Eglot.      (line   6)
-* symbol completion using Eglot:         Eglot Commands.      (line 195)
+* symbol completion using Eglot:         Eglot Commands.      (line 207)
 * troubleshooting Eglot:                 Troubleshooting Eglot.
                                                               (line   6)
-* type hierarchy:                        Eglot Commands.      (line 133)
+* type hierarchy:                        Eglot Commands.      (line 145)
 * upgrading Eglot:                       Getting the latest version.
                                                               (line   6)
 * variables, Eglot:                      Customization Variables.
@@ -2262,37 +2434,40 @@ Index
 * workspace:                             Eglot and Buffers.   (line   6)
 * workspace configuration:               Project-specific configuration.
                                                               (line   6)
-* xref, and Eglot:                       Eglot Commands.      (line 187)
+* xref, and Eglot:                       Eglot Commands.      (line 199)
 
 
 
 Tag Table:
 Node: Top892
-Ref: Top-Footnote-13551
-Node: Quick Start3626
-Node: Eglot and LSP Servers6299
-Node: Setting Up LSP Servers6720
-Node: Starting Eglot11961
-Node: Shutting Down LSP Servers14627
-Node: Using Eglot16175
-Node: Eglot Features16544
-Node: Eglot and Buffers22070
-Node: Eglot Commands28287
-Node: Customizing Eglot37578
-Node: Customization Variables38634
-Node: Other Variables45128
-Node: More Customization47286
-Node: Advanced server configuration51129
-Node: Project-specific configuration53125
-Node: User-specific configuration59600
-Node: JSONRPC objects in Elisp62052
-Node: Extending Eglot63592
-Node: Troubleshooting Eglot70320
-Node: Performance71095
-Node: Getting the latest version71989
-Node: Reporting bugs73107
-Node: GNU Free Documentation License77396
-Node: Index102559
+Ref: Top-Footnote-13613
+Node: Quick Start3688
+Node: Eglot and LSP Servers6361
+Node: Setting Up LSP Servers6782
+Node: Starting Eglot12023
+Node: Shutting Down LSP Servers14689
+Node: Using Eglot16237
+Node: Eglot Features16606
+Node: Eglot and Buffers22132
+Node: Eglot Commands28349
+Node: Customizing Eglot38210
+Node: Customization Variables39266
+Node: Other Variables45842
+Node: More Customization48000
+Node: Advanced server configuration51843
+Node: Project-specific configuration53844
+Node: User-specific configuration60319
+Node: JSONRPC objects in Elisp62771
+Node: Multi-server support64311
+Node: Using Rassumfrassum66879
+Node: Design rationale68900
+Node: Extending Eglot70770
+Node: Troubleshooting Eglot77489
+Node: Performance78264
+Node: Getting the latest version79378
+Node: Reporting bugs80496
+Node: GNU Free Documentation License85269
+Node: Index110432
 
 End Tag Table
 
