@@ -645,6 +645,13 @@ commands:
      command with a prefix argument avoids killing the buffers used for
      communications with the language servers.
 
+‘M-x eglot-list-connections’
+     This command pops up a buffer listing all active Eglot connections,
+     showing aspects such as the server name, project, number of managed
+     buffers, major modes, and the server invocation.  In this buffer,
+     ‘k’ shuts down the server on the current line and ‘r’ reconnects to
+     it.
+
 ‘M-x eglot-rename’
      This command renames the program symbol (a.k.a. “identifier”) at
      point to another name.  It prompts for the new name of the symbol,
@@ -2303,13 +2310,13 @@ Index
 * activating Eglot for a project:        Starting Eglot.      (line   6)
 * buffers managed by Eglot:              Eglot and Buffers.   (line   6)
 * bug reports:                           Reporting bugs.      (line   6)
-* call hierarchy:                        Eglot Commands.      (line 149)
-* code actions:                          Eglot Commands.      (line  78)
+* call hierarchy:                        Eglot Commands.      (line 156)
+* code actions:                          Eglot Commands.      (line  85)
 * command-line arguments:                User-specific configuration.
                                                               (line   6)
 * commands, Eglot:                       Eglot Commands.      (line   6)
 * customizing Eglot:                     Customizing Eglot.   (line   6)
-* documentation using Eglot:             Eglot Commands.      (line 189)
+* documentation using Eglot:             Eglot Commands.      (line 196)
 * eglot:                                 Starting Eglot.      (line   6)
 * eglot-advertise-cancellation:          Customization Variables.
                                                               (line  91)
@@ -2340,11 +2347,11 @@ Index
                                                               (line 115)
 * eglot-mode-map:                        Customization Variables.
                                                               (line  71)
-* eglot-momentary-inlay-hints:           Eglot Commands.      (line 114)
+* eglot-momentary-inlay-hints:           Eglot Commands.      (line 121)
 * eglot-report-progress:                 Customization Variables.
                                                               (line  84)
-* eglot-semantic-token-modifiers:        Eglot Commands.      (line 135)
-* eglot-semantic-token-types:            Eglot Commands.      (line 135)
+* eglot-semantic-token-modifiers:        Eglot Commands.      (line 142)
+* eglot-semantic-token-types:            Eglot Commands.      (line 142)
 * eglot-server-initialized-hook:         Other Variables.     (line  19)
 * eglot-server-programs:                 Setting Up LSP Servers.
                                                               (line  19)
@@ -2360,15 +2367,15 @@ Index
                                                               (line   6)
 * eglot-workspace-configuration <1>:     User-specific configuration.
                                                               (line  35)
-* ElDoc, and Eglot:                      Eglot Commands.      (line 189)
+* ElDoc, and Eglot:                      Eglot Commands.      (line 196)
 * features in buffers supported by Eglot: Eglot Features.     (line   6)
 * finding definitions of identifiers using Eglot: Eglot Commands.
-                                                              (line 199)
-* Flymake, and Eglot:                    Eglot Commands.      (line 192)
-* imenu navigation using Eglot:          Eglot Commands.      (line 202)
+                                                              (line 206)
+* Flymake, and Eglot:                    Eglot Commands.      (line 199)
+* imenu navigation using Eglot:          Eglot Commands.      (line 209)
 * initializationOptions:                 User-specific configuration.
                                                               (line   6)
-* inlay hints:                           Eglot Commands.      (line 105)
+* inlay hints:                           Eglot Commands.      (line 112)
 * language server for Eglot:             Setting Up LSP Servers.
                                                               (line   6)
 * language server protocol:              Top.                 (line   6)
@@ -2378,33 +2385,34 @@ Index
 * LSP server multiplexer:                Multi-server support.
                                                               (line   6)
 * M-x eglot:                             Eglot Commands.      (line   9)
-* M-x eglot-call-type-hierarchy:         Eglot Commands.      (line 149)
-* M-x eglot-clear-status:                Eglot Commands.      (line 172)
-* M-x eglot-code-action-extract:         Eglot Commands.      (line  81)
-* M-x eglot-code-action-inline:          Eglot Commands.      (line  82)
-* M-x eglot-code-action-organize-imports: Eglot Commands.     (line  79)
-* M-x eglot-code-action-quickfix:        Eglot Commands.      (line  80)
-* M-x eglot-code-action-rewrite:         Eglot Commands.      (line  83)
-* M-x eglot-code-actions:                Eglot Commands.      (line  78)
-* M-x eglot-events-buffer:               Eglot Commands.      (line 156)
-* M-x eglot-forget-pending-continuations: Eglot Commands.     (line 164)
-* M-x eglot-format:                      Eglot Commands.      (line  69)
-* M-x eglot-format-buffer:               Eglot Commands.      (line  74)
-* M-x eglot-inlay-hints-mode:            Eglot Commands.      (line 105)
+* M-x eglot-call-type-hierarchy:         Eglot Commands.      (line 156)
+* M-x eglot-clear-status:                Eglot Commands.      (line 179)
+* M-x eglot-code-action-extract:         Eglot Commands.      (line  88)
+* M-x eglot-code-action-inline:          Eglot Commands.      (line  89)
+* M-x eglot-code-action-organize-imports: Eglot Commands.     (line  86)
+* M-x eglot-code-action-quickfix:        Eglot Commands.      (line  87)
+* M-x eglot-code-action-rewrite:         Eglot Commands.      (line  90)
+* M-x eglot-code-actions:                Eglot Commands.      (line  85)
+* M-x eglot-events-buffer:               Eglot Commands.      (line 163)
+* M-x eglot-forget-pending-continuations: Eglot Commands.     (line 171)
+* M-x eglot-format:                      Eglot Commands.      (line  76)
+* M-x eglot-format-buffer:               Eglot Commands.      (line  81)
+* M-x eglot-inlay-hints-mode:            Eglot Commands.      (line 112)
+* M-x eglot-list-connections:            Eglot Commands.      (line  62)
 * M-x eglot-reconnect:                   Eglot Commands.      (line  35)
-* M-x eglot-rename:                      Eglot Commands.      (line  62)
-* M-x eglot-semantic-tokens-mode:        Eglot Commands.      (line 126)
-* M-x eglot-show-type-hierarchy:         Eglot Commands.      (line 145)
+* M-x eglot-rename:                      Eglot Commands.      (line  69)
+* M-x eglot-semantic-tokens-mode:        Eglot Commands.      (line 133)
+* M-x eglot-show-type-hierarchy:         Eglot Commands.      (line 152)
 * M-x eglot-shutdown:                    Eglot Commands.      (line  41)
 * M-x eglot-shutdown-all:                Eglot Commands.      (line  56)
-* M-x eglot-signal-didChangeConfiguration: Eglot Commands.    (line 167)
-* M-x eglot-stderr-buffer:               Eglot Commands.      (line 160)
+* M-x eglot-signal-didChangeConfiguration: Eglot Commands.    (line 174)
+* M-x eglot-stderr-buffer:               Eglot Commands.      (line 167)
 * mode-line indication of language server: Eglot and Buffers. (line  53)
-* momentary inlay hints:                 Eglot Commands.      (line 114)
+* momentary inlay hints:                 Eglot Commands.      (line 121)
 * mouse clicks on mode-line, and Eglot:  Eglot and Buffers.   (line  53)
 * multiple servers per buffer:           Multi-server support.
                                                               (line   6)
-* on-the-fly diagnostics using Eglot:    Eglot Commands.      (line 192)
+* on-the-fly diagnostics using Eglot:    Eglot Commands.      (line 199)
 * per-buffer multiple servers:           Multi-server support.
                                                               (line   6)
 * performance problems, with Eglot:      Performance.         (line   6)
@@ -2414,17 +2422,17 @@ Index
 * quick start:                           Quick Start.         (line   6)
 * request cancellation:                  Customization Variables.
                                                               (line  91)
-* semantic token faces:                  Eglot Commands.      (line 142)
-* semantic tokens:                       Eglot Commands.      (line 126)
+* semantic token faces:                  Eglot Commands.      (line 149)
+* semantic tokens:                       Eglot Commands.      (line 133)
 * setting up LSP server for Eglot:       Setting Up LSP Servers.
                                                               (line   6)
 * shutting down LSP server:              Shutting Down LSP Servers.
                                                               (line   6)
 * starting Eglot:                        Starting Eglot.      (line   6)
-* symbol completion using Eglot:         Eglot Commands.      (line 207)
+* symbol completion using Eglot:         Eglot Commands.      (line 214)
 * troubleshooting Eglot:                 Troubleshooting Eglot.
                                                               (line   6)
-* type hierarchy:                        Eglot Commands.      (line 145)
+* type hierarchy:                        Eglot Commands.      (line 152)
 * upgrading Eglot:                       Getting the latest version.
                                                               (line   6)
 * variables, Eglot:                      Customization Variables.
@@ -2432,7 +2440,7 @@ Index
 * workspace:                             Eglot and Buffers.   (line   6)
 * workspace configuration:               Project-specific configuration.
                                                               (line   6)
-* xref, and Eglot:                       Eglot Commands.      (line 199)
+* xref, and Eglot:                       Eglot Commands.      (line 206)
 
 
 Tag Table:
@@ -2447,24 +2455,24 @@ Node: Using Eglot16207
 Node: Eglot Features16572
 Node: Eglot and Buffers22094
 Node: Eglot Commands28307
-Node: Customizing Eglot38164
-Node: Customization Variables39216
-Node: Other Variables45788
-Node: More Customization47942
-Node: Advanced server configuration51781
-Node: Project-specific configuration53778
-Node: User-specific configuration60249
-Node: JSONRPC objects in Elisp62696
-Node: Multi-server support64232
-Node: Using Rassumfrassum66796
-Node: Design rationale68813
-Node: Extending Eglot70679
-Node: Troubleshooting Eglot77394
-Node: Performance78165
-Node: Getting the latest version79275
-Node: Reporting bugs80389
-Node: GNU Free Documentation License85158
-Node: Index110317
+Node: Customizing Eglot38505
+Node: Customization Variables39557
+Node: Other Variables46129
+Node: More Customization48283
+Node: Advanced server configuration52122
+Node: Project-specific configuration54119
+Node: User-specific configuration60590
+Node: JSONRPC objects in Elisp63037
+Node: Multi-server support64573
+Node: Using Rassumfrassum67137
+Node: Design rationale69154
+Node: Extending Eglot71020
+Node: Troubleshooting Eglot77735
+Node: Performance78506
+Node: Getting the latest version79616
+Node: Reporting bugs80730
+Node: GNU Free Documentation License85499
+Node: Index110658
 
 End Tag Table
 

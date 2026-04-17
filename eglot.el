@@ -1225,7 +1225,11 @@ object."
     :accessor eglot--saved-initargs)
    (semtok-cache
     :initform (make-hash-table :test #'equal)
-    :documentation "Map LSP token conses to face names."))
+    :documentation "Map LSP token conses to face names.")
+   (trueroot
+    :initform nil
+    :documentation "Cached truename of the associated project root."
+    :accessor eglot--trueroot))
   :documentation
   "Represents a server. Wraps a process for LSP communication.")
 
@@ -1235,20 +1239,31 @@ object."
   (when (keywordp uri) (setq uri (substring (symbol-name uri) 1)))
   (let* ((server (eglot-current-server))
          (remote-prefix (and server (eglot--trampish-p server)))
+         (root (and server (project-root (eglot--project server))))
+         (trueroot (and server (eglot--trueroot server)))
          (url (url-generic-parse-url uri)))
     ;; Only parse file:// URIs, leave other URI untouched as
     ;; `file-name-handler-alist' should know how to handle them
     ;; (bug#58790).
     (if (string= "file" (url-type url))
-        (let* ((retval (url-unhex-string (url-filename url)))
+        (let* ((unhexed (url-unhex-string (url-filename url)))
                ;; Remove the leading "/" for local MS Windows-style paths.
-               (normalized (if (and (not remote-prefix)
+               (norm (if (and (not remote-prefix)
                                     (eq system-type 'windows-nt)
-                                    (cl-plusp (length retval))
-                                    (eq (aref retval 0) ?/))
-                               (w32-long-file-name (substring retval 1))
-                             retval)))
-          (concat remote-prefix normalized))
+                                    (cl-plusp (length unhexed))
+                                    (eq (aref unhexed 0) ?/))
+                               (w32-long-file-name (substring unhexed 1))
+                             unhexed))
+               ;; Even though we exchange truename URIs with the server,
+               ;; ensure paths exchanged with Emacs facilities such as
+               ;; Xref contains the familiar root as found by
+               ;; 'project-current', not a potentially obscure
+               ;; canonicalized truename.
+               (norm
+                (if (and trueroot (string-prefix-p trueroot norm))
+                    (expand-file-name (substring norm (length trueroot)) root)
+                  norm)))
+          (concat remote-prefix norm))
       uri)))
 
 (cl-defun eglot-path-to-uri (path &key truenamep)
@@ -1833,6 +1848,7 @@ This docstring appeases checkdoc, that's all."
     (setf (eglot--saved-initargs server) initargs)
     (setf (eglot--project server) project)
     (setf (eglot--project-nickname server) nickname)
+    (setf (eglot--trueroot server) (file-truename (project-root project)))
     (setf (eglot--languages server)
           (cl-loop for m in managed-modes for l in language-ids
                    collect (cons m l)))
@@ -4925,6 +4941,13 @@ If NOERROR, return predicate, else erroring function."
 
 ;;; List connections mode
 
+(defvar eglot-list-connections-mode-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map "k" #'eglot-shutdown-listed-connection)
+    (define-key map "r" #'eglot-reconnect-listed-connection)
+    map)
+  "Keymap for `eglot-list-connections-mode'.")
+
 (define-derived-mode eglot-list-connections-mode  tabulated-list-mode
   "" "Eglot mode for listing server connections.
 \\{eglot-list-connections-mode-map}"
@@ -4934,6 +4957,25 @@ If NOERROR, return predicate, else erroring function."
                 ("Modes" 20) ("Invocation" 32)])
   (tabulated-list-init-header))
 
+(defun eglot--list-connections-entries ()
+  "Compute `tabulated-list-entries' for the connections list buffer."
+  (mapcar
+   (lambda (server)
+     (list server
+           `[,(or (plist-get (eglot--server-info server) :name)
+                  (jsonrpc-name server))
+             ,(eglot-project-nickname server)
+             ,(format "%s" (length (eglot--managed-buffers server)))
+             ,(mapconcat #'symbol-name
+                         (eglot--major-modes server)
+                         ", ")
+             ,(let ((c (process-command
+                        (jsonrpc--process server))))
+                (if (consp c) (mapconcat #'identity c " ")
+                  "network"))]))
+   (cl-reduce #'append
+              (hash-table-values eglot--servers-by-project))))
+
 (defun eglot-list-connections ()
   "List currently active Eglot connections."
   (interactive)
@@ -4942,25 +4984,23 @@ If NOERROR, return predicate, else erroring function."
     (let ((inhibit-read-only t))
       (erase-buffer)
       (eglot-list-connections-mode)
-      (setq-local tabulated-list-entries
-                  (mapcar
-                   (lambda (server)
-                     (list server
-                           `[,(or (plist-get (eglot--server-info server) :name)
-                                  (jsonrpc-name server))
-                             ,(eglot-project-nickname server)
-                             ,(format "%s" (length (eglot--managed-buffers server)))
-                             ,(mapconcat #'symbol-name
-                                         (eglot--major-modes server)
-                                         ", ")
-                             ,(let ((c (process-command
-                                        (jsonrpc--process server))))
-                                (if (consp c) (mapconcat #'identity c " ")
-                                  "network"))]))
-                   (cl-reduce #'append
-                              (hash-table-values eglot--servers-by-project))))
+      (setq-local tabulated-list-entries #'eglot--list-connections-entries)
       (revert-buffer)
       (pop-to-buffer (current-buffer)))))
+
+(cl-defmacro eglot--list-connections-cmd (name s doc &body body)
+  (declare (indent 2) (debug (sexp sexp sexp &rest form)))
+  `(defun ,name ()
+     ,doc (interactive)
+     (if-let* ((,s (tabulated-list-get-id)))
+         (progn ,@body (tabulated-list-revert))
+       (user-error "No server on this line"))))
+
+(eglot--list-connections-cmd eglot-shutdown-listed-connection s
+  "Shutdown Eglot server on current line" (eglot-shutdown s))
+
+(eglot--list-connections-cmd eglot-reconnect-listed-connection s
+  "Reconnect Eglot server on current line" (eglot-reconnect s))
 
 
 ;;; Inlay hints
@@ -5620,6 +5660,10 @@ lock machinery calls us again."
                eglot-signal-didChangeConfiguration
                eglot-stderr-buffer))
   (function-put sym 'command-modes '(eglot--managed-mode)))
+
+(dolist (sym '(eglot-shutdown-listed-connection
+               eglot-reconnect-listed-connection))
+  (function-put sym 'command-modes '(eglot-list-connections-mode)))
 
 (provide 'eglot)
 

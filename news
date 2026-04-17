@@ -18,6 +18,13 @@ to look up issue github#1234, go to
 https://github.com/joaotavora/eglot/issues/1234.
 
 
+* Changes to upcoming Eglot
+
+** New commands for the 'M-x eglot-list-connections' major mode
+
+'k' shuts down and 'r' reconnects the server on the current line.
+
+
 * Changes in Eglot 1.23 (2/4/2026)
 
 ** Unbreak ELPA Eglot (github#1584)
@@ -98,7 +105,5 @@ diagnostic reports.  Now it's practically unnoticeable.
 Eglot can now leverage LSP server multiplexer programs like Rassumfrassum
 (invoked via the 'rass' command) to use multiple language servers in a
 single buffer.  This enables combining spell-checkers with language
-servers, using multiple servers for the same language (e.g., 'ty' for
-type checking and 'ruff' for linting in Python), or handling
 ...
 ...
