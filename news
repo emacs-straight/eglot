@@ -20,9 +20,17 @@ https://github.com/joaotavora/eglot/issues/1234.
 
 * Changes to upcoming Eglot
 
-** New commands for the 'M-x eglot-list-connections' major mode
+** New command 'M-x eglot-describe-connection'
 
-'k' shuts down and 'r' reconnects the server on the current line.
+Pops up a detailed description buffer for the current connection,
+outlining aspects such as the LSP server name and version, the project
+name and root path, among others.
+
+** Improvements to 'M-x eglot-list-connections'
+
+New key bindings: 'k' shuts down, 'r' reconnects, 'e' visits the events
+buffer, 'w' shows workspace configuration, and 'RET' invokes
+'eglot-describe-connection'.
 
 
 * Changes in Eglot 1.23 (2/4/2026)
@@ -98,12 +106,5 @@ This is a bugfix release with small fixes for semantic tokens and Emacs
 Diagnostic conversion between LSP and Flymake versions is now much
 faster.  Previously, editing, e.g. a Python file with thousands of
 diagnostics was next to impossible to to periodic interruptions of
-diagnostic reports.  Now it's practically unnoticeable.
-
-** Support for LSP server multiplexers via Rassumfrassum
-
-Eglot can now leverage LSP server multiplexer programs like Rassumfrassum
-(invoked via the 'rass' command) to use multiple language servers in a
-single buffer.  This enables combining spell-checkers with language
 ...
 ...
