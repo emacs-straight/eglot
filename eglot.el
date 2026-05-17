@@ -720,9 +720,14 @@ This can be useful when using docker to run a language server.")
   (if (>= emacs-major-version 27) (executable-find command remote)
     (executable-find command)))
 
+(declare-function treesit-grammar-location "treesit.c")
 (defun eglot--accepted-formats ()
-  (if (and (not eglot-prefer-plaintext) (fboundp 'gfm-view-mode))
-      ["markdown" "plaintext"] ["plaintext"]))
+  (if (and (not eglot-prefer-plaintext)
+           (or (fboundp 'gfm-view-mode)
+               (and (fboundp 'markdown-ts-view-mode)
+                    (treesit-grammar-location 'markdown))))
+      ["markdown" "plaintext"]
+    ["plaintext"]))
 
 (defconst eglot--uri-path-allowed-chars
   (let ((vec (copy-sequence url-path-allowed-chars)))
@@ -2152,19 +2157,18 @@ LBP defaults to `eglot--bol'."
                            (funcall eglot-current-linepos-function)))))
 
 (defvar eglot-move-to-linepos-function #'eglot-move-to-utf-16-linepos
-  "Function to move to a position within a line reported by the LSP server.
+  "Move point to LSP-reported position within a line.
 
-Per the LSP spec, character offsets in LSP Position objects count
-UTF-16 code units, not actual code points.  So when LSP says
-position 3 of a line containing just \"aXbc\", where X is a funny
-looking character in the UTF-16 \"supplementary plane\", it
-actually means `b', not `c'.  The default value
-`eglot-move-to-utf-16-linepos' accounts for this.
+Per the LSP spec, character offsets in LSP Position objects count UTF-16
+code units, not actual code points.  So when LSP says position 3 of a
+line containing just \"aXbc\", where X is a funny looking character in
+the UTF-16 \"supplementary plane\", it actually means `b', not `c'.  The
+default value `eglot-move-to-utf-16-linepos' accounts for this.
 
 This variable can also be set to `eglot-move-to-utf-8-linepos' or
-`eglot-move-to-utf-32-linepos' for servers not closely following
-the spec.  Also, since LSP 3.17 server and client may agree on an
-encoding and Eglot will set this variable automatically.")
+`eglot-move-to-utf-32-linepos' for servers not closely following the
+spec.  Also, since LSP 3.17 server and client may agree on an encoding
+and Eglot will set this variable automatically.")
 
 (defun eglot-move-to-utf-8-linepos (n)
   "Move to line's Nth byte as computed by LSP's UTF-8 criterion."
@@ -2175,7 +2179,8 @@ encoding and Eglot will set this variable automatically.")
     (while (and (< (position-bytes (point)) goal-byte) (< (point) eol))
       ;; raw bytes take 2 bytes in the buffer
       (when (>= (char-after) #x3fff80) (setq goal-byte (1+ goal-byte)))
-      (forward-char 1))))
+      (forward-char 1))
+    (point)))
 
 (defun eglot-move-to-utf-16-linepos (n)
   "Move to line's Nth code unit as computed by LSP's UTF-16 criterion."
@@ -2186,7 +2191,8 @@ encoding and Eglot will set this variable automatically.")
     (while (and (< (point) goal-char) (< (point) eol))
       ;; code points in the "supplementary place" use two code units
       (when (<= #x010000 (char-after) #x10ffff) (setq goal-char (1- goal-char)))
-      (forward-char 1))))
+      (forward-char 1))
+    (point)))
 
 (defun eglot-move-to-utf-32-linepos (n)
   "Move to line's Nth codepoint as computed by LSP's UTF-32 criterion."
@@ -2224,48 +2230,51 @@ Doubles as an indicator of snippet support."
            (unless (bound-and-true-p yas-minor-mode) (yas-minor-mode 1))
            (apply #'yas-expand-snippet args)))))
 
-(defun eglot--format-markup (markup &optional mode)
+(cl-defun eglot--format-markup
+    (markup &optional mode
+            &aux string lang render extract
+            (built-in (and (fboundp 'markdown-ts-view-mode)
+                           (treesit-grammar-location 'markdown))))
   "Format MARKUP according to LSP's spec.
-MARKUP is either an LSP MarkedString or MarkupContent object."
-  (let (string render-mode language)
-    (cond ((stringp markup)
-           (setq string markup
-                 render-mode (or mode 'gfm-view-mode)))
-          ((setq language (plist-get markup :language))
-           ;; Deprecated MarkedString
-           (setq string (concat "```" language "\n"
-                                (plist-get markup :value) "\n```")
-                 render-mode (or mode 'gfm-view-mode)))
-          (t
-           ;; MarkupContent
-           (setq string (plist-get markup :value)
-                 render-mode
-                 (or mode
-                     (pcase (plist-get markup :kind)
-                       ("markdown" 'gfm-view-mode)
-                       ("plaintext" 'text-mode)
-                       (_ major-mode))))))
+MARKUP is either an LSP MarkedString or MarkupContent object.
+If MODE, force MODE to be used for fontifying MARKUP."
+  (cl-labels
+      ((gfm-extract ()
+         ;; For `gfm-view-mode', the `invisible' regions are set to
+         ;; `markdown-markup'.  Set them to 't' on extraction, since
+         ;; this has actual meaning in the "*eldoc*" buffer where we're
+         ;; taking this string (#bug79552).
+         (cl-loop with inhibit-read-only = t
+                  for from = (point-min) then to
+                  while (< from (point-max))
+                  for inv = (get-text-property from 'invisible)
+                  for to = (or (next-single-property-change from 'invisible)
+                               (point-max))
+                  when inv
+                  do (put-text-property from to 'invisible t)))
+       (calc2 (forced-mode)
+         (cond
+          (forced-mode              `(,forced-mode))
+          (built-in                 `(,#'markdown-ts-view-mode))
+          ((fboundp 'gfm-view-mode) `(,#'gfm-view-mode #'gfm-extract))
+          (t                        `(#'text-mode))))
+       (calc (s &optional (forced-mode mode) &aux (x (calc2 forced-mode)))
+         (setq string s render (car x) extract (or (cadr x) #'buffer-string))))
+    (cond ((stringp markup) (calc string))            ; plain string
+          ((setq lang (plist-get markup :language))   ; deprecated MarkedString
+           (calc (format "```%s\n%s\n```" lang (plist-get markup :value))))
+          (t (calc (plist-get markup :value)          ; Assume MarkupContent
+                   (or mode (pcase (plist-get markup :kind)
+                              ("markdown" nil)
+                              ("plaintext" 'text-mode)
+                              (_ major-mode))))))
     (with-temp-buffer
       (setq-local markdown-fontify-code-blocks-natively t)
       (insert string)
-      (let ((inhibit-message t)
-            (message-log-max nil))
-        (ignore-errors (delay-mode-hooks (funcall render-mode)))
+      (let ((inhibit-message t) (message-log-max nil))
+        (ignore-errors (delay-mode-hooks (funcall render)))
         (font-lock-ensure)
-        (goto-char (point-min))
-        (let ((inhibit-read-only t))
-          ;; If `render-mode' is `gfm-view-mode', the `invisible'
-          ;; regions are set to `markdown-markup'.  Set them to 't'
-          ;; instead, since this has actual meaning in the "*eldoc*"
-          ;; buffer where we're taking this string (#bug79552).
-          (cl-loop for from = (point) then to
-                   while (< from (point-max))
-                   for inv = (get-text-property from 'invisible)
-                   for to = (or (next-single-property-change from 'invisible)
-                                (point-max))
-                   when inv
-                   do (put-text-property from to 'invisible t)))
-        (string-trim (buffer-string))))))
+        (string-trim (funcall extract))))))
 
 (defun eglot--read-server (prompt &optional dont-if-just-the-one)
   "Read a running Eglot server from minibuffer using PROMPT.
@@ -4108,66 +4117,67 @@ for which LSP on-type-formatting should be requested."
   (mapconcat #'eglot--format-markup
              (if (vectorp contents) contents (list contents)) "\n"))
 
-(defun eglot--sig-info (sig &optional sig-active briefp)
+(cl-defun eglot--sig-info (sig &optional sig-active briefp
+                               &aux (move-fn eglot-move-to-linepos-function)
+                               first-parlabel
+                               fpardoc)
   (eglot--dbind ((SignatureInformation)
                  ((:label siglabel))
                  ((:documentation sigdoc)) parameters activeParameter)
       sig
     (with-temp-buffer
-      (insert siglabel)
-      ;; Add documentation, indented so we can distinguish multiple signatures
-      (when-let* ((doc (and (not briefp) sigdoc (eglot--format-markup sigdoc))))
-        (goto-char (point-max))
-        (insert "\n" (replace-regexp-in-string "^" "  " doc)))
-      ;; Try to highlight function name only
-      (let (first-parlabel)
-        (cond ((and (cl-plusp (length parameters))
-                    (vectorp (setq first-parlabel
-                                   (plist-get (aref parameters 0) :label))))
-               (save-excursion
-                (goto-char (elt first-parlabel 0))
-                (skip-syntax-backward "^w")
-                (add-face-text-property (point-min) (point)
-                                        'font-lock-function-name-face)))
-              ((save-excursion
-                 (goto-char (point-min))
-                 (looking-at "\\([^(]*\\)([^)]*)"))
-               (add-face-text-property (match-beginning 1) (match-end 1)
-                                       'font-lock-function-name-face))))
+      (save-excursion
+        ;; Insert main siglabel line
+        (insert siglabel)
+        ;; Add function documentation to end on a new line, indented so
+        ;; we can distinguish multiple signatures
+        (when-let* ((doc (and (not briefp) sigdoc (eglot--format-markup sigdoc))))
+          (goto-char (point-max))
+          (insert "\n" (replace-regexp-in-string "^" "  " doc))))
+      ;; Back to point-min: try to highlight function name only
+      (cond ((and (cl-plusp (length parameters))
+                  (vectorp (setq first-parlabel
+                                 (plist-get (aref parameters 0) :label))))
+             (funcall move-fn (elt first-parlabel 0))
+             (skip-syntax-backward "^w")
+             (add-face-text-property (point-min) (point)
+                                     'font-lock-function-name-face))
+            ((looking-at "\\([^(]*\\)([^)]*)")
+             (add-face-text-property (match-beginning 1) (match-end 1)
+                                     'font-lock-function-name-face)))
       ;; Now to the parameters
       (cl-loop
        with active-param = (or activeParameter sig-active)
+       with case-fold-search = nil
        for i from 0 for parameter across parameters do
        (eglot--dbind ((ParameterInformation)
                       ((:label parlabel))
                       ((:documentation pardoc)))
            parameter
-         ;; ...perhaps highlight it in the formals list
-         (when (eq i active-param)
-           (save-excursion
-             (goto-char (point-min))
-             (pcase-let
-                 ((`(,beg ,end)
-                   (if (stringp parlabel)
-                       (let ((case-fold-search nil))
-                         (and (search-forward parlabel (line-end-position) t)
-                              (list (match-beginning 0) (match-end 0))))
-                     (list (1+ (aref parlabel 0)) (1+ (aref parlabel 1))))))
-               (if (and beg end)
-                   (add-face-text-property
-                    beg end
-                    'eldoc-highlight-function-argument)))))
-         ;; ...and/or maybe add its doc on a line by its own.
-         (let (fpardoc)
+         (cl-flet ((parlabel-bounds ()
+                     (cond ((stringp parlabel)
+                            (and (search-forward parlabel (line-end-position) t)
+                                 (match-data)))
+                           (t (mapcar move-fn parlabel)))))
+           ;; ...perhaps highlight it in the formals list
+           (when-let* ((b (and (eq i active-param)
+                               (parlabel-bounds))))
+             (add-face-text-property
+              (car b) (cadr b)
+              'eldoc-highlight-function-argument))
+           ;; ...and/or maybe add its doc on a line by its own.
            (when (and pardoc (not briefp)
                       (not (string-empty-p
                             (setq fpardoc (eglot--format-markup pardoc)))))
-             (insert "\n  "
-                     (propertize
-                      (if (stringp parlabel) parlabel
-                        (substring siglabel (aref parlabel 0) (aref parlabel 1)))
-                      'face (and (eq i active-param) 'eldoc-highlight-function-argument))
-                     ": " fpardoc)))))
+             (unless (stringp parlabel)
+               (setq parlabel (apply #'buffer-substring (parlabel-bounds))))
+             (save-excursion
+               (goto-char (point-max))
+               (insert "\n  "
+                       (propertize
+                        parlabel
+                        'face (and (eq i active-param) 'eldoc-highlight-function-argument))
+                       ": " fpardoc))))))
       (buffer-string))))
 
 (defun eglot-signature-eldoc-function (cb &rest _ignored)

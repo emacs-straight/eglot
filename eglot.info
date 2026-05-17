@@ -429,11 +429,11 @@ directly (*note Eglot Commands::).
      (*note Eglot Commands::).  Automatic reformatting of source code is
      also supported and is activated automatically as you type.
 
-   • If a completion package such as the Company package (a popular
-     third-party completion package providing ‘company-mode’), is
-     installed, Eglot enhances it by providing completion candidates
-     based on the language server's analysis of the source code.
-     (Company can be installed from GNU ELPA.)
+   • Eglot enhances symbol completion front-ends by providing completion
+     candidates based on the language server's understanding of the
+     source code (*note (emacs)Symbol Completion::).  The Company
+     package, installable from GNU ELPA, is a popular package known to
+     work well with Eglot.
 
    • If YASnippet, a popular third-party package for automatic insertion
      of code templates (snippets), is installed, and the language server
@@ -441,12 +441,11 @@ directly (*note Eglot Commands::).
      completion package to instantiate these snippets using YASnippet.
      (YASnippet can be installed from GNU ELPA.)
 
-   • If the popular third-party package ‘markdown-mode’ is installed,
-     and the server provides at-point documentation formatted as
+   • When the server provides at-point documentation formatted as
      Markdown in addition to plain text, Eglot arranges for the ElDoc
-     package to enrich this text with fontifications and other nice
-     formatting before displaying it to the user.  This makes the
-     documentation shown by ElDoc look nicer on display.
+     package to enrich this text with fontifications, hyperlinks and
+     other nice formatting before displaying it to the user.  This makes
+     the documentation shown by ElDoc look nicer on display.
 
    • In addition to enabling and enhancing other features and packages,
      Eglot also provides a number of user commands based on the
@@ -1799,7 +1798,7 @@ Eglot-specific checklist:
      versions.
 
   7. Include a recipe to replicate the problem with _a clean Emacs run_.
-     The invocation ‘emacs -Q -f package-initialize’ starts Emacs with
+     The invocation ‘emacs -Q -f package-activate-all’ starts Emacs with
      no configuration and initializes the ELPA packages.  A very minimal
      ‘.emacs’ initialization file (10 lines or less) is also acceptable
      and good means to describe changes to variables.
@@ -2461,26 +2460,26 @@ Node: Starting Eglot12001
 Node: Shutting Down LSP Servers14663
 Node: Using Eglot16207
 Node: Eglot Features16572
-Node: Eglot and Buffers22094
-Node: Eglot Commands28307
-Node: Customizing Eglot38902
-Node: Customization Variables39954
-Node: Other Variables46526
-Node: More Customization48680
-Node: Advanced server configuration52519
-Node: Project-specific configuration54516
-Node: User-specific configuration60987
-Node: JSONRPC objects in Elisp63434
-Node: Multi-server support64970
-Node: Using Rassumfrassum67534
-Node: Design rationale69551
-Node: Extending Eglot71417
-Node: Troubleshooting Eglot78132
-Node: Performance78903
-Node: Getting the latest version80013
-Node: Reporting bugs81127
-Node: GNU Free Documentation License85896
-Node: Index111055
+Node: Eglot and Buffers22019
+Node: Eglot Commands28232
+Node: Customizing Eglot38827
+Node: Customization Variables39879
+Node: Other Variables46451
+Node: More Customization48605
+Node: Advanced server configuration52444
+Node: Project-specific configuration54441
+Node: User-specific configuration60912
+Node: JSONRPC objects in Elisp63359
+Node: Multi-server support64895
+Node: Using Rassumfrassum67459
+Node: Design rationale69476
+Node: Extending Eglot71342
+Node: Troubleshooting Eglot78057
+Node: Performance78828
+Node: Getting the latest version79938
+Node: Reporting bugs81052
+Node: GNU Free Documentation License85823
+Node: Index110982
 
 End Tag Table
 
