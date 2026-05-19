@@ -1,4 +1,4 @@
-This is eglot.info, produced by makeinfo version 7.2 from eglot.texi.
+This is eglot.info, produced by makeinfo version 7.1.1 from eglot.texi.
 
 This manual is for Eglot, the Emacs LSP client.
 
@@ -1305,6 +1305,7 @@ done like so:
        (add-to-list 'eglot-server-programs
                     `(c++-mode . ("clangd" "--compile-commands-dir=/tmp"))))
 
+
 Another way is to have Eglot pass a JSON object to the server during the
 LSP handshake.  This is done using the ‘:initializationOptions’ syntax
 of ‘eglot-server-programs’:
@@ -2372,7 +2373,7 @@ Index
 * eglot-workspace-configuration:         Project-specific configuration.
                                                               (line   6)
 * eglot-workspace-configuration <1>:     User-specific configuration.
-                                                              (line  35)
+                                                              (line  36)
 * ElDoc, and Eglot:                      Eglot Commands.      (line 203)
 * features in buffers supported by Eglot: Eglot Features.     (line   6)
 * finding definitions of identifiers using Eglot: Eglot Commands.
@@ -2449,42 +2450,42 @@ Index
                                                               (line   6)
 * xref, and Eglot:                       Eglot Commands.      (line 213)
 
+
 
 Tag Table:
-Node: Top886
-Ref: Top-Footnote-13603
-Node: Quick Start3678
-Node: Eglot and LSP Servers6347
-Node: Setting Up LSP Servers6764
-Node: Starting Eglot12001
-Node: Shutting Down LSP Servers14663
-Node: Using Eglot16207
-Node: Eglot Features16572
-Node: Eglot and Buffers22019
-Node: Eglot Commands28232
-Node: Customizing Eglot38827
-Node: Customization Variables39879
-Node: Other Variables46451
-Node: More Customization48605
-Node: Advanced server configuration52444
-Node: Project-specific configuration54441
-Node: User-specific configuration60912
-Node: JSONRPC objects in Elisp63359
-Node: Multi-server support64895
-Node: Using Rassumfrassum67459
-Node: Design rationale69476
-Node: Extending Eglot71342
-Node: Troubleshooting Eglot78057
-Node: Performance78828
-Node: Getting the latest version79938
-Node: Reporting bugs81052
-Node: GNU Free Documentation License85823
-Node: Index110982
+Node: Top888
+Ref: Top-Footnote-13605
+Node: Quick Start3680
+Node: Eglot and LSP Servers6349
+Node: Setting Up LSP Servers6766
+Node: Starting Eglot12003
+Node: Shutting Down LSP Servers14665
+Node: Using Eglot16209
+Node: Eglot Features16574
+Node: Eglot and Buffers22021
+Node: Eglot Commands28234
+Node: Customizing Eglot38829
+Node: Customization Variables39881
+Node: Other Variables46453
+Node: More Customization48607
+Node: Advanced server configuration52446
+Node: Project-specific configuration54443
+Node: User-specific configuration60914
+Node: JSONRPC objects in Elisp63362
+Node: Multi-server support64898
+Node: Using Rassumfrassum67462
+Node: Design rationale69479
+Node: Extending Eglot71345
+Node: Troubleshooting Eglot78060
+Node: Performance78831
+Node: Getting the latest version79941
+Node: Reporting bugs81055
+Node: GNU Free Documentation License85826
+Node: Index110985
 
 End Tag Table
 
 
 Local Variables:
 coding: utf-8
-Info-documentlanguage: en
 End:
