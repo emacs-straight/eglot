@@ -905,6 +905,16 @@ This section provides a reference for the Eglot user options.
      the server will consider it to be part of the workspace.  The
      default is ‘nil’.
 
+‘eglot-documentation-renderer’
+     This variable controls how Eglot renders at-point documentation
+     imported from the server (*note Eglot Features::).  By default, the
+     variable's value is set during startup to the ‘gfm-view-mode’
+     markdown renderer if available.  This utility visually enhances the
+     documentation content through fontification and other formatting.
+     If you set it to ‘t’, plain text will be requested from the server
+     and no rendering is attempted.  If the variable's value is ‘nil’,
+     Eglot will attempt to find a suitable renderer every time.
+
 ‘eglot-mode-map’
      This variable is the keymap for binding Eglot-related command.  It
      is in effect only as long as the buffer is managed by Eglot.  By
@@ -2326,20 +2336,22 @@ Index
 * documentation using Eglot:             Eglot Commands.      (line 203)
 * eglot:                                 Starting Eglot.      (line   6)
 * eglot-advertise-cancellation:          Customization Variables.
-                                                              (line  91)
+                                                              (line 101)
 * eglot-autoreconnect:                   Customization Variables.
                                                               (line   8)
 * eglot-autoshutdown:                    Customization Variables.
                                                               (line  42)
 * eglot-code-action-indications:         Customization Variables.
-                                                              (line  97)
+                                                              (line 107)
 * eglot-code-action-indicator:           Customization Variables.
-                                                              (line 111)
+                                                              (line 121)
 * eglot-confirm-server-edits:            Customization Variables.
                                                               (line  48)
 * eglot-connect-hook:                    Other Variables.     (line  25)
 * eglot-connect-timeout:                 Customization Variables.
                                                               (line  19)
+* eglot-documentation-renderer:          Customization Variables.
+                                                              (line  71)
 * eglot-ensure:                          Starting Eglot.      (line  29)
 * eglot-events-buffer-config:            Customization Variables.
                                                               (line  34)
@@ -2351,12 +2363,12 @@ Index
 * eglot-managed-p:                       Eglot and Buffers.   (line  95)
 * eglot-menu:                            Eglot and Buffers.   (line  53)
 * eglot-mode-line-format:                Customization Variables.
-                                                              (line 115)
+                                                              (line 125)
 * eglot-mode-map:                        Customization Variables.
-                                                              (line  71)
+                                                              (line  81)
 * eglot-momentary-inlay-hints:           Eglot Commands.      (line 128)
 * eglot-report-progress:                 Customization Variables.
-                                                              (line  84)
+                                                              (line  94)
 * eglot-semantic-token-modifiers:        Eglot Commands.      (line 149)
 * eglot-semantic-token-types:            Eglot Commands.      (line 149)
 * eglot-server-initialized-hook:         Other Variables.     (line  19)
@@ -2415,6 +2427,8 @@ Index
 * M-x eglot-shutdown-all:                Eglot Commands.      (line  56)
 * M-x eglot-signal-didChangeConfiguration: Eglot Commands.    (line 181)
 * M-x eglot-stderr-buffer:               Eglot Commands.      (line 174)
+* markdown renderer:                     Customization Variables.
+                                                              (line  71)
 * mode-line indication of language server: Eglot and Buffers. (line  53)
 * momentary inlay hints:                 Eglot Commands.      (line 128)
 * mouse clicks on mode-line, and Eglot:  Eglot and Buffers.   (line  53)
@@ -2425,11 +2439,11 @@ Index
                                                               (line   6)
 * performance problems, with Eglot:      Performance.         (line   6)
 * progress:                              Customization Variables.
-                                                              (line  84)
+                                                              (line  94)
 * projects and Eglot:                    Eglot and Buffers.   (line   6)
 * quick start:                           Quick Start.         (line   6)
 * request cancellation:                  Customization Variables.
-                                                              (line  91)
+                                                              (line 101)
 * semantic token faces:                  Eglot Commands.      (line 156)
 * semantic tokens:                       Eglot Commands.      (line 140)
 * setting up LSP server for Eglot:       Setting Up LSP Servers.
@@ -2466,22 +2480,22 @@ Node: Eglot and Buffers22021
 Node: Eglot Commands28234
 Node: Customizing Eglot38829
 Node: Customization Variables39881
-Node: Other Variables46453
-Node: More Customization48607
-Node: Advanced server configuration52446
-Node: Project-specific configuration54443
-Node: User-specific configuration60914
-Node: JSONRPC objects in Elisp63362
-Node: Multi-server support64898
-Node: Using Rassumfrassum67462
-Node: Design rationale69479
-Node: Extending Eglot71345
-Node: Troubleshooting Eglot78060
-Node: Performance78831
-Node: Getting the latest version79941
-Node: Reporting bugs81055
-Node: GNU Free Documentation License85826
-Node: Index110985
+Node: Other Variables47061
+Node: More Customization49215
+Node: Advanced server configuration53054
+Node: Project-specific configuration55051
+Node: User-specific configuration61522
+Node: JSONRPC objects in Elisp63970
+Node: Multi-server support65506
+Node: Using Rassumfrassum68070
+Node: Design rationale70087
+Node: Extending Eglot71953
+Node: Troubleshooting Eglot78668
+Node: Performance79439
+Node: Getting the latest version80549
+Node: Reporting bugs81663
+Node: GNU Free Documentation License86434
+Node: Index111593
 
 End Tag Table
 
