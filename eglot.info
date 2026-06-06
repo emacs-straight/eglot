@@ -907,13 +907,13 @@ This section provides a reference for the Eglot user options.
 
 ‘eglot-documentation-renderer’
      This variable controls how Eglot renders at-point documentation
-     imported from the server (*note Eglot Features::).  By default, the
-     variable's value is set during startup to the ‘gfm-view-mode’
-     markdown renderer if available.  This utility visually enhances the
-     documentation content through fontification and other formatting.
-     If you set it to ‘t’, plain text will be requested from the server
-     and no rendering is attempted.  If the variable's value is ‘nil’,
-     Eglot will attempt to find a suitable renderer every time.
+     imported from the server (*note Eglot Features::).  The default
+     value is ‘nil’, meaning Eglot selects a suitable Markdown renderer
+     on each use--for example, ‘gfm-view-mode’ from ‘markdown-mode’ on
+     NonGNU ELPA, which enhances documentation through fontification and
+     other formatting.  If you set it to ‘t’, plain text is requested
+     from the server and no rendering is attempted.  See docstring for
+     more options.
 
 ‘eglot-mode-map’
      This variable is the keymap for binding Eglot-related command.  It
@@ -2480,22 +2480,22 @@ Node: Eglot and Buffers22021
 Node: Eglot Commands28234
 Node: Customizing Eglot38829
 Node: Customization Variables39881
-Node: Other Variables47061
-Node: More Customization49215
-Node: Advanced server configuration53054
-Node: Project-specific configuration55051
-Node: User-specific configuration61522
-Node: JSONRPC objects in Elisp63970
-Node: Multi-server support65506
-Node: Using Rassumfrassum68070
-Node: Design rationale70087
-Node: Extending Eglot71953
-Node: Troubleshooting Eglot78668
-Node: Performance79439
-Node: Getting the latest version80549
-Node: Reporting bugs81663
-Node: GNU Free Documentation License86434
-Node: Index111593
+Node: Other Variables47019
+Node: More Customization49173
+Node: Advanced server configuration53012
+Node: Project-specific configuration55009
+Node: User-specific configuration61480
+Node: JSONRPC objects in Elisp63928
+Node: Multi-server support65464
+Node: Using Rassumfrassum68028
+Node: Design rationale70045
+Node: Extending Eglot71911
+Node: Troubleshooting Eglot78626
+Node: Performance79397
+Node: Getting the latest version80507
+Node: Reporting bugs81621
+Node: GNU Free Documentation License86392
+Node: Index111551
 
 End Tag Table
 
