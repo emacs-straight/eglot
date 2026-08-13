@@ -464,7 +464,7 @@ capabilities to Emacs users.  However, *Note Extending Eglot::.
 all features that it _can_ turn on.  It's possible to opt out of
 features via the ‘eglot-ignored-server-capabilities’ user option (*note
 Customizing Eglot::) and the ‘eglot-managed-mode-hook’ hook that runs
-after Eglot starts managing a buffer (*note Eglot and Buffers::).
+after Eglot starts managing a buffer (*note Other Variables::).
 
 
 File: eglot.info,  Node: Eglot and Buffers,  Next: Eglot Commands,  Prev: Eglot Features,  Up: Using Eglot
@@ -564,23 +564,9 @@ specially in several ways:
    • The minor mode's main job is to "hook up" Eglot to other Emacs
      functionality, i.e.  arrange for these features to receive
      information from the language server, by changing special variables
-     controlling these features.  *Note Eglot Features::.
-
-   • To customize this, Eglot's special minor mode provides a hook
-     variable ‘eglot-managed-mode-hook’ specifically to alter Eglot's
-     interaction with these variables in each buffer.  This hook is run
-     both when the minor mode is turned on and when it's turned off; use
-     the function ‘eglot-managed-p’ to tell if current buffer is still
-     being managed or not.
-
-   For example, to turn off “inlay hints” and “semantic tokens” by
-default but still retain the ability to turn them on again interactively
-use this:
-
-       (add-hook 'eglot-managed-mode-hook
-         (lambda ()
-           (eglot-inlay-hints-mode -1)
-           (eglot-semantic-tokens-mode -1)))
+     controlling these features.  *Note Eglot Features:: and *Note Other
+     Variables:: for how to exercise finer control over this minor
+     mode's activation.
 
 
 File: eglot.info,  Node: Eglot Commands,  Prev: Eglot and Buffers,  Up: Using Eglot
@@ -1006,8 +992,20 @@ be changed from Elisp snippets.
      as argument.  *Note Starting Eglot::.
 
 ‘eglot-managed-mode-hook’
-     A hook run after Eglot started or stopped managing a buffer.  *Note
-     Eglot and Buffers::, for details of its usage.
+     A hook run after Eglot started or stopped managing a buffer.
+
+     You may use it to alter Eglot's setting of other Eglot and Emacs
+     variables in each buffer.  This hook is run both when the minor
+     mode is turned on and when it's turned off; use the function
+     ‘eglot-managed-p’ to tell if current buffer is still being managed
+     or not.  For example, to turn off “inlay hints” and “semantic
+     tokens” by default but still retain the ability to turn them on
+     again interactively use this:
+
+            (add-hook 'eglot-managed-mode-hook
+              (lambda ()
+                (eglot-inlay-hints-mode -1)
+                (eglot-semantic-tokens-mode -1)))
 
 ‘eglot-stay-out-of’
      This variable's value lists Emacs features that Eglot shouldn't
@@ -1705,10 +1703,17 @@ Variables::) and set its ‘:size’ property to 0.  This will disable
 recording any events and may speed things up.
 
    In other situations, the cause of poor performance lies in the
-language server itself.  Some servers use aggressive caching and other
-techniques to improve their performance.  Often, this can be tweaked by
-changing the server configuration (*note Advanced server
-configuration::).
+language server itself.  Some servers may have poor implementations of
+some LSP features that Eglot turns on by default.  Some servers use
+aggressive caching and other techniques to improve their performance.
+Often, this can be tweaked by changing the server configuration (*note
+Advanced server configuration::).
+
+   Depending on the specific nature of the performance bottleneck,
+sometimes a workaround is to turn off these features on the Eglot side
+using the ‘eglot-ignored-server-capabilities’ and
+‘eglot-managed-mode-hook’ variables (*note Other Variables:: and *note
+More Customization::).
 
    Another aspect that may cause performance degradation is the amount
 of JSONRPC information exchanged with Emacs.  Using an LSP program like
@@ -2359,8 +2364,8 @@ Index
                                                               (line  62)
 * eglot-ignored-server-capabilities:     Customization Variables.
                                                               (line  57)
-* eglot-managed-mode-hook:               Eglot and Buffers.   (line  95)
-* eglot-managed-p:                       Eglot and Buffers.   (line  95)
+* eglot-managed-mode-hook:               Other Variables.     (line  30)
+* eglot-managed-p:                       Other Variables.     (line  30)
 * eglot-menu:                            Eglot and Buffers.   (line  53)
 * eglot-mode-line-format:                Customization Variables.
                                                               (line 125)
@@ -2378,7 +2383,7 @@ Index
                                                               (line  32)
 * eglot-shutdown:                        Shutting Down LSP Servers.
                                                               (line  15)
-* eglot-stay-out-of:                     Other Variables.     (line  34)
+* eglot-stay-out-of:                     Other Variables.     (line  46)
 * eglot-strict-mode:                     Other Variables.     (line  14)
 * eglot-sync-connect:                    Customization Variables.
                                                               (line  24)
@@ -2476,26 +2481,26 @@ Node: Starting Eglot12003
 Node: Shutting Down LSP Servers14665
 Node: Using Eglot16209
 Node: Eglot Features16574
-Node: Eglot and Buffers22021
-Node: Eglot Commands28234
-Node: Customizing Eglot38829
-Node: Customization Variables39881
-Node: Other Variables47019
-Node: More Customization49173
-Node: Advanced server configuration53012
-Node: Project-specific configuration55009
-Node: User-specific configuration61480
-Node: JSONRPC objects in Elisp63928
-Node: Multi-server support65464
-Node: Using Rassumfrassum68028
-Node: Design rationale70045
-Node: Extending Eglot71911
-Node: Troubleshooting Eglot78626
-Node: Performance79397
-Node: Getting the latest version80507
-Node: Reporting bugs81621
-Node: GNU Free Documentation License86392
-Node: Index111551
+Node: Eglot and Buffers22019
+Node: Eglot Commands27641
+Node: Customizing Eglot38236
+Node: Customization Variables39288
+Node: Other Variables46426
+Node: More Customization49149
+Node: Advanced server configuration52988
+Node: Project-specific configuration54985
+Node: User-specific configuration61456
+Node: JSONRPC objects in Elisp63904
+Node: Multi-server support65440
+Node: Using Rassumfrassum68004
+Node: Design rationale70021
+Node: Extending Eglot71887
+Node: Troubleshooting Eglot78602
+Node: Performance79373
+Node: Getting the latest version80870
+Node: Reporting bugs81984
+Node: GNU Free Documentation License86755
+Node: Index111914
 
 End Tag Table
 
