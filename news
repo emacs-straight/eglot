@@ -18,6 +18,15 @@ to look up issue github#1234, go to
 https://github.com/joaotavora/eglot/issues/1234.
 
 
+* Changes to upcoming Eglot
+
+** Changes to 'eglot-server-programs'
+
+- new 'vala-language-server' for 'vala-mode'  (bug#81543)
+
+** Miscellaneous bugs fixed (bug#81593, bug#81538, bug#81514, bug#81425)
+
+
 * Changes in Eglot 1.24 (23/6/2026)
 
 ** New command 'M-x eglot-describe-connection'
@@ -94,13 +103,5 @@ subsequently opened.
 - new 'static-ls' for 'haskell-mode'
 - new 'wat_server' for 'wat-mode' (WebAssembly Text) (bug#80188)
 - new 'elp' replaces 'erlang_ls' for 'erlang-mode' (bug#79943)
-
-** Fixed textDocument/prepareRename support (github#1554)
-
-Eglot now properly checks server capabilities before sending
-prepareRename requests.
-
-
-* Changes in Eglot 1.21 (11/1/2026)
 ...
 ...
