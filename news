@@ -18,7 +18,14 @@ to look up issue github#1234, go to
 https://github.com/joaotavora/eglot/issues/1234.
 
 
-* Changes to upcoming Eglot
+* Changes in Eglot 1.26 (30/10/2026)
+
+This is a bugfix release to align Eglot with its latest Xref and
+Refactor dependencies, fixing small issues with Emacs 26 integration and
+obscure keybindings.  See commit logs for more info.
+
+
+* Changes in Eglot 1.25 (28/10/2026)
 
 ** Changes to 'eglot-server-programs'
 
@@ -41,13 +48,23 @@ for which Eglot is now a backend.  The old commands are obsolete aliases
 for Refactor's: for example, 'eglot-code-actions' is now 'M-x refactor'
 and 'eglot-rename' is now 'M-x refactor-rename'.
 
+** Better Xref integration
+
+Eglot can now find references for any symbol, not just the one at
+point, as with 'C-u M-?', as long as the server supports
+'workspace/symbol'.  With a very recent Xref, Eglot also supports
+'M-g .' ('xref-find-by-kind'), for finding references, declarations,
+implementations or type definitions.
+
 ** 'eglot-reconnect' reuses the events buffer again
 
 As fallout from a recent redesign, Eglot created a new events buffer,
 suffixed '<2>', '<3>', etc., on every reconnection.  It also never
 killed the previous hidden stderr buffer, so they piled up.
 
-** Miscellaneous bugs fixed (bug#81593, bug#81538, bug#81514, bug#81425)
+** Miscellaneous bugs fixed
+
+bug#81593, bug#81538, bug#81514, bug#81425, bug#81150, bug#82021.
 
 
 * Changes in Eglot 1.24 (23/6/2026)
@@ -88,17 +105,5 @@ Broken due to bad 'jsonrpc.el' dependency.
 
 The new variable 'eglot-max-file-watches' limits the number of file
 watches that can be created.  Some language servers request watching
-for a very large number of directories (e.g. Python virtualenvs), which
-can exhaust system resources and cause slow startup.
-
-** Support for complex workspace edits (create/rename/delete files)
-
-Eglot now advertises support for file resource operations in workspace
-edits and can handle create, rename, and delete file operations.  The
-confirmation UI has been reworked to handle mixed operation types.
-
-The 'eglot-confirm-server-edits' defcustom has been overhauled and now
-also accepts file operation kinds as keys in the alist form, providing
-more fine-grained control over what confirmation mechanism to use.
 ...
 ...
